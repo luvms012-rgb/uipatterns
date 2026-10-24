@@ -1,0 +1,31 @@
+/* 사이드바 (mo/web 공용) — UI 패턴(그룹) → 컴포넌트 → 카테고리 유형 */
+.sb-sec { padding-bottom: 8px; }
+.sb-sec + .sb-sec { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 8px; }
+.sb-sec-hdr { padding: 14px 8px 10px; font-size: 18px; font-weight: 700; color: var(--text-1); }
+
+.sb-search {
+  display: flex; align-items: center; gap: 8px; margin: 0 2px 8px; padding: 0 12px; height: 36px;
+  background: #2c2e38; border-radius: 999px; color: var(--text-3); cursor: text;
+}
+.sb-search input {
+  flex: 1; min-width: 0; background: none; border: none; outline: none;
+  color: var(--text-1); font: inherit; font-size: 14px;
+}
+.sb-search input::placeholder { color: var(--text-3); }
+.sb-search:focus-within { background: #363844; }
+
+.sb-grp-hdr {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 8px 6px; background: none; border: none; cursor: pointer;
+  font: inherit; color: var(--text-1); text-align: left;
+}
+.sb-grp.sub .sb-grp-hdr { font-size: 13px; font-weight: 600; color: var(--text-3); }
+.sb-grp:not(.sub) > .sb-grp-hdr { padding: 14px 8px 10px; font-size: 18px; font-weight: 700; }
+.sb-grp-hdr:hover { color: var(--text-1); }
+.sb-chev { color: var(--text-3); transition: transform .15s; }
+.sb-grp.collapsed:not(.searching) .sb-chev { transform: rotate(180deg); }
+.sb-grp.collapsed:not(.searching) .sb-grp-body { display: none; }
+
+.sb-note { margin: 0 8px 8px; font-size: 12px; line-height: 1.5; color: var(--text-3); }
+.cat-row.disabled { cursor: default; opacity: .45; }
+.cat-row.disabled:hover { background: none; }

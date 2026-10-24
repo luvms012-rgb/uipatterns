@@ -28,6 +28,7 @@
 uipatterns/
 ├─ index.html            → mo/ 로 이동
 ├─ config.js             이미지 주소(imgBase) · 다운로드 중계(imgProxy)
+├─ assets/sidebar.js·css 사이드바 (mo/web 공용): UI 패턴(그룹) → 컴포넌트 → 카테고리 유형
 ├─ 업데이트.bat / 업데이트.command
 ├─ scripts/
 │  ├─ update.js          원클릭 업데이트 (pull → 스캔 → 커밋 → push)
@@ -36,6 +37,8 @@ uipatterns/
 │  ├─ index.html         화면 (CSS·JS)
 │  ├─ data.js            이미지 목록 — 자동 생성, 한 줄 = 1장
 │  ├─ svc-types.js       서비스 → 업종 매핑 (직접 수정 가능, 새 서비스는 자동 추가)
+│  ├─ taxonomy.js        사이드바 분류 — uibowl 패턴 그룹 · 폴더명 별칭 · 컴포넌트 목록
+│  ├─ components.json    (선택) 이미지별 컴포넌트 { "카테고리/파일.png": ["버튼", …] } → data.js의 comps
 │  ├─ icons.js · search-index.js · stats.js · version.js · upload-list.txt
 │  ├─ update-index.js    예전 명령 호환용 (→ scripts/update-index.js)
 │  └─ 카테고리 폴더/ · icons/ · (업데이트)/ · (업로드)/   ← 이미지, git 제외 (.gitignore)

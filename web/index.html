@@ -799,6 +799,7 @@
   }
 
 </style>
+<link rel="stylesheet" href="../assets/sidebar.css">
 </head>
 <body>
 
@@ -907,6 +908,8 @@
 <script src="data.js"></script>
 <script src="svc-types.js"></script>
 <script src="icons.js"></script>
+<script src="taxonomy.js"></script>
+<script src="../assets/sidebar.js"></script>
 <script>
 
 window.DATA = DATA;
@@ -924,7 +927,7 @@ const ALL_CATS = [...new Set(DISPLAY_DATA.map(i => i.category))].sort(sortMixed)
 const CAT_COUNTS = {};
 DISPLAY_DATA.forEach(i => { CAT_COUNTS[i.category] = (CAT_COUNTS[i.category]||0)+1; });
 
-const S = { checked: new Set(), checkedTypes: new Set(), selected: new Set(), view: 'index', svc: null };
+const S = { checked: new Set(), checkedComps: new Set(), checkedTypes: new Set(), selected: new Set(), view: 'index', svc: null };
 
 // SVC_TYPES에 없는 새 서비스는 '미분류'로 자동 분류 (수동 매핑 전까지 사이드바에 자동 노출)
 const UNCLASSIFIED = '미분류';
@@ -1011,6 +1014,7 @@ function extractPattern(name) {
 function getItems() {
   return DISPLAY_DATA.filter(item => {
     if (S.checked.size && !S.checked.has(item.category)) return false;
+    if (S.checkedComps.size && !(item.comps || []).some(c => S.checkedComps.has(c))) return false;
     if (S.checkedTypes.size) {
       const t = getSvcType(extractService(item.name));
       if (!t || !S.checkedTypes.has(t)) return false;
@@ -1020,31 +1024,7 @@ function getItems() {
 }
 
 // ── 사이드바 ────────────────────────────────────────────────────────────
-const CHECK_SVG = `<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="1.5 6 5 9.5 10.5 2.5"/></svg>`;
-
-function makeCatRow(label, count, isOn, onclickAttr) {
-  return `<div class="cat-row${isOn?' on':''}" ${onclickAttr}>
-    <div class="cb-box">${isOn ? CHECK_SVG : ''}</div>
-    <span class="cat-label">${label}</span>
-    <span class="cat-cnt">(${count})</span>
-  </div>`;
-}
-
-function buildSidebar() {
-  const el = document.getElementById('cat-rows');
-  // 미분류(SVC_TYPES 미등록) 항목이 있으면 유형 목록 맨 끝에 자동 추가
-  const typeList = TYPE_COUNTS[UNCLASSIFIED] ? [...ALL_INDUSTRY_TYPES, UNCLASSIFIED] : ALL_INDUSTRY_TYPES;
-  const typeRows = typeList.map(t =>
-    makeCatRow(t, TYPE_COUNTS[t]||0, S.checkedTypes.has(t), `onclick="toggleType('${encodeURIComponent(t)}')"`)
-  ).join('');
-  const catRows = ALL_CATS.map(cat =>
-    makeCatRow(cat, CAT_COUNTS[cat]||0, S.checked.has(cat), `onclick="toggleCat('${encodeURIComponent(cat)}')"`)
-  ).join('');
-  el.innerHTML =
-    `<div class="sb-section-label">UI 패턴</div>${catRows}` +
-    `<div class="sb-divider"></div>` +
-    `<div class="sb-section-label">카테고리 유형</div>${typeRows}`;
-}
+// 그리기(buildSidebar)·컴포넌트 토글은 ../assets/sidebar.js, 분류 기준은 taxonomy.js
 
 function toggleType(enc) {
   S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
@@ -1294,17 +1274,20 @@ function buildChips() {
     `<span class="chip">${t}<span class="chip-x" onclick="toggleType('${encodeURIComponent(t)}')" title="제거">${X_SVG}</span></span>`
   ).join('');
   const catChips = [...S.checked].map(cat =>
-    `<span class="chip">${cat}<span class="chip-x" onclick="toggleCat('${encodeURIComponent(cat)}')" title="제거">${X_SVG}</span></span>`
+    `<span class="chip">${catLabel(cat)}<span class="chip-x" onclick="toggleCat('${encodeURIComponent(cat)}')" title="제거">${X_SVG}</span></span>`
+  ).join('');
+  const compChips = [...S.checkedComps].map(c =>
+    `<span class="chip">${c}<span class="chip-x" onclick="toggleComp('${encodeURIComponent(c)}')" title="제거">${X_SVG}</span></span>`
   ).join('');
   const RESET_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
-  const hasAny = S.checkedTypes.size + S.checked.size > 0;
+  const hasAny = S.checkedTypes.size + S.checked.size + S.checkedComps.size > 0;
   const resetChip = hasAny ? `<button class="chip-reset" onclick="clearFilters()" title="전체 해제">${RESET_SVG}초기화</button>` : '';
-  el.innerHTML = typeChips + catChips + resetChip;
+  el.innerHTML = catChips + compChips + typeChips + resetChip;
 }
 
 function clearFilters() {
   S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
-  S.checked.clear(); S.checkedTypes.clear();
+  S.checked.clear(); S.checkedComps.clear(); S.checkedTypes.clear();
   S.view = 'index'; S.svc = null;
   buildSidebar(); render(); syncUrl();
   window.scrollTo({ top: 0, behavior: 'auto' });
@@ -1526,7 +1509,7 @@ function render() {
     return;
   }
 
-  const hasFilter = S.checked.size > 0 || S.checkedTypes.size > 0;
+  const hasFilter = S.checked.size > 0 || S.checkedComps.size > 0 || S.checkedTypes.size > 0;
   const units = [];
 
   if (hasFilter) {
@@ -1809,6 +1792,7 @@ function switchTab(tab, el) {
 function syncUrl() {
   const params = new URLSearchParams();
   if (S.checked.size)      params.set('cat',  [...S.checked].join(','));
+  if (S.checkedComps.size) params.set('comp', [...S.checkedComps].join(','));
   if (S.checkedTypes.size) params.set('type', [...S.checkedTypes].join(','));
   if (S.view === 'detail' && S.svc) params.set('svc', S.svc);
   const qs = params.toString();
@@ -1821,9 +1805,11 @@ function readUrl() {
   try {
     const params = new URLSearchParams(hash);
     const cat  = params.get('cat');
+    const comp = params.get('comp');
     const type = params.get('type');
     const svc  = params.get('svc');
     if (cat)  cat.split(',').forEach(c => { if (c && ALL_CATS.includes(c)) S.checked.add(c); });
+    if (comp) comp.split(',').forEach(c => { if (c && COMPONENTS.includes(c)) S.checkedComps.add(c); });
     if (type) type.split(',').forEach(t => { if (t) S.checkedTypes.add(t); });
     if (svc)  { S.view = 'detail'; S.svc = svc.trim().normalize('NFC'); }
   } catch(e) {}

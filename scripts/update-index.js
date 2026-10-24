@@ -275,6 +275,19 @@ function updatePlatform(platform, imageDir, opts = {}) {
   if (!fs.existsSync(imageDir)) throw new Error(`이미지 폴더를 찾을 수 없습니다: ${imageDir}`);
 
   const items = scanImages(imageDir);
+
+  // 이미지별 컴포넌트 — <platform>/components.json { "카테고리/파일.png": ["버튼", "탭"] }
+  // 캡처할 때 uibowl 이미지의 components(componentCodeName)를 이 파일에 모아 두면 사이드바 컴포넌트 필터에 쓰인다.
+  const COMP_FILE = path.join(BASE, 'components.json');
+  if (fs.existsSync(COMP_FILE)) {
+    const comps = JSON.parse(fs.readFileSync(COMP_FILE, 'utf-8'));
+    const byPath = new Map(Object.entries(comps).map(([k, v]) => [k.normalize('NFC'), v]));
+    for (const item of items) {
+      const c = byPath.get(item.path);
+      if (c && c.length) item.comps = [...new Set(c)];
+    }
+  }
+
   const prev = readData(DATA_FILE);
   const prevPaths = new Set(prev.map(i => i.path));
   const curPaths  = new Set(items.map(i => i.path));
