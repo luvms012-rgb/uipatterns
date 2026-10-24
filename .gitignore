@@ -1,0 +1,16 @@
+# 이미지는 회사 서버에만 둔다 — mo/·web/ 아래 하위 폴더(카테고리, icons, (업데이트), (업로드), backups)는 전부 제외
+/mo/*/
+/web/*/
+
+# 업로드용 압축 · 로컬 상태
+*.zip
+.update.lock
+업로드할 이미지.txt
+node_modules/
+
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# 로컬 미리보기 설정
+.claude/

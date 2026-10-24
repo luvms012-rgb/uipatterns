@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI Patterns</title>
+<link rel="icon" type="image/png" href="https://imagesisa.ybmnet.co.kr/platform/exam_ybmnet_co_kr/common/favicon.png">
+<link rel="icon" type="image/x-icon" href="https://imagesisa.ybmnet.co.kr/platform/exam_ybmnet_co_kr/common/favicon.ico">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #0c0c0e;
+    --bg-nav:    #101013;
+    --bg-side:   #101013;
+    --bg-card:   #17181c;
+    --bg-hover:  #1c1d22;
+    --bg-input:  #1a1b1f;
+    --border:    #32343e;
+    --text-1:    #f0f0f2;
+    --text-2:    #9b9da8;
+    --text-3:    #6b6d7e;
+    --accent:    #3182f6;
+    --acc-h:     #2272eb;
+    --sidebar-w: 256px;
+    --header-h:  80px;
+  }
+  html, body { height: 100%; font-family: 'Pretendard', -apple-system, sans-serif; font-size: 16px; background: var(--bg); color: var(--text-1); }
+  svg, i[data-lucide] { display: block; flex-shrink: 0; }
+  i[data-lucide] { display: flex; align-items: center; justify-content: center; }
+
+  /* Header */
+  #header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h); background: var(--bg-nav);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 24px; padding: 0 16px;
+  }
+  .logo { font-size: 28px; font-weight: 700; color: var(--text-1); flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
+  .logo-by { font-size: 16px; font-weight: 400; color: #D97757; display: flex; align-items: center; gap: 6px; margin-top: 5px; opacity: 0; transform: translateX(14px); animation: logoByIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards; }
+  @keyframes logoByIn {
+    0% { opacity: 0; transform: translateX(14px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo-by { animation: none; opacity: 1; transform: none; }
+  }
+  .hdr-right { display: flex; align-items: center; gap: 8px; }
+  .hdr-search-wrap { position: relative; display: flex; align-items: center; }
+  .hdr-search-icon { position: absolute; left: 12px; display: flex; align-items: center; color: var(--text-3); pointer-events: none; }
+  .hdr-search {
+    width: 220px; background: #2c2e38; border: none;
+    border-radius: 999px; padding: 0 16px 0 36px; height: 36px;
+    color: var(--text-1); font-size: 14px; outline: none; transition: background .15s, width .2s;
+    font-family: inherit;
+  }
+  .hdr-search::placeholder { color: var(--text-3); }
+  .hdr-search:focus { background: #363844; width: 280px; }
+
+  /* 검색 드롭다운 */
+  .search-drop {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    width: 360px; background: #1a1b20; border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 12px 32px rgba(0,0,0,.5); z-index: 400;
+  }
+  .search-drop.open { display: block; }
+  .sd-section { padding: 12px 0 4px; }
+  .sd-section + .sd-section { border-top: 1px solid #2a2b32; }
+  .sd-label {
+    padding: 0 16px 6px; font-size: 11px; font-weight: 600;
+    color: var(--text-3); letter-spacing: .06em; text-transform: uppercase;
+  }
+  .sd-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; cursor: pointer; transition: background .1s;
+  }
+  .sd-row:hover { background: var(--bg-hover); }
+  .sd-icon {
+    width: 32px; height: 32px; border-radius: 8px; background: #2c2e38;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: var(--text-2);
+  }
+  .sd-body { flex: 1; min-width: 0; }
+  .sd-title { font-size: 13px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sd-title mark { background: transparent; color: var(--accent); font-weight: 700; }
+  .sd-sub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+  .sd-cnt {
+    font-size: 12px; color: var(--text-3); flex-shrink: 0;
+    background: #2c2e38; padding: 2px 8px; border-radius: 999px;
+  }
+  .sd-empty { padding: 20px 16px; font-size: 13px; color: var(--text-3); text-align: center; }
+  .sd-badge {
+    font-size: 10px; font-weight: 700; color: var(--accent); flex-shrink: 0;
+    background: rgba(49,130,246,.14); border: 1px solid rgba(49,130,246,.32);
+    padding: 2px 7px; border-radius: 999px; margin-left: 6px;
+  }
+
+  /* 탭 네비게이션 (헤더 우측 배치, 하단 정렬) */
+  .hdr-tabs { display: flex; align-items: center; gap: 0; margin-left: auto; }
+  .hdr-tab {
+    padding: 0 8px; font-size: 14px; font-weight: 600;
+    color: var(--text-3); cursor: pointer; transition: color .15s; border: none;
+    background: transparent; font-family: inherit; line-height: normal;
+  }
+  .hdr-tab:hover { color: var(--text-2); }
+  .hdr-tab.active { color: var(--text-1); }
+  .hdr-divider { width: 1px; height: 14px; background: var(--border); margin: 0 4px; flex-shrink: 0; align-self: center; }
+
+  /* Layout */
+  #app { display: flex; margin-top: var(--header-h); min-height: calc(100vh - var(--header-h)); }
+
+  /* Sidebar */
+  #sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    background: var(--bg-side); border-right: 1px solid var(--border);
+    position: fixed; top: var(--header-h); bottom: 0; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+  #cat-rows { padding: 8px 8px 20px; }
+  .sb-section-label {
+    padding: 14px 8px 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-1);
+  }
+  .sb-divider { height: 1px; background: var(--border); margin: 32px 8px 24px; }
+  .cat-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 10px; margin: 0 -2px; border-radius: 6px; cursor: pointer; user-select: none;
+    transition: background .12s;
+  }
+  .cat-row:hover { background: #2a2b33; }
+  .cb-box {
+    width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid #484a5a;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all .12s; background: transparent;
+  }
+  .cat-row.on .cb-box { background: var(--accent); border-color: var(--accent); }
+  .cat-label { flex: 1; font-size: 14px; color: var(--text-1); }
+  .cat-cnt   { font-size: 14px; color: var(--text-3); }
+
+  /* Main */
+  #main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 0 24px 24px; }
+  #toolbar { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; margin-bottom: 24px; }
+  .tb-title { font-size: 22px; font-weight: 700; color: var(--text-1); }
+  .tb-sub   { font-size: 15px; color: var(--text-3); }
+
+
+  /* Chips */
+  #chips-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  #chips-row:empty { margin-bottom: 0; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #e8e9ed; border: none;
+    border-radius: 999px; padding: 0 10px 0 16px; height: 36px; font-size: 14px; font-weight: 600; color: #1a1b1f;
+  }
+  .chip-x {
+    width: 16px; height: 16px; border-radius: 50%; background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .12s; color: #5a5c6e;
+  }
+  .chip-x:hover { background: rgba(0,0,0,.12); color: #1a1b1f; }
+  .chip-reset {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 999px; padding: 0 14px; height: 36px; font-size: 14px; font-weight: 600;
+    color: var(--text-2); cursor: pointer; transition: background .12s, border-color .12s, color .12s;
+    font-family: inherit;
+  }
+  .chip-reset:hover { background: var(--bg-hover); border-color: var(--border); color: var(--text-1); }
+
+  /* Service group header */
+  #grid.filter-mode { display: block; }
+  .svc-group { margin-top: 48px; }
+  .svc-group.first { margin-top: 0; }
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    column-gap: 32px;
+    row-gap: 56px;
+    margin-top: 24px;
+  }
+  .svc-header {
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .svc-h-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    object-fit: cover; flex-shrink: 0;
+    background: var(--bg-hover);
+  }
+  .svc-h-icon[data-missing] { display: none; }
+  .svc-h-info { display: flex; flex-direction: column; gap: 2px; }
+  .svc-h-name { font-size: 18px; font-weight: 700; color: var(--text-1); }
+  .svc-h-cat  { font-size: 12px; color: var(--text-3); }
+
+  /* Grid */
+  #grid { display: grid; grid-template-columns: repeat(5, 1fr); column-gap: 32px; row-gap: 56px; }
+  .card {
+    background: var(--bg-card); border-radius: 20px; overflow: hidden;
+    cursor: pointer; transition: transform .18s, box-shadow .18s;
+    min-width: 0;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+  /* 화면 밖 카드는 레이아웃·페인트·이미지 디코드를 통째로 건너뛴다.
+     (4,263장 필터뷰 레이아웃 4,027ms → 250ms / 1,047장 상세뷰 382ms → 48ms — 서버 실측 2026-08-06)
+     --cih 는 render() 에서 현재 그리드 폭 기준 카드 높이로 갱신된다. */
+  .card { content-visibility: auto; contain-intrinsic-size: auto var(--cih, 642px); }
+  .card-img-wrap { position: relative; aspect-ratio: 375/812; background: var(--bg-hover); overflow: hidden; }
+  .card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s, opacity .2s; opacity: 0; }
+  .card-img.loaded { opacity: 1; }
+  .card:hover .card-img { transform: scale(1.02); }
+  /* 푸시알림: 가로 배너를 세로 카드 상단에 표시 */
+  .card-img-wrap.push-notif { background: #111216; }
+  .card-img-wrap.push-notif .card-img { object-fit: contain; object-position: top; }
+  .card:hover .card-img-wrap.push-notif .card-img { transform: none; }
+  .card-ov {
+    position: absolute; inset: 0; background: rgba(0,0,0,.45);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .18s;
+  }
+  .card:hover .card-ov { opacity: 1; }
+  .ov-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,.18); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s;
+  }
+  .card:hover .ov-icon { background: var(--accent); }
+
+  /* Service Index Item — 썸네일/타이틀 분리형 */
+  .svc-item { cursor: pointer; min-width: 0; }
+  /* 인덱스 카드도 동일 처리 (523장 레이아웃 102ms → 20ms). 썸네일 + 하단 정보바(62px) */
+  .svc-item { content-visibility: auto; contain-intrinsic-size: auto calc(var(--cih, 642px) + 62px); }
+  .svc-thumb {
+    position: relative; aspect-ratio: 375/812; overflow: hidden;
+    border-radius: 20px; background: var(--bg-card);
+    transition: transform .18s, box-shadow .18s;
+  }
+  .svc-item:hover .svc-thumb { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+  .svc-thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s, opacity .2s; opacity: 0; }
+  .svc-thumb-img.loaded { opacity: 1; }
+  .svc-item:hover .svc-thumb-img { transform: scale(1.02); }
+  /* 푸시알림 인덱스 썸네일 */
+  .svc-thumb.push-notif { background: #111216; }
+  .svc-thumb.push-notif .svc-thumb-img { object-fit: contain; object-position: top; }
+  .svc-item:hover .svc-thumb.push-notif .svc-thumb-img { transform: none; }
+  .svc-thumb-ov {
+    position: absolute; inset: 0; background: rgba(0,0,0,.4);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .18s;
+  }
+  .svc-item:hover .svc-thumb-ov { opacity: 1; }
+  .svc-item:hover .ov-icon { background: var(--accent); }
+  .svc-info { display: flex; align-items: center; gap: 10px; padding: 14px 4px 0; }
+  .svc-info-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    object-fit: cover; flex-shrink: 0; background: var(--bg-hover);
+  }
+  .svc-info-icon[data-missing] { display: none; }
+  .svc-info-text { flex: 1; min-width: 0; }
+  .svc-info-name { font-size: 18px; font-weight: 700; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .svc-info-cat  { font-size: 13px; color: var(--text-3); margin-top: 4px; }
+
+  /* Service Index Cards */
+  .svc-card {
+    background: var(--bg-card); border-radius: 20px; overflow: hidden;
+    cursor: pointer; transition: transform .18s, box-shadow .18s;
+    min-width: 0;
+  }
+  .svc-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+  .svc-card-img-wrap { position: relative; aspect-ratio: 375/812; background: var(--bg-hover); overflow: hidden; }
+  .svc-card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s, opacity .2s; opacity: 0; }
+  .svc-card-img.loaded { opacity: 1; }
+  .svc-card:hover .svc-card-img { transform: scale(1.02); }
+  .svc-card-ov {
+    position: absolute; inset: 0; background: rgba(0,0,0,.4);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .18s;
+  }
+  .svc-card:hover .svc-card-ov { opacity: 1; }
+  .svc-card-footer { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+  .svc-footer-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    object-fit: cover; flex-shrink: 0; background: var(--bg-hover);
+  }
+  .svc-footer-icon[data-missing] { display: none; }
+  .svc-footer-info { flex: 1; min-width: 0; }
+  .svc-footer-name { font-size: 13px; font-weight: 700; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .svc-footer-cat { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+  /* Detail view */
+  #detail-header { display: none; }
+  .detail-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 0 20px; border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    position: sticky; top: var(--header-h); z-index: 90;
+    background: var(--bg);
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+    border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-2); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background .12s, color .12s; font-family: inherit; flex-shrink: 0;
+  }
+  .back-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+  .back-btn svg { flex-shrink: 0; }
+
+  /* Empty */
+  .empty { text-align: center; padding: 100px 20px; color: var(--text-3); grid-column: 1/-1; }
+  .empty svg { margin: 0 auto 16px; opacity: .3; }
+  .empty p { font-size: 15px; }
+  .empty-sub { margin-top: 8px; font-size: 13px; opacity: .6; }
+
+  /* Lightbox */
+  #lightbox {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,.88); align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+  }
+  #lightbox.open { display: flex; }
+  .lb-close {
+    position: absolute; top: 20px; right: 20px;
+    width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .12s, border-color .12s, color .12s;
+  }
+  .lb-close:hover { background: var(--bg-hover); color: var(--text-1); }
+  .lb-img-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+  .lb-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 201;
+    width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .12s, opacity .12s, color .12s, border-color .12s;
+  }
+  .lb-nav:hover { background: var(--bg-hover); color: var(--text-1); }
+  .lb-nav:disabled { opacity: .25; cursor: default; pointer-events: none; }
+  .lb-prev { left: -56px; }
+  .lb-next { right: -56px; }
+  @media (max-width: 768px) {
+    .lb-nav { width: 34px; height: 34px; }
+    .lb-prev { left: -44px; }
+    .lb-next { right: -44px; }
+  }
+  @media (max-width: 480px) {
+    /* 화면 폭이 좁으면 이미지 옆 여백이 부족해 화살표를 숨김 (키보드 ←/→ 로 대체) */
+    .lb-nav { display: none !important; }
+  }
+  #lb-img { display: block; max-height: 80vh; max-width: 420px; width: auto; height: auto; border-radius: 12px; }
+  .lb-info { display: flex; align-items: center; gap: 12px; }
+  .lb-name { color: var(--text-1); font-size: 14px; font-weight: 600; }
+  #lb-cat  { color: var(--text-3); font-size: 13px; }
+  .lb-dl {
+    display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+    background: var(--accent); color: #fff; border-radius: 8px;
+    font-size: 14px; font-weight: 600; text-decoration: none; transition: background .12s;
+    border: none; cursor: pointer; font-family: inherit;
+  }
+  .lb-dl:hover { background: var(--acc-h); }
+
+  /* Toast */
+  #toast {
+    position: fixed; top: calc(var(--header-h) + 16px); left: 50%; transform: translateX(-50%) translateY(-12px);
+    background: #1e2130; color: var(--text-1); font-size: 14px; font-weight: 500;
+    padding: 12px 20px; border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    white-space: nowrap; z-index: 300;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ═══ RESPONSIVE ═══ */
+
+  /* 사이드바 오버레이 (모바일) */
+  #sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.65); z-index: 94;
+    backdrop-filter: blur(2px);
+  }
+  #sidebar-overlay.show { display: block; }
+
+  /* 햄버거 버튼 */
+  .hdr-menu-btn {
+    display: none; width: 36px; height: 36px; border-radius: 10px;
+    background: transparent; border: none; cursor: pointer;
+    align-items: center; justify-content: center;
+    color: var(--text-2); transition: background .15s, color .15s;
+    flex-shrink: 0;
+  }
+  .hdr-menu-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+
+  /* 사이드바 내 탭 메뉴 (모바일 전용) */
+  .sb-mobile-tabs {
+    display: none;
+    flex-direction: column; gap: 2px;
+    padding: 8px 8px 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .sb-mobile-tab {
+    display: flex; align-items: center;
+    padding: 10px 10px; border-radius: 8px;
+    font-size: 15px; font-weight: 600; color: var(--text-3);
+    background: transparent; border: none; cursor: pointer;
+    font-family: inherit; text-align: left;
+    transition: background .12s, color .12s;
+  }
+  .sb-mobile-tab:hover { background: var(--bg-hover); color: var(--text-1); }
+  .sb-mobile-tab.active { color: var(--text-1); }
+  @media (max-width: 768px) { .sb-mobile-tabs { display: flex; } }
+
+  .sb-mobile-tabs-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 10px 10px;
+  }
+  .sb-mobile-tabs-title { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; }
+  .sb-mobile-close {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: var(--bg-hover); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-2); transition: background .12s;
+  }
+  .sb-mobile-close:hover { background: var(--border); color: var(--text-1); }
+
+  /* 다중 선택 모드 */
+  .select-mode-btn {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+    border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-2); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background .12s, color .12s; font-family: inherit;
+  }
+  .select-mode-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+  .select-mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  /* 카드 호버 시 상단 그라디언트 스크림 */
+  .card-img-wrap::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 72px;
+    background: linear-gradient(to bottom, rgba(0,0,0,.45) 0%, transparent 100%);
+    opacity: 0; transition: opacity .18s;
+    z-index: 8; pointer-events: none;
+  }
+  .card:hover .card-img-wrap::before,
+  .card.selected .card-img-wrap::before { opacity: 1; }
+
+  /* 체크박스 */
+  .sel-chk {
+    display: none;
+    position: absolute; top: 10px; left: 10px;
+    width: 28px; height: 28px; border-radius: 6px;
+    border: 2.5px solid rgba(255,255,255,.9);
+    background: #fff;
+    align-items: center; justify-content: center;
+    transition: background .12s, border-color .12s;
+    z-index: 10; flex-shrink: 0; cursor: pointer;
+  }
+  .card:hover .sel-chk { display: flex; }
+  .card.selected .sel-chk {
+    display: flex;
+    background: var(--accent); border-color: var(--accent);
+  }
+  .card.selected .card-img-wrap::after {
+    content: '';
+    position: absolute; inset: 0;
+    border: 3px solid var(--accent);
+    border-radius: 20px;
+    pointer-events: none;
+  }
+
+  /* 선택 바 */
+  #select-bar {
+    display: flex;
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(calc(100% + 32px));
+    opacity: 0; pointer-events: none;
+    transition: transform .3s cubic-bezier(.34,1.4,.64,1), opacity .2s ease;
+    background: #1e2130; border: 1px solid var(--border);
+    border-radius: 16px; padding: 10px 12px 10px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.55);
+    align-items: center; gap: 10px; z-index: 150;
+    white-space: nowrap;
+  }
+  #select-bar.open { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+  .sb-count { font-size: 14px; font-weight: 600; color: var(--text-1); flex: 1; }
+  .sb-count-num { color: var(--accent); }
+  .sb-sel-all-btn {
+    font-size: 13px; font-weight: 500; color: var(--text-2); cursor: pointer;
+    padding: 6px 10px; border-radius: 6px; transition: background .12s, color .12s;
+    background: transparent; border: none; font-family: inherit;
+  }
+  .sb-sel-all-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+  .sb-dl-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px; background: var(--accent); color: #fff;
+    border-radius: 8px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background .12s; border: none; font-family: inherit;
+  }
+  .sb-dl-btn:hover:not(:disabled) { background: var(--acc-h); }
+  .sb-dl-btn:disabled { background: #444; cursor: not-allowed; opacity: .6; }
+  .sb-exit-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s; flex-shrink: 0;
+  }
+  .sb-exit-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+
+  /* ═══ ADMIN DASHBOARD ═══ */
+  #admin-btn {
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    background: transparent; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-3); transition: background .15s, color .15s;
+  }
+  #admin-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+
+  #dashboard {
+    position: fixed; inset: 0; background: var(--bg); z-index: 500;
+    overflow-y: auto; opacity: 0; pointer-events: none;
+    transform: translateY(20px);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  #dashboard.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+  .dash-hdr {
+    position: sticky; top: 0; height: 64px;
+    background: var(--bg-nav); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; z-index: 10;
+  }
+  .dash-hdr-title { font-size: 20px; font-weight: 700; color: var(--text-1); }
+  .dash-hdr-close {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s, color .12s;
+  }
+  .dash-hdr-close:hover { background: var(--bg-hover); color: var(--text-1); }
+
+  .dash-body { max-width: 960px; margin: 0 auto; padding: 48px 40px 80px; }
+
+  .dash-hero { margin-bottom: 40px; }
+  .dash-hero-big { font-size: 36px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; line-height: 1.2; }
+  .dash-hero-big em { color: var(--accent); font-style: normal; }
+  .dash-hero-sub { font-size: 18px; color: var(--text-2); }
+
+  .dash-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 40px; }
+  .dash-card { background: var(--bg-card); border-radius: 20px; padding: 34px 32px; }
+  .dash-card-label { font-size: 15px; color: var(--text-2); margin-bottom: 14px; font-weight: 500; }
+  .dash-card-num { font-size: 38px; font-weight: 700; color: var(--text-1); line-height: 1; }
+  .dash-card-unit { font-size: 18px; font-weight: 500; color: var(--text-3); margin-left: 3px; }
+  .dash-card-sub { font-size: 14px; color: var(--text-3); margin-top: 8px; }
+
+  .dash-section { margin-bottom: 40px; }
+  .dash-section-title { font-size: 19px; font-weight: 700; color: var(--text-1); margin-bottom: 16px; }
+
+  .dash-week-card { background: var(--bg-card); border-radius: 20px; padding: 36px 36px 40px; }
+  .dash-week-headline { font-size: 24px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+  .dash-week-sub { font-size: 15px; color: var(--text-2); margin-bottom: 32px; }
+  .dash-bars {
+    display: flex; align-items: flex-end; gap: 8px;
+    height: 150px; padding-bottom: 28px; position: relative;
+  }
+  .dash-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end; }
+  .dash-bar-val { font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 4px; min-height: 15px; text-align: center; }
+  .dash-bar-rect { width: 100%; border-radius: 6px 6px 0 0; min-height: 4px; }
+  .dash-bar-rect.active { background: var(--accent); }
+  .dash-bar-rect.past { background: #252737; }
+  .dash-bar-date { position: absolute; bottom: -22px; font-size: 13px; color: var(--text-3); white-space: nowrap; }
+
+  .dash-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 40px; }
+
+  .dash-hbar-card, .dash-rank-card { background: var(--bg-card); border-radius: 20px; padding: 34px 32px; }
+  .dash-hbar-list { display: flex; flex-direction: column; gap: 16px; }
+  .dash-hbar-top { display: flex; justify-content: space-between; margin-bottom: 7px; }
+  .dash-hbar-name { font-size: 15px; font-weight: 600; color: var(--text-1); }
+  .dash-hbar-cnt { font-size: 14px; color: var(--text-2); }
+  .dash-hbar-track { height: 7px; border-radius: 4px; background: var(--bg-hover); overflow: hidden; }
+  .dash-hbar-fill { height: 100%; border-radius: 4px; background: var(--accent); }
+
+  .dash-rank-list { display: flex; flex-direction: column; }
+  .dash-rank-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 0; border-bottom: 1px solid var(--border);
+  }
+  .dash-rank-row:last-child { border-bottom: none; }
+  .dash-rank-num { font-size: 15px; font-weight: 700; color: var(--accent); width: 20px; flex-shrink: 0; }
+  .dash-rank-icon { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; background: var(--bg-hover); flex-shrink: 0; }
+  .dash-rank-name { font-size: 15px; font-weight: 600; color: var(--text-1); flex: 1; }
+  .dash-rank-cnt { font-size: 14px; color: var(--text-2); }
+
+  .dash-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dash-tag {
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    font-size: 13px; color: var(--text-2);
+  }
+  .dash-empty-msg { font-size: 15px; color: var(--text-3); padding: 8px 0; line-height: 1.8; }
+
+  /* Cost savings */
+  .dash-cost-card {
+    background: linear-gradient(135deg, #0f1729 0%, #131a2e 100%);
+    border: 1px solid #1e2d50; border-radius: 20px;
+    padding: 40px 36px; margin-bottom: 40px;
+    position: relative; overflow: hidden;
+  }
+  .dash-cost-card::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(49,130,246,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .dash-cost-eyebrow {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .dash-cost-headline {
+    font-size: 28px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; line-height: 1.2;
+  }
+  .dash-cost-headline em { color: var(--accent); font-style: normal; }
+  .dash-cost-sub { font-size: 16px; color: var(--text-2); margin-bottom: 32px; }
+
+  /* 절감 2열 stat */
+  .dash-cost-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+  .dash-cost-stat {
+    background: rgba(255,255,255,.04); border: 1px solid #1e2d50;
+    border-radius: 14px; padding: 18px 18px 14px;
+  }
+  .dash-cost-stat-label { font-size: 13px; color: var(--text-3); margin-bottom: 8px; font-weight: 600; letter-spacing:.04em; text-transform:uppercase; }
+  .dash-cost-stat-val { font-size: 26px; font-weight: 700; color: var(--text-1); line-height: 1.15; }
+  .dash-cost-stat-val.accent { color: var(--accent); }
+  .dash-cost-stat-unit { font-size: 16px; font-weight: 500; margin-left: 2px; }
+  .dash-cost-stat-note { font-size: 13px; color: var(--text-3); margin-top: 6px; }
+
+  /* 진행 바 */
+  .dash-cost-prog-wrap { margin-top: 20px; }
+  .dash-cost-prog-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--text-3); margin-bottom: 8px;
+  }
+  .dash-cost-prog-track {
+    height: 5px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden;
+  }
+  .dash-cost-prog-fill {
+    height: 100%; background: var(--accent); border-radius: 999px;
+  }
+
+  /* 비교 행 */
+  .dash-cost-divider { height: 1px; background: #1e2d50; }
+  .dash-cost-compare { display: flex; flex-direction: column; gap: 10px; }
+  .dash-cost-compare-row { display: flex; justify-content: space-between; align-items: center; }
+  .dash-cost-compare-label { font-size: 15px; color: var(--text-2); }
+  .dash-cost-compare-val { font-size: 15px; font-weight: 600; color: var(--text-1); }
+  .dash-cost-compare-note { font-size: 13px; color: var(--text-3); margin-left: 6px; font-weight: 400; }
+
+  /* 사용현황 통합 탭 + 플랫폼 요약 */
+  .dash-tabs { display: inline-flex; gap: 4px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 4px; margin-bottom: 28px; }
+  .dash-tab { appearance: none; border: none; background: transparent; color: var(--text-3); font-size: 14px; font-weight: 600; padding: 9px 18px; border-radius: 10px; cursor: pointer; transition: background .15s, color .15s; }
+  .dash-tab:hover { color: var(--text-1); }
+  .dash-tab.active { background: var(--accent); color: #fff; }
+
+  .dash-platform-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; max-width: 460px; }
+  .dash-platform-pill { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; transition: border-color .15s, background .15s; cursor: pointer; text-align: left; font-family: inherit; width: 100%; appearance: none; }
+  .dash-platform-pill:hover { background: var(--bg-hover); }
+  .dash-platform-pill.active { border-color: var(--accent); }
+  .dash-platform-pill-label { display: block; font-size: 13px; color: var(--text-3); font-weight: 600; margin-bottom: 4px; }
+  .dash-platform-pill-val { display: block; font-size: 20px; color: var(--text-1); font-weight: 700; line-height: 1.3; }
+  .dash-platform-pill-sub { display: block; font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE — 모든 기본 스타일 다음에 위치
+     ══════════════════════════════════════════ */
+
+  /* ── Tablet Landscape : ≤1100px ── */
+  @media (max-width: 1100px) {
+    :root { --sidebar-w: 180px; }
+    .logo-by { display: none; }
+    .hdr-search { width: 180px; }
+    .hdr-search:focus { width: 220px; }
+    /* 열 수는 변경하지 않음 — 데스크탑은 항상 5열 유지 */
+    #grid { column-gap: 20px; row-gap: 44px; }
+    .mini-grid { column-gap: 20px; row-gap: 44px; }
+    .sb-section-label { font-size: 15px; }
+    .cat-label, .cat-cnt { font-size: 13px; }
+  }
+
+  /* ── Tablet Portrait : ≤768px ── */
+  @media (max-width: 768px) {
+    :root { --header-h: 60px; --sidebar-w: 268px; }
+
+    /* 헤더 */
+    .hdr-menu-btn { display: flex; }
+    .logo { font-size: 22px; }
+    .logo-by { display: none; }
+    .hdr-tabs { display: none; }
+    .hdr-search { width: 150px; }
+    .hdr-search:focus { width: 190px; }
+
+    /* 사이드바 슬라이드 */
+    #sidebar {
+      transform: translateX(-100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      z-index: 95;
+      box-shadow: 4px 0 24px rgba(0,0,0,.5);
+    }
+    #sidebar.open { transform: translateX(0); }
+
+    /* 메인 */
+    #main { margin-left: 0; padding: 0 16px 80px; }
+
+    /* 그리드: 3열, gap 축소 */
+    #grid { grid-template-columns: repeat(3, 1fr); column-gap: 16px; row-gap: 28px; }
+    .mini-grid { grid-template-columns: repeat(3, 1fr); column-gap: 16px; row-gap: 28px; }
+
+    /* 카드 */
+    .svc-info-name { font-size: 15px; }
+    .tb-title { font-size: 18px; }
+
+    /* 대시보드 */
+    .dash-body { max-width: 100%; padding: 24px 16px 60px; }
+    .dash-hdr { padding: 0 16px; }
+    .dash-hero-big { font-size: 28px; }
+    .dash-cost-headline { font-size: 24px; }
+    .dash-cards { grid-template-columns: 1fr; gap: 10px; }
+    .dash-grid-2 { grid-template-columns: 1fr; }
+    .dash-cost-2col { grid-template-columns: 1fr; gap: 10px; }
+    .dash-tab { padding: 8px 14px; font-size: 13px; }
+    .dash-platform-pills { max-width: 100%; }
+
+    /* 터치 기기: hover 없으므로 체크박스 항상 표시 */
+    .sel-chk { display: flex; opacity: 0.5; }
+    .card.selected .sel-chk { opacity: 1; }
+  }
+
+  /* ── Mobile : ≤480px ── */
+  @media (max-width: 480px) {
+    :root { --header-h: 56px; }
+
+    .logo { font-size: 18px; }
+    #header { gap: 12px; padding: 0 14px; }
+    .hdr-search { width: 110px; }
+    .hdr-search:focus { width: 150px; }
+
+    #main { padding: 0 12px 80px; }
+    #toolbar { padding-top: 16px; margin-bottom: 16px; }
+
+    /* 모바일: 2열 */
+    #grid { grid-template-columns: repeat(2, 1fr); column-gap: 12px; row-gap: 20px; }
+    .mini-grid { grid-template-columns: repeat(2, 1fr); column-gap: 12px; row-gap: 20px; }
+
+    .svc-info { padding: 10px 2px 0; gap: 8px; }
+    .svc-info-name { font-size: 13px; }
+    .svc-info-cat  { font-size: 11px; }
+    .svc-info-icon { width: 28px; height: 28px; border-radius: 10px; }
+
+    /* 좁은 화면: 뒤로가기 버튼 아이콘만 표시 */
+    .back-btn span { display: none; }
+    .back-btn { padding: 8px; }
+    .detail-bar { gap: 10px; }
+
+    #lb-img { max-height: 72vh; max-width: 92vw; }
+    #select-bar { width: calc(100vw - 24px); }
+
+    .dash-body { max-width: 100%; padding: 20px 16px 60px; }
+    .dash-hdr { padding: 0 16px; }
+    .dash-hero-big { font-size: 24px; line-height: 1.3; }
+    .dash-hero-sub { font-size: 16px; }
+    .dash-cards { grid-template-columns: 1fr; gap: 10px; }
+    .dash-cost-2col { grid-template-columns: 1fr; gap: 10px; }
+    .dash-grid-2 { grid-template-columns: 1fr; }
+    .dash-cost-headline { font-size: 21px; }
+    .dash-cost-card { padding: 32px 26px; }
+    .dash-card { padding: 28px 26px; }
+    .dash-card-num { font-size: 30px; }
+    .dash-week-card { padding: 28px 24px 36px; }
+    .dash-week-headline { font-size: 20px; }
+    .dash-platform-pills { grid-template-columns: 1fr; }
+    .dash-platform-pill-val { font-size: 18px; }
+  }
+
+  /* ── Small Mobile : ≤360px ── */
+  @media (max-width: 360px) {
+    #grid { grid-template-columns: repeat(2, 1fr); column-gap: 8px; }
+    .mini-grid { grid-template-columns: repeat(2, 1fr); column-gap: 8px; }
+    .hdr-search { width: 90px; }
+    .hdr-search:focus { width: 120px; }
+  }
+
+</style>
+</head>
+<body>
+
+<header id="header">
+  <button class="hdr-menu-btn" id="sidebarToggle" onclick="toggleSidebar()" aria-label="메뉴">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="logo" onclick="backToIndex()" style="cursor:pointer">
+    UI Patterns
+    <span class="logo-by">by <svg xmlns="http://www.w3.org/2000/svg" viewBox="30 0 82 24" height="16" fill="currentColor" role="img" aria-label="Claude" shape-rendering="geometricPrecision" style="display:inline-block;vertical-align:middle"><path d="M39.504 21.2643C37.688 21.2643 36.06 20.9003 34.62 20.1723C33.18 19.4443 32.048 18.4163 31.224 17.0883C30.408 15.7603 30 14.2243 30 12.4803C30 10.6563 30.412 9.03233 31.236 7.60833C32.06 6.17633 33.196 5.06833 34.644 4.28433C36.1 3.49233 37.74 3.09633 39.564 3.09633C40.692 3.09633 41.82 3.22033 42.948 3.46833C44.084 3.71633 45.072 4.09633 45.912 4.60833V8.56833H44.832C44.536 7.16833 43.96 6.12433 43.104 5.43633C42.256 4.74833 41.076 4.40433 39.564 4.40433C38.164 4.40433 36.996 4.73233 36.06 5.38833C35.132 6.03633 34.444 6.93633 33.996 8.08833C33.548 9.24033 33.324 10.5643 33.324 12.0603C33.324 13.5483 33.576 14.8883 34.08 16.0803C34.584 17.2723 35.328 18.2163 36.312 18.9123C37.296 19.6003 38.476 19.9443 39.852 19.9443C40.796 19.9443 41.608 19.7483 42.288 19.3563C42.968 18.9643 43.54 18.4363 44.004 17.7723C44.468 17.1003 44.908 16.2803 45.324 15.3123H46.464L45.684 19.6803C44.892 20.2003 43.936 20.5963 42.816 20.8683C41.704 21.1323 40.6 21.2643 39.504 21.2643ZM47.964 21.0003V19.9563C48.356 19.9003 48.668 19.8403 48.9 19.7763C49.14 19.7043 49.332 19.5883 49.476 19.4283C49.628 19.2683 49.704 19.0443 49.704 18.7563V5.83233L47.964 5.08833V4.28433L51.612 2.73633H52.56V18.7563C52.56 19.0523 52.632 19.2803 52.776 19.4403C52.928 19.6003 53.12 19.7123 53.352 19.7763C53.592 19.8403 53.912 19.9003 54.312 19.9563V21.0003H47.964ZM59.028 21.2643C58.38 21.2643 57.792 21.1363 57.264 20.8803C56.736 20.6243 56.32 20.2563 56.016 19.7763C55.712 19.2963 55.56 18.7363 55.56 18.0963C55.56 17.1203 55.86 16.3443 56.46 15.7683C57.068 15.1843 57.916 14.7403 59.004 14.4363L63.24 13.2363V11.7123C63.24 10.8883 63.048 10.2523 62.664 9.80433C62.288 9.34833 61.708 9.12033 60.924 9.12033C60.228 9.12033 59.704 9.33233 59.352 9.75633C59.008 10.1723 58.836 10.7483 58.836 11.4843V12.6123H56.988C56.764 12.4683 56.588 12.2763 56.46 12.0363C56.34 11.7883 56.28 11.5163 56.28 11.2203C56.28 10.5563 56.516 9.98833 56.988 9.51633C57.46 9.03633 58.06 8.67633 58.788 8.43633C59.516 8.19633 60.256 8.07633 61.008 8.07633C62.592 8.07633 63.836 8.44033 64.74 9.16833C65.644 9.89633 66.096 11.0003 66.096 12.4803V18.5403C66.096 18.8603 66.168 19.1043 66.312 19.2723C66.456 19.4403 66.644 19.5603 66.876 19.6323C67.116 19.6963 67.44 19.7563 67.848 19.8123V20.8563C67.536 20.9683 67.208 21.0563 66.864 21.1203C66.528 21.1843 66.204 21.2163 65.892 21.2163C65.148 21.2163 64.548 21.0483 64.092 20.7123C63.644 20.3683 63.372 19.8643 63.276 19.2003C62.716 19.8643 62.08 20.3763 61.368 20.7363C60.664 21.0883 59.884 21.2643 59.028 21.2643ZM60.444 19.3443C60.948 19.3443 61.44 19.2283 61.92 18.9963C62.408 18.7563 62.848 18.4403 63.24 18.0483V14.3403L60.168 15.2523C59.592 15.4283 59.152 15.7003 58.848 16.0683C58.544 16.4363 58.392 16.9003 58.392 17.4603C58.392 17.8203 58.48 18.1443 58.656 18.4323C58.832 18.7203 59.076 18.9443 59.388 19.1043C59.7 19.2643 60.052 19.3443 60.444 19.3443ZM73.608 21.2643C72.32 21.2643 71.356 20.9283 70.716 20.2563C70.084 19.5843 69.768 18.6363 69.768 17.4123V10.9083L68.016 10.2603L68.112 9.45633L71.664 8.07633H72.624V16.9323C72.624 17.6923 72.812 18.2563 73.188 18.6243C73.564 18.9923 74.14 19.1763 74.916 19.1763C75.428 19.1763 75.964 19.0603 76.524 18.8283C77.084 18.5883 77.6 18.2803 78.072 17.9043V10.9083L76.32 10.2603V9.45633L79.98 8.07633H80.928V17.8323C80.928 18.1523 81 18.4003 81.144 18.5763C81.288 18.7443 81.476 18.8643 81.708 18.9363C81.948 19.0083 82.272 19.0723 82.68 19.1283V20.1603L79.02 21.1803H78.072V19.0803C77.44 19.7363 76.728 20.2643 75.936 20.6643C75.144 21.0643 74.368 21.2643 73.608 21.2643ZM89.328 21.2643C88.264 21.2643 87.312 21.0083 86.472 20.4963C85.632 19.9763 84.976 19.2683 84.504 18.3723C84.032 17.4763 83.796 16.4843 83.796 15.3963C83.796 13.9643 84.08 12.6963 84.648 11.5923C85.224 10.4883 86.032 9.62833 87.072 9.01233C88.112 8.38833 89.32 8.07633 90.696 8.07633C91.12 8.07633 91.556 8.12433 92.004 8.22033C92.46 8.30833 92.896 8.43633 93.312 8.60433V5.82033L91.56 5.08833V4.28433L95.22 2.73633H96.168V17.8323C96.168 18.1523 96.24 18.4003 96.384 18.5763C96.536 18.7443 96.728 18.8643 96.96 18.9363C97.2 19.0083 97.52 19.0723 97.92 19.1283V20.1603L94.26 21.1803H93.312V19.5843C92.752 20.1123 92.132 20.5243 91.452 20.8203C90.78 21.1163 90.072 21.2643 89.328 21.2643ZM90.504 19.3323C90.976 19.3323 91.456 19.2363 91.944 19.0443C92.432 18.8523 92.888 18.5883 93.312 18.2523V10.3563C92.584 9.76433 91.776 9.46833 90.888 9.46833C89.992 9.46833 89.236 9.69633 88.62 10.1523C88.004 10.6083 87.54 11.2283 87.228 12.0123C86.924 12.7883 86.772 13.6563 86.772 14.6163C86.772 15.5283 86.908 16.3403 87.18 17.0523C87.452 17.7563 87.868 18.3123 88.428 18.7203C88.988 19.1283 89.68 19.3323 90.504 19.3323ZM105.252 21.2643C104.068 21.2643 103.004 20.9883 102.06 20.4363C101.116 19.8843 100.376 19.1163 99.84 18.1323C99.304 17.1483 99.036 16.0443 99.036 14.8203C99.036 13.5563 99.308 12.4123 99.852 11.3883C100.404 10.3563 101.156 9.54833 102.108 8.96433C103.068 8.37233 104.136 8.07633 105.312 8.07633C106.216 8.07633 107.048 8.26433 107.808 8.64033C108.568 9.01633 109.2 9.54433 109.704 10.2243C110.216 10.9043 110.552 11.6883 110.712 12.5763L101.928 15.2883C102.168 16.4003 102.644 17.2763 103.356 17.9163C104.076 18.5563 104.968 18.8763 106.032 18.8763C106.92 18.8763 107.716 18.6523 108.42 18.2043C109.124 17.7483 109.748 17.0603 110.292 16.1403L111.228 16.4403C111.012 17.4003 110.62 18.2443 110.052 18.9723C109.484 19.7003 108.784 20.2643 107.952 20.6643C107.128 21.0643 106.228 21.2643 105.252 21.2643ZM107.628 12.2043C107.516 11.6523 107.324 11.1683 107.052 10.7523C106.788 10.3283 106.46 10.0003 106.068 9.76833C105.676 9.53633 105.244 9.42033 104.772 9.42033C104.18 9.42033 103.656 9.60033 103.2 9.96033C102.752 10.3123 102.4 10.8163 102.144 11.4723C101.896 12.1203 101.772 12.8723 101.772 13.7283C101.772 13.8803 101.776 13.9963 101.784 14.0763L107.628 12.2043Z"></path></svg></span>
+  </div>
+  <nav class="hdr-tabs">
+    <button class="hdr-tab active" onclick="switchTab('mobile',this)">모바일</button>
+    <button class="hdr-tab" onclick="location.href='../web/index.html'">웹사이트</button>
+    <div class="hdr-divider"></div>
+    <button class="hdr-tab" onclick="openDashboard()">사용 현황</button>
+  </nav>
+  <div class="hdr-right">
+    <div class="hdr-search-wrap">
+      <i data-lucide="search" class="hdr-search-icon" width="14" height="14"></i>
+      <input class="hdr-search" id="hdrSearchInput" type="text" placeholder="패턴 검색"
+        oninput="onSearchInput(this.value)"
+        onfocus="onSearchInput(this.value)"
+        onkeydown="onSearchKey(event)" autocomplete="off" />
+      <div class="search-drop" id="searchDrop"></div>
+    </div>
+  </div>
+</header>
+
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div id="app">
+  <aside id="sidebar">
+    <div class="sb-mobile-tabs">
+      <div class="sb-mobile-tabs-hdr">
+        <span class="sb-mobile-tabs-title">메뉴</span>
+        <button class="sb-mobile-close" onclick="closeSidebar()" aria-label="닫기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <button class="sb-mobile-tab active" onclick="switchTab('mobile',this);closeSidebar()">모바일</button>
+      <button class="sb-mobile-tab" onclick="location.href='../web/index.html'">웹사이트</button>
+      <button class="sb-mobile-tab" onclick="openDashboard();closeSidebar()">사용 현황</button>
+    </div>
+    <div id="cat-rows"></div>
+  </aside>
+  <main id="main">
+    <div id="toolbar">
+      <span class="tb-title">모바일</span>
+    </div>
+    <div id="chips-row"></div>
+    <div id="detail-header"></div>
+    <div id="grid"></div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<div id="dashboard">
+  <div class="dash-hdr">
+    <span class="dash-hdr-title">사용 현황</span>
+    <div style="display:flex;align-items:center;gap:4px">
+<button class="dash-hdr-close" onclick="closeDashboard()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="dash-body" id="dash-body"></div>
+</div>
+
+<div id="select-bar">
+  <span class="sb-count"><span id="sb-count-num" class="sb-count-num">0</span>개 선택됨</span>
+  <button id="sb-sel-all" class="sb-sel-all-btn" onclick="selectAll()">전체 선택</button>
+  <button id="sb-dl-btn" class="sb-dl-btn" disabled onclick="dlSelected()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    다운로드
+  </button>
+  <button class="sb-exit-btn" onclick="exitSelectMode()" title="선택 취소">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
+</div>
+
+<div id="lightbox" onclick="closeLb(event)">
+  <button class="lb-close" onclick="closeLb()">
+    <i data-lucide="x" width="18" height="18"></i>
+  </button>
+  <div class="lb-img-wrap">
+    <button id="lb-prev" class="lb-nav lb-prev" onclick="event.stopPropagation();lbNav(-1)">
+      <i data-lucide="chevron-left" width="22" height="22"></i>
+    </button>
+    <img id="lb-img" src="" alt="" />
+    <button id="lb-next" class="lb-nav lb-next" onclick="event.stopPropagation();lbNav(1)">
+      <i data-lucide="chevron-right" width="22" height="22"></i>
+    </button>
+  </div>
+  <div class="lb-info">
+    <span class="lb-name" id="lb-name"></span>
+    <span id="lb-cat"></span>
+  </div>
+  <button id="lb-dl" class="lb-dl" onclick="dlFromLb()">
+    <i data-lucide="download" width="15" height="15"></i>
+    다운로드
+  </button>
+</div>
+
+<script src="../config.js"></script>
+<script src="data.js"></script>
+<script src="svc-types.js"></script>
+<script src="icons.js"></script>
+<script>
+window.DATA = DATA;
+
+// 영문 우선 → 한글 순 정렬
+function sortMixed(a, b) {
+  const aKo = /^[ㄱ-ㅎ가-힣]/.test(a);
+  const bKo = /^[ㄱ-ㅎ가-힣]/.test(b);
+  if (aKo !== bKo) return aKo ? 1 : -1;
+  return a.localeCompare(b, aKo ? 'ko' : 'en', { sensitivity: 'base' });
+}
+const DISPLAY_DATA = DATA.filter(i => i.category !== 'icons');
+const DATA_BY_PATH = new Map(DISPLAY_DATA.map(i => [i.path, i]));
+const ALL_CATS = [...new Set(DISPLAY_DATA.map(i => i.category))].sort(sortMixed);
+const CAT_COUNTS = {};
+DISPLAY_DATA.forEach(i => { CAT_COUNTS[i.category] = (CAT_COUNTS[i.category]||0)+1; });
+
+const S = { checked: new Set(), checkedTypes: new Set(), selected: new Set(), view: 'index', svc: null };
+
+// SVC_TYPES에 없는 새 서비스는 '미분류'로 자동 분류 (수동 매핑 전까지 사이드바에 자동 노출)
+const UNCLASSIFIED = '미분류';
+function getSvcType(svcName) { return SVC_TYPES[svcName] || UNCLASSIFIED; }
+
+
+// 업종별 아이템 수 계산
+const TYPE_COUNTS = {};
+DISPLAY_DATA.forEach(item => {
+  const t = getSvcType(extractService(item.name));
+  if (t) TYPE_COUNTS[t] = (TYPE_COUNTS[t]||0) + 1;
+});
+
+// ── 이미지 주소 ──────────────────────────────────────────────────────────
+// 이미지는 회사 서버(UIP_CONFIG.imgBase)에만 있다. 화면 표시는 원본 주소를 바로 쓰고,
+// 다운로드처럼 파일 내용을 읽어야 할 때만 이미지 중계(UIP_CONFIG.imgProxy)를 거친다
+// (회사 서버에 CORS 헤더가 없어 github.io에서 직접 fetch하면 브라우저가 막는다).
+function encodePath(p) { return p.split('/').map(encodeURIComponent).join('/'); }
+function imgUrl(p, platform = PLATFORM) { return UIP_CONFIG.imgBase + platform + '/' + encodePath(p); }
+function dlUrl(p, platform = PLATFORM) {
+  if (!UIP_CONFIG.imgProxy) return imgUrl(p, platform);
+  return UIP_CONFIG.imgProxy.replace(/\/$/, '') + '/' + platform + '/' + encodePath(p);
+}
+function iconBase(platform = PLATFORM) { return UIP_CONFIG.imgBase + platform + '/icons/'; }
+
+async function dlImg(encPath, encName) {
+  const path = decodeURIComponent(encPath);
+  const name = decodeURIComponent(encName) + '.png';
+  aTrack('download', { count: 1 });
+  try {
+    const res = await fetch(dlUrl(path));
+    if (!res.ok) throw new Error();
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch {
+    // fetch 실패(file:// 등) 시 이미지 뷰어 새창으로 열기 (닫기 버튼 포함)
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${name}</title>
+      <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0c0c0e;display:flex;align-items:center;justify-content:center;min-height:100vh}
+      img{max-width:calc(100vw - 80px);max-height:calc(100vh - 80px);object-fit:contain;border-radius:8px}
+      .close-btn{position:fixed;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1}
+      .close-btn:hover{background:rgba(255,255,255,.22)}
+      .back-btn{position:fixed;top:16px;left:16px;height:36px;padding:0 14px;border-radius:18px;background:rgba(255,255,255,.12);border:none;cursor:pointer;color:#fff;font-size:13px;font-family:sans-serif}
+      .back-btn:hover{background:rgba(255,255,255,.22)}</style></head>
+      <body>
+      <button class="back-btn" onclick="window.close()">← 돌아가기</button>
+      <img src="${imgUrl(path)}" alt="${name}">
+      <button class="close-btn" onclick="window.close()">✕</button>
+      </body></html>`);
+      win.document.close();
+    }
+  }
+}
+
+// 아이콘 확장자 순차 시도 (png → webp → jpg → 숨김)
+const ICON_EXTS = ['webp', 'jpg'];
+function tryNextIconExt(el) {
+  const svc = el.dataset.svc || el.alt;
+  const base = el.dataset.iconBase || iconBase();
+  const tried = (el.dataset.iconTry | 0);
+  if (tried < ICON_EXTS.length) {
+    el.dataset.iconTry = tried + 1;
+    el.src = base + encodeURIComponent(svc) + '.' + ICON_EXTS[tried];
+  } else {
+    el.setAttribute('data-missing', '1');
+  }
+}
+
+function extractService(name) {
+  return name.split('_')[0].trim().normalize('NFC');
+}
+function extractPattern(name) {
+  const parts = name.split('_');
+  // 구조: 서비스_패턴_번호_날짜 → 패턴명 추출 (없으면 빈 문자열)
+  if (parts.length <= 3) return '';
+  return parts.slice(1, -2).join(' ');
+}
+
+function getItems() {
+  return DISPLAY_DATA.filter(item => {
+    if (S.checked.size && !S.checked.has(item.category)) return false;
+    if (S.checkedTypes.size) {
+      const t = getSvcType(extractService(item.name));
+      if (!t || !S.checkedTypes.has(t)) return false;
+    }
+    return true;
+  });
+}
+
+// ── 사이드바 ────────────────────────────────────────────────────────────
+const CHECK_SVG = `<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="1.5 6 5 9.5 10.5 2.5"/></svg>`;
+
+function makeCatRow(label, count, isOn, onclickAttr) {
+  return `<div class="cat-row${isOn?' on':''}" ${onclickAttr}>
+    <div class="cb-box">${isOn ? CHECK_SVG : ''}</div>
+    <span class="cat-label">${label}</span>
+    <span class="cat-cnt">(${count})</span>
+  </div>`;
+}
+
+function buildSidebar() {
+  const el = document.getElementById('cat-rows');
+  // 미분류(SVC_TYPES 미등록) 항목이 있으면 유형 목록 맨 끝에 자동 추가
+  const typeList = TYPE_COUNTS[UNCLASSIFIED] ? [...ALL_INDUSTRY_TYPES, UNCLASSIFIED] : ALL_INDUSTRY_TYPES;
+  const typeRows = typeList.map(t =>
+    makeCatRow(t, TYPE_COUNTS[t]||0, S.checkedTypes.has(t), `onclick="toggleType('${encodeURIComponent(t)}')"`)
+  ).join('');
+  const catRows = ALL_CATS.map(cat =>
+    makeCatRow(cat, CAT_COUNTS[cat]||0, S.checked.has(cat), `onclick="toggleCat('${encodeURIComponent(cat)}')"`)
+  ).join('');
+  el.innerHTML =
+    `<div class="sb-section-label">UI 패턴</div>${catRows}` +
+    `<div class="sb-divider"></div>` +
+    `<div class="sb-section-label">카테고리 유형</div>${typeRows}`;
+}
+
+function toggleType(enc) {
+  S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
+  const t = decodeURIComponent(enc);
+  S.checkedTypes.has(t) ? S.checkedTypes.delete(t) : S.checkedTypes.add(t);
+  S.view = 'index'; S.svc = null;
+  buildSidebar(); render(); syncUrl();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+  closeSidebarOnMobile();
+}
+
+function toggleCat(enc) {
+  S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
+  const cat = decodeURIComponent(enc);
+  if (!S.checked.has(cat)) aTrack('filter_cat', { cat });
+  S.checked.has(cat) ? S.checked.delete(cat) : S.checked.add(cat);
+  S.view = 'index'; S.svc = null;
+  buildSidebar(); render(); syncUrl();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+  closeSidebarOnMobile();
+}
+
+function onSbSearch(v) { render(); }
+
+// ── 검색 드롭다운 ────────────────────────────────────────────────────────
+function hl(text, q) {
+  if (!q) return text;
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+// ── 통합검색: 상대편 사이트 검색 인덱스 (지연 로딩, script 주입 방식) ──────
+let crossSearchIndex = null;
+let crossSearchPromise = null;
+function loadCrossSearchIndex() {
+  if (crossSearchPromise) return crossSearchPromise;
+  const otherPlatform = PLATFORM === 'mo' ? 'web' : 'mo';
+  crossSearchPromise = new Promise(resolve => {
+    const s = document.createElement('script');
+    s.src = '../' + otherPlatform + '/search-index.js?_=' + Date.now();
+    s.onload = () => { crossSearchIndex = window.__SEARCH_INDEX__ || null; s.remove(); resolve(crossSearchIndex); };
+    s.onerror = () => { s.remove(); resolve(null); };
+    document.head.appendChild(s);
+  });
+  return crossSearchPromise;
+}
+
+function onSearchInput(v) {
+  const q = v.trim();
+  const drop = document.getElementById('searchDrop');
+  if (q.length < 2) { drop.classList.remove('open'); return; }
+
+  // 상대 사이트 인덱스가 아직 없으면 백그라운드로 불러온 뒤, 입력값이 그대로면 재검색
+  if (!crossSearchIndex) {
+    loadCrossSearchIndex().then(() => {
+      const cur = document.getElementById('hdrSearchInput');
+      if (cur && cur.value.trim() === q) onSearchInput(q);
+    });
+  }
+
+  // 카테고리 매칭
+  const cats = ALL_CATS.filter(c => c.toLowerCase().includes(q.toLowerCase()));
+
+  // 서비스 매칭 (서비스명 유니크)
+  const svcMap = new Map();
+  DISPLAY_DATA.forEach(item => {
+    const svc = extractService(item.name);
+    if (!svc.toLowerCase().includes(q.toLowerCase())) return;
+    if (!svcMap.has(svc)) svcMap.set(svc, { cat: item.category, count: 0 });
+    svcMap.get(svc).count++;
+  });
+  const svcs = [...svcMap.entries()].sort((a,b) => sortMixed(a[0],b[0]));
+
+  // 패턴명 매칭 (유니크 패턴명 기준)
+  const patMap = new Map();
+  DISPLAY_DATA.forEach(item => {
+    const pat = extractPattern(item.name);
+    if (!pat || !pat.toLowerCase().includes(q.toLowerCase())) return;
+    const key = pat + '|' + extractService(item.name);
+    if (!patMap.has(key)) patMap.set(key, { pat, svc: extractService(item.name), cat: item.category, item });
+  });
+  const pats = [...patMap.values()].slice(0, 8);
+
+  // ── 상대 사이트 매칭 (모바일·웹사이트 통합검색) ────────────────────────
+  const otherPlatform = PLATFORM === 'mo' ? 'web' : 'mo';
+  const otherLabel = otherPlatform === 'mo' ? '모바일' : '웹사이트';
+  let crossCats = [], crossSvcs = [], crossPats = [];
+  if (crossSearchIndex) {
+    crossCats = (crossSearchIndex.cats || []).filter(c => c.toLowerCase().includes(q.toLowerCase())).slice(0, 4);
+    crossSvcs = (crossSearchIndex.svcs || []).filter(s => s.svc.toLowerCase().includes(q.toLowerCase())).slice(0, 4);
+    crossPats = (crossSearchIndex.pats || []).filter(p => p.pat.toLowerCase().includes(q.toLowerCase())).slice(0, 4);
+  }
+
+  const total = cats.length + svcs.length + pats.length + crossCats.length + crossSvcs.length + crossPats.length;
+  if (!total) {
+    drop.innerHTML = `<div class="sd-empty">검색 결과가 없어요</div>`;
+    drop.classList.add('open');
+    return;
+  }
+
+  const SEARCH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`;
+  const IMG_SVG   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>`;
+  const GRID_SVG  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`;
+
+  let html = '';
+
+  if (cats.length) {
+    html += `<div class="sd-section"><div class="sd-label">카테고리</div>`;
+    html += cats.map(c => `
+      <div class="sd-row" onclick="searchSelectCat('${encodeURIComponent(c)}')">
+        <div class="sd-body"><div class="sd-title">${hl(c, q)}</div></div>
+        <span class="sd-cnt">${CAT_COUNTS[c]||0}</span>
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  if (svcs.length) {
+    html += `<div class="sd-section"><div class="sd-label">서비스</div>`;
+    html += svcs.map(([svc, info]) => `
+      <div class="sd-row" onclick="searchSelectSvc('${encodeURIComponent(svc)}')">
+        <div class="sd-body">
+          <div class="sd-title">${hl(svc, q)}</div>
+          <div class="sd-sub">${info.cat} · ${info.count}장</div>
+        </div>
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  if (pats.length) {
+    html += `<div class="sd-section"><div class="sd-label">패턴</div>`;
+    html += pats.map(({pat, svc, cat, item}) => `
+      <div class="sd-row" onclick="searchOpenItem('${encodeURIComponent(item.path)}','${encodeURIComponent(item.name)}','${encodeURIComponent(cat)}')">
+        <div class="sd-body">
+          <div class="sd-title">${hl(pat, q)}</div>
+          <div class="sd-sub">${svc} · ${cat}</div>
+        </div>
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  if (crossCats.length || crossSvcs.length || crossPats.length) {
+    html += `<div class="sd-section"><div class="sd-label">${otherLabel}에서</div>`;
+    html += crossCats.map(c => `
+      <div class="sd-row" onclick="crossSearchSelectCat('${otherPlatform}','${encodeURIComponent(c)}')">
+        <div class="sd-body"><div class="sd-title">${hl(c, q)}</div></div>
+        <span class="sd-badge">${otherLabel}</span>
+      </div>`).join('');
+    html += crossSvcs.map(s => `
+      <div class="sd-row" onclick="crossSearchSelectSvc('${otherPlatform}','${encodeURIComponent(s.svc)}')">
+        <div class="sd-body">
+          <div class="sd-title">${hl(s.svc, q)}</div>
+          <div class="sd-sub">${s.cat} · ${s.count}장</div>
+        </div>
+        <span class="sd-badge">${otherLabel}</span>
+      </div>`).join('');
+    html += crossPats.map(p => `
+      <div class="sd-row" onclick="crossSearchOpenItem('${otherPlatform}','${encodeURIComponent(p.path)}','${encodeURIComponent(p.name)}','${encodeURIComponent(p.cat)}')">
+        <div class="sd-body">
+          <div class="sd-title">${hl(p.pat, q)}</div>
+          <div class="sd-sub">${p.svc} · ${p.cat}</div>
+        </div>
+        <span class="sd-badge">${otherLabel}</span>
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  drop.innerHTML = html;
+  drop.classList.add('open');
+}
+
+function closeSearchDrop() {
+  document.getElementById('searchDrop').classList.remove('open');
+}
+
+function onSearchKey(e) {
+  if (e.key === 'Escape') {
+    closeSearchDrop();
+    e.target.blur();
+  }
+}
+
+function searchSelectCat(enc) {
+  const cat = decodeURIComponent(enc);
+  const q = document.getElementById('hdrSearchInput').value.trim();
+  if (q.length >= 2) aTrack('search', { q });
+  S.checked.clear();
+  S.checked.add(cat);
+  S.view = 'index'; S.svc = null;
+  buildSidebar(); render(); syncUrl();
+  closeSearchDrop();
+  document.getElementById('hdrSearchInput').value = '';
+}
+
+function searchSelectSvc(enc) {
+  const svc = decodeURIComponent(enc);
+  const q = document.getElementById('hdrSearchInput').value.trim();
+  if (q.length >= 2) aTrack('search', { q });
+  closeSearchDrop();
+  document.getElementById('hdrSearchInput').value = '';
+  showService(svc);
+}
+
+function searchOpenItem(encPath, encName, encCat) {
+  const q = document.getElementById('hdrSearchInput').value.trim();
+  if (q.length >= 2) aTrack('search', { q });
+  closeSearchDrop();
+  document.getElementById('hdrSearchInput').value = '';
+  openLb(encPath, encName, encCat);
+}
+
+// ── 통합검색: 상대 사이트 결과 클릭 ──────────────────────────────────────
+function crossSearchSelectCat(platform, encCat) {
+  const cat = decodeURIComponent(encCat);
+  const q = document.getElementById('hdrSearchInput').value.trim();
+  if (q.length >= 2) aTrack('search', { q });
+  closeSearchDrop();
+  document.getElementById('hdrSearchInput').value = '';
+  location.href = '../' + platform + '/index.html#cat=' + encodeURIComponent(cat);
+}
+
+function crossSearchSelectSvc(platform, encSvc) {
+  const svc = decodeURIComponent(encSvc);
+  const q = document.getElementById('hdrSearchInput').value.trim();
+  if (q.length >= 2) aTrack('search', { q });
+  closeSearchDrop();
+  document.getElementById('hdrSearchInput').value = '';
+  location.href = '../' + platform + '/index.html#svc=' + encodeURIComponent(svc);
+}
+
+function crossSearchOpenItem(platform, encPath, encName, encCat) {
+  const q = document.getElementById('hdrSearchInput').value.trim();
+  if (q.length >= 2) aTrack('search', { q });
+  closeSearchDrop();
+  document.getElementById('hdrSearchInput').value = '';
+  openLbCross(platform, encPath, encName, encCat);
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.hdr-search-wrap')) closeSearchDrop();
+});
+
+// ── 칩스 ────────────────────────────────────────────────────────────────
+function buildChips() {
+  const el = document.getElementById('chips-row');
+  const X_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+  const typeChips = [...S.checkedTypes].map(t =>
+    `<span class="chip">${t}<span class="chip-x" onclick="toggleType('${encodeURIComponent(t)}')" title="제거">${X_SVG}</span></span>`
+  ).join('');
+  const catChips = [...S.checked].map(cat =>
+    `<span class="chip">${cat}<span class="chip-x" onclick="toggleCat('${encodeURIComponent(cat)}')" title="제거">${X_SVG}</span></span>`
+  ).join('');
+  const RESET_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
+  const hasAny = S.checkedTypes.size + S.checked.size > 0;
+  const resetChip = hasAny ? `<button class="chip-reset" onclick="clearFilters()" title="전체 해제">${RESET_SVG}초기화</button>` : '';
+  el.innerHTML = typeChips + catChips + resetChip;
+}
+
+function clearFilters() {
+  S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
+  S.checked.clear(); S.checkedTypes.clear();
+  S.view = 'index'; S.svc = null;
+  buildSidebar(); render(); syncUrl();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+// ── 다중 선택 ──────────────────────────────────────────────────────────
+function exitSelectMode() {
+  S.selected.clear();
+  document.querySelectorAll('.card.selected').forEach(c => {
+    c.classList.remove('selected');
+    const chk = c.querySelector('.sel-chk'); if (chk) chk.innerHTML = '';
+  });
+  document.getElementById('select-bar').classList.remove('open');
+}
+
+function toggleSelect(el) {
+  const path = el.dataset.path;
+  if (S.selected.has(path)) {
+    S.selected.delete(path);
+    el.classList.remove('selected');
+    const chk = el.querySelector('.sel-chk'); if (chk) chk.innerHTML = '';
+  } else {
+    S.selected.add(path);
+    el.classList.add('selected');
+    const chk = el.querySelector('.sel-chk'); if (chk) chk.innerHTML = CHK_SVG;
+  }
+  updateSelectBar();
+}
+
+function selectAll() {
+  const cards = [...document.querySelectorAll('.card[data-path]')];
+  const allSel = cards.length > 0 && cards.every(c => S.selected.has(c.dataset.path));
+  if (allSel) {
+    cards.forEach(c => {
+      S.selected.delete(c.dataset.path);
+      c.classList.remove('selected');
+      const chk = c.querySelector('.sel-chk'); if (chk) chk.innerHTML = '';
+    });
+  } else {
+    cards.forEach(c => {
+      S.selected.add(c.dataset.path);
+      c.classList.add('selected');
+      const chk = c.querySelector('.sel-chk'); if (chk) chk.innerHTML = CHK_SVG;
+    });
+  }
+  updateSelectBar();
+}
+
+function updateSelectBar() {
+  const cnt = S.selected.size;
+  const numEl = document.getElementById('sb-count-num');
+  if (numEl) numEl.textContent = cnt;
+  const dlBtn = document.getElementById('sb-dl-btn');
+  if (dlBtn) dlBtn.disabled = cnt === 0;
+  const bar = document.getElementById('select-bar');
+  if (cnt > 0) bar.classList.add('open');
+  else bar.classList.remove('open');
+  const selAllBtn = document.getElementById('sb-sel-all');
+  if (selAllBtn) {
+    const cards = [...document.querySelectorAll('.card[data-path]')];
+    const allSel = cards.length > 0 && cards.every(c => S.selected.has(c.dataset.path));
+    selAllBtn.textContent = allSel ? '전체 해제' : '전체 선택';
+  }
+}
+
+// 선택 다운로드 — ZIP으로 묶지 않고 원래 파일명 그대로 저장한다.
+//  1) 크롬·엣지: 저장할 폴더를 한 번 고르면 선택한 이미지를 그 폴더에 한꺼번에 저장
+//  2) 그 외 브라우저: 한 장씩 순서대로 다운로드 (처음 한 번 '여러 파일 다운로드 허용' 필요)
+// 파일 내용을 읽어야 하므로 이미지 중계(UIP_CONFIG.imgProxy)가 있어야 한다. 없거나 실패하면
+// 남은 이미지는 예전처럼 새 창으로 연다.
+async function dlSelected() {
+  const items = DISPLAY_DATA.filter(i => S.selected.has(i.path));
+  if (!items.length) return;
+  const cnt = items.length;
+  const btn = document.getElementById('sb-dl-btn');
+  const DL_SVG_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+  const fileName = item => item.path.split('/').pop();
+  async function getBlob(item) {
+    const res = await fetch(dlUrl(item.path));
+    if (!res.ok) throw new Error('fetch ' + res.status);
+    return res.blob();
+  }
+
+  let dir = null;
+  if (window.showDirectoryPicker) {
+    try { dir = await window.showDirectoryPicker({ id: 'uip-download', mode: 'readwrite' }); }
+    catch (e) { if (e.name === 'AbortError') return; dir = null; }  // 폴더 선택 취소 → 아무것도 안 함
+  }
+
+  if (btn) btn.disabled = true;
+  let i = 0;
+  try {
+    for (; i < cnt; i++) {
+      const item = items[i];
+      if (btn) btn.innerHTML = `${DL_SVG_SM} ${i + 1} / ${cnt} 저장 중`;
+      const blob = await getBlob(item);
+      if (dir) {
+        const fh = await dir.getFileHandle(fileName(item), { create: true });
+        const w = await fh.createWritable();
+        await w.write(blob);
+        await w.close();
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = fileName(item);
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+        if (i < cnt - 1) await new Promise(r => setTimeout(r, 300));
+      }
+    }
+    aTrack('download', { count: cnt });
+    showToast(dir ? `${cnt}개를 '${dir.name}' 폴더에 저장했어요` : `${cnt}개 다운로드 완료`);
+  } catch {
+    // 중계 없음·실패: 남은 이미지는 새 창으로 열기 (dlImg가 개별 집계)
+    if (i > 0) aTrack('download', { count: i });
+    for (; i < cnt; i++) {
+      const item = items[i];
+      if (btn) btn.innerHTML = `${DL_SVG_SM} ${i + 1} / ${cnt}`;
+      await dlImg(encodeURIComponent(item.path), encodeURIComponent(item.name));
+      if (i < cnt - 1) await new Promise(r => setTimeout(r, 300));
+    }
+    showToast(`${cnt}개 다운로드 완료`);
+  }
+  if (btn) btn.innerHTML = `${DL_SVG_SM} 다운로드`;
+  exitSelectMode();
+  updateSelectBar();
+}
+
+// ── 렌더 ────────────────────────────────────────────────────────────────
+const DL_SVG   = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+const BACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`;
+const NEXT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`;
+
+const CHK_SVG = `<svg width="15" height="15" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5 6 5 9.5 10.5 2.5"/></svg>`;
+
+function cardTpl(item, ec) {
+  const isSel = S.selected.has(item.path);
+  const safePath = item.path.replace(/"/g,'&quot;');
+  const isPush = item.category === '푸시알림';
+  return `
+  <div class="card${isSel?' selected':''}" data-path="${safePath}" onclick="openLb('${ec(item.path)}','${ec(item.name)}','${ec(item.category)}')">
+    <div class="card-img-wrap${isPush?' push-notif':''}">
+      <img class="card-img" data-src="${imgUrl(item.path)}" alt="${item.name}" decoding="async" />
+      <div class="sel-chk" onclick="event.stopPropagation();toggleSelect(this.closest('.card'))">${isSel ? CHK_SVG : ''}</div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  buildChips();
+  updateCardIntrinsic();
+  const g = document.getElementById('grid');
+  const ec = encodeURIComponent;
+
+  if (!DISPLAY_DATA.length) {
+    g.classList.remove('filter-mode');
+    g.innerHTML = `<div class="empty">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <p>이미지가 없습니다</p>
+      <p class="empty-sub">카테고리 폴더에 이미지를 추가한 뒤 update.bat을 실행하세요</p>
+    </div>`;
+    return;
+  }
+
+  // ── 디테일 모드: 선택된 서비스의 전체 스크린 ─────────────────────────────
+  if (S.view === 'detail' && S.svc) {
+    const svcItems = DISPLAY_DATA.filter(i => extractService(i.name) === S.svc);
+    if (!svcItems.length) { backToIndex(); return; }
+    const cat = svcItems[0].category;
+    const dh = document.getElementById('detail-header');
+    dh.style.display = 'block';
+    dh.innerHTML = `<div class="detail-bar">
+      <button class="back-btn" onclick="backToIndex()" aria-label="목록으로 돌아가기">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        <span>목록</span>
+      </button>
+      <img class="svc-h-icon" src="${iconBase()}${encodeURIComponent(S.svc)}.png" alt="${S.svc}"
+        data-svc="${S.svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)">
+      <div class="svc-h-info">
+        <span class="svc-h-name">${S.svc}</span>
+        <span class="svc-h-cat">${cat}</span>
+      </div>
+    </div>`;
+    g.classList.remove('filter-mode');
+    resetLazyObservers();
+    renderChunked(g, svcItems.map(item => cardTpl(item, ec)));
+    return;
+  }
+  document.getElementById('detail-header').style.display = 'none';
+
+  // ── 인덱스 모드: 서비스당 카드 1장 ──────────────────────────────────────
+  const items = getItems();
+  // svc별 이미지 배열 + 최신 날짜를 한 번의 순회로 함께 계산한다.
+  // (예전엔 정렬 비교함수 안에서 매번 배열 전체를 훑어 최신 날짜를 재계산했는데,
+  //  이미지가 많은 서비스가 비교될 때마다 반복 재계산되어 O(N log N × 그룹크기)로
+  //  폭증했다 — 524개 서비스 정렬에 1.46초까지 걸린 것을 실측으로 확인. 그룹핑 시
+  //  1회만 계산해두는 것으로 40ms 미만까지 줄어든다.)
+  const groupsRaw = new Map(); // svc -> { items:[], maxDate:'' }
+  items.forEach(item => {
+    const svc = extractService(item.name);
+    let g2 = groupsRaw.get(svc);
+    if (!g2) { g2 = { items: [], maxDate: '' }; groupsRaw.set(svc, g2); }
+    g2.items.push(item);
+    const d = item.name.split('_').pop();
+    if (d > g2.maxDate) g2.maxDate = d;
+  });
+  const sortedEntries = [...groupsRaw.entries()].sort((a, b) => {
+    const da = a[1].maxDate, db = b[1].maxDate;
+    return da === db ? sortMixed(a[0], b[0]) : (da < db ? 1 : -1);
+  });
+  const groups = new Map(sortedEntries.map(([svc, g2]) => [svc, g2.items]));
+
+  if (!groups.size) {
+    g.classList.remove('filter-mode');
+    g.innerHTML = `<div class="empty">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>검색 결과가 없습니다</p>
+    </div>`;
+    return;
+  }
+
+  const hasFilter = S.checked.size > 0 || S.checkedTypes.size > 0;
+  const units = [];
+
+  if (hasFilter) {
+    // 필터 적용 시: 서비스별 전체 카드 + 서비스 헤더 (mini-grid 구조)
+    g.classList.add('filter-mode');
+    let isFirst = true;
+    for (const [svc, svcItems] of groups) {
+      const cat = svcItems[0].category;
+      const safeSvc = svc.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      units.push(`<div class="svc-group${isFirst?' first':''}">
+        <div class="svc-header" onclick="showService('${safeSvc}')" style="cursor:pointer" title="${svc} 전체 화면 보기">
+          <img class="svc-h-icon" src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+            data-svc="${svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)">
+          <div class="svc-h-info">
+            <span class="svc-h-name">${svc}</span>
+            <span class="svc-h-cat">${cat}</span>
+          </div>
+        </div>
+        <div class="mini-grid">
+          ${svcItems.map(item => cardTpl(item, ec)).join('')}
+        </div>
+      </div>`);
+      isFirst = false;
+    }
+    resetLazyObservers();
+    // 그룹 단위 청크 — 그룹 하나가 카드 수십 장을 포함할 수 있어 청크 크기를 작게 잡는다.
+    renderChunked(g, units, 15);
+  } else {
+    g.classList.remove('filter-mode');
+    // 필터 없음: 서비스당 카드 1장
+    for (const [svc, svcItems] of groups) {
+      // 대표 스크린: 메인 우선, 없으면 첫 화면 유지 / 부제: 업종
+      const repItem = svcItems.find(i => i.category === '메인') || svcItems[0];
+      const svcType = getSvcType(svc);
+      const safeSvc = svc.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const isPushIdx = repItem.category === '푸시알림';
+      units.push(`
+        <div class="svc-item" onclick="showService('${safeSvc}')">
+          <div class="svc-thumb${isPushIdx?' push-notif':''}">
+            <img class="svc-thumb-img" data-src="${imgUrl(repItem.path)}" alt="${svc}" decoding="async" />
+          </div>
+          <div class="svc-info">
+            <img class="svc-info-icon" src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+              data-svc="${svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)" />
+            <div class="svc-info-text">
+              <div class="svc-info-name">${svc}</div>
+              <div class="svc-info-cat">${svcType}</div>
+            </div>
+          </div>
+        </div>`);
+    }
+    resetLazyObservers();
+    renderChunked(g, units, 80);
+  }
+}
+
+function showService(svc) {
+  S.view = 'detail'; S.svc = svc.trim().normalize('NFC');
+  aTrack('view_service', { svc: S.svc });
+  render(); syncUrl();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function backToIndex() {
+  S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
+  S.view = 'index'; S.svc = null;
+  render(); syncUrl();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── 지연 로딩 (IntersectionObserver) ────────────────────────────────────
+let _lazyObserver = null;
+let _unloadObserver = null;
+
+// observer만 (재)생성 — 전체 DOM 재스캔은 하지 않음. 청크 렌더링에서 신규 삽입분만 개별 observe.
+function resetLazyObservers() {
+  if (_lazyObserver)  _lazyObserver.disconnect();
+  if (_unloadObserver) _unloadObserver.disconnect();
+
+  // 로드 observer: 뷰포트 800px 앞에서 미리 로드
+  _lazyObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const img = entry.target;
+      const src = img.dataset.src;
+      if (!src || (img.getAttribute('src') || '').endsWith(src.split('/').pop())) return;
+      img.src = src;
+      img.onload = () => img.classList.add('loaded');
+      img.onerror = () => img.classList.add('loaded'); // 실패해도 레이아웃 유지
+      _lazyObserver.unobserve(img);
+    });
+  }, { rootMargin: '800px 0px', threshold: 0 });
+
+  // 언로드 observer: 뷰포트 2000px 밖으로 나가면 src 해제
+  _unloadObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) return;
+      const img = entry.target;
+      if (!img.getAttribute('src') || !img.dataset.src) return;
+      // src=''로 비우면 img.src가 문서 URL(8.7MB index.html)을 가리키게 되므로 속성 자체를 제거한다.
+      img.removeAttribute('src');
+      img.classList.remove('loaded');
+      // 다시 lazy observer에 등록
+      _lazyObserver.observe(img);
+    });
+  }, { rootMargin: '2000px 0px', threshold: 0 });
+}
+
+function initLazyLoad() {
+  resetLazyObservers();
+  // 모든 lazy 이미지에 등록 (한 번에 전체를 그린 경우용 — 청크 렌더링 경로에서는 미사용)
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    _lazyObserver.observe(img);
+    _unloadObserver.observe(img);
+  });
+}
+
+// ── 대량 카드 청크 렌더링 (메인 스레드 블로킹 방지) ──────────────────────
+// 카드 수백~수천 개를 한 번에 innerHTML로 밀어넣으면 레이아웃 계산이 몰려
+// 메인 스레드가 1초 이상 멈춘다(실측). 첫 청크는 즉시 그려 화면을 바로 채우고,
+// 나머지는 requestAnimationFrame으로 프레임을 나눠 삽입해 끊김 없이 채운다.
+// content-visibility로 건너뛴 카드의 자리 높이(--cih)를 현재 그리드 폭 기준으로 계산한다.
+// 값이 실제와 어긋나면 스크롤바 길이가 튀므로, CSS의 컬럼 수·간격 브레이크포인트와 반드시 일치시킬 것.
+function updateCardIntrinsic() {
+  const g = document.getElementById('grid');
+  if (!g) return;
+  const w = window.innerWidth;
+  const cols = w <= 480 ? 2 : w <= 768 ? 3 : 5;              // #grid / .mini-grid grid-template-columns
+  const gap  = w <= 480 ? 12 : w <= 768 ? 16 : w <= 1100 ? 20 : 32;  // column-gap
+  const cw = (g.clientWidth - gap * (cols - 1)) / cols;
+  if (cw > 0) document.documentElement.style.setProperty('--cih', Math.round(cw * 812 / 375) + 'px');
+}
+window.addEventListener('resize', updateCardIntrinsic);
+
+let _renderToken = 0;
+function renderChunked(container, htmlUnits, chunkSize) {
+  chunkSize = chunkSize || 60;
+  const token = ++_renderToken;
+  container.innerHTML = '';
+  if (!htmlUnits.length) return;
+  const tmp = document.createElement('div');
+  let i = 0;
+  function step() {
+    if (token !== _renderToken) return; // 다른 렌더가 이미 이 화면을 대체함
+    const end = Math.min(i + chunkSize, htmlUnits.length);
+    tmp.innerHTML = htmlUnits.slice(i, end).join('');
+    const imgs = [...tmp.querySelectorAll('img[data-src]')];
+    const frag = document.createDocumentFragment();
+    while (tmp.firstChild) frag.appendChild(tmp.firstChild);
+    container.appendChild(frag);
+    imgs.forEach(img => { _lazyObserver.observe(img); _unloadObserver.observe(img); });
+    i = end;
+    if (i < htmlUnits.length) requestAnimationFrame(step);
+  }
+  step();
+}
+
+// ── 라이트박스 ───────────────────────────────────────────────────────────
+let _lbPath = '', _lbPlatform = '', _lbName = '', _lbList = [], _lbIndex = -1;
+function openLb(encPath, encName, encCat) {
+  _lbPath = decodeURIComponent(encPath);
+  _lbPlatform = PLATFORM;
+  _lbName = decodeURIComponent(encName);
+  const cat = decodeURIComponent(encCat);
+  _lbList = [...document.querySelectorAll('#grid [data-path]')].map(el => el.dataset.path);
+  _lbIndex = _lbList.indexOf(_lbPath);
+  document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
+  document.getElementById('lb-name').textContent = extractService(_lbName);
+  document.getElementById('lb-cat').textContent  = cat;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  updateLbNav();
+}
+// 통합검색에서 상대 사이트 패턴을 클릭했을 때: 페이지 이동 없이 상대 폴더 이미지를 바로 미리보기
+function openLbCross(platform, encPath, encName, encCat) {
+  _lbPath = decodeURIComponent(encPath);
+  _lbPlatform = platform;
+  _lbName = decodeURIComponent(encName);
+  const cat = decodeURIComponent(encCat);
+  _lbList = [];
+  _lbIndex = -1;
+  document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
+  document.getElementById('lb-name').textContent = extractService(_lbName);
+  document.getElementById('lb-cat').textContent  = cat;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  updateLbNav();
+}
+function updateLbNav() {
+  const hasList = _lbIndex > -1 && _lbList.length > 1;
+  const prevBtn = document.getElementById('lb-prev');
+  const nextBtn = document.getElementById('lb-next');
+  prevBtn.style.display = hasList ? 'flex' : 'none';
+  nextBtn.style.display = hasList ? 'flex' : 'none';
+  if (!hasList) return;
+  prevBtn.disabled = _lbIndex <= 0;
+  nextBtn.disabled = _lbIndex >= _lbList.length - 1;
+}
+function lbNav(dir) {
+  if (_lbIndex < 0 || !_lbList.length) return;
+  const next = _lbIndex + dir;
+  if (next < 0 || next >= _lbList.length) return;
+  _lbIndex = next;
+  const item = DATA_BY_PATH.get(_lbList[_lbIndex]);
+  if (!item) return;
+  _lbPath = item.path;
+  _lbPlatform = PLATFORM;
+  _lbName = item.name;
+  document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
+  document.getElementById('lb-name').textContent = extractService(_lbName);
+  document.getElementById('lb-cat').textContent  = item.category;
+  updateLbNav();
+}
+function closeLb(e) {
+  if (e && e.target !== document.getElementById('lightbox') && !e.target.closest('.lb-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+async function dlFromLb() {
+  if (!_lbPath) return;
+  aTrack('download', { count: 1 });
+  try {
+    const res = await fetch(dlUrl(_lbPath, _lbPlatform));
+    if (!res.ok) throw new Error();
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = _lbName + '.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch {
+    const a = document.createElement('a');
+    a.href = imgUrl(_lbPath, _lbPlatform); a.download = _lbName + '.png';
+    a.target = '_blank';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeLb(); return; }
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'ArrowLeft') lbNav(-1);
+  if (e.key === 'ArrowRight') lbNav(1);
+});
+
+// ── 탭 전환 ─────────────────────────────────────────────────────────────
+
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function switchTab(tab, el) {
+  // 디자인 시스템: 탭 전환 없이 토스트만 노출
+  if (tab === 'ds') {
+    showToast('지금 열심히 만들고 있어요. 조금만 기다려 주세요.');
+    return;
+  }
+  document.querySelectorAll('.hdr-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const g = document.getElementById('grid');
+  const titleEl = document.querySelector('.tb-title');
+  if (tab === 'web') {
+    if (titleEl) titleEl.textContent = '웹사이트';
+    g.innerHTML = `<div class="empty">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <p>웹사이트 패턴 준비하고 있어요</p>
+    </div>`;
+  } else {
+    if (titleEl) titleEl.textContent = '모바일';
+    S.view = 'index'; S.svc = null;
+    buildSidebar(); render();
+  }
+}
+
+// ── URL 상태 동기화 ────────────────────────────────────────────────────────
+function syncUrl() {
+  const params = new URLSearchParams();
+  if (S.checked.size)      params.set('cat',  [...S.checked].join(','));
+  if (S.checkedTypes.size) params.set('type', [...S.checkedTypes].join(','));
+  if (S.view === 'detail' && S.svc) params.set('svc', S.svc);
+  const qs = params.toString();
+  history.replaceState(null, '', qs ? '#' + qs : location.pathname + location.search);
+}
+
+function readUrl() {
+  const hash = location.hash.slice(1);
+  if (!hash) return;
+  try {
+    const params = new URLSearchParams(hash);
+    const cat  = params.get('cat');
+    const type = params.get('type');
+    const svc  = params.get('svc');
+    if (cat)  cat.split(',').forEach(c => { if (c && ALL_CATS.includes(c)) S.checked.add(c); });
+    if (type) type.split(',').forEach(t => { if (t) S.checkedTypes.add(t); });
+    if (svc)  { S.view = 'detail'; S.svc = svc.trim().normalize('NFC'); }
+  } catch(e) {}
+}
+
+window.addEventListener('popstate', () => { readUrl(); buildSidebar(); render(); });
+
+document.addEventListener('DOMContentLoaded', () => {
+  readUrl(); buildSidebar(); render();
+  if (window.lucide) lucide.createIcons();
+});
+
+// ════════════════════════════════════════════
+// 자동 새로고침 (file:// 호환)
+// version.js를 주기적으로 다시 불러와 버전이 바뀌면 페이지를 새로고침.
+// update-index.js가 폴더 스캔 후 version.js의 __UIP_VER 값을 갱신한다.
+// fetch는 file://에서 막히므로 <script> 주입 방식 사용.
+// ════════════════════════════════════════════
+(function autoReload() {
+  // 로컬 미리보기(file://, localhost)에서만 동작 — 배포된 사이트는 push로만 바뀌므로 폴링할 필요가 없다.
+  if (location.protocol !== 'file:' && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+  const INTERVAL = 2500;
+  let baseVer = null;
+  function poll() {
+    const s = document.createElement('script');
+    s.src = 'version.js?_=' + Date.now();
+    s.onload = () => {
+      const v = window.__UIP_VER;
+      if (v) {
+        if (baseVer === null) baseVer = v;
+        else if (v !== baseVer) { location.reload(); return; }
+      }
+      s.remove();
+      setTimeout(poll, INTERVAL);
+    };
+    s.onerror = () => { s.remove(); setTimeout(poll, INTERVAL); };
+    document.head.appendChild(s);
+  }
+  poll();
+})();
+
+// ════════════════════════════════════════════
+// PLATFORM (mo/web 통합 사용현황용)
+// ════════════════════════════════════════════
+// 서버·로컬 모두 폴더명(/mo/ 또는 /web/)으로 판별. 둘 다 아니면(예: 루트) mo로 취급.
+const PLATFORM = location.pathname.includes('/web/') ? 'web' : 'mo';
+let dashTab = 'all'; // '사용 현황' 패널에서 선택된 탭: 'all' | 'mo' | 'web'
+
+// ════════════════════════════════════════════
+// ANALYTICS (localStorage 기반)
+// ════════════════════════════════════════════
+// AK는 mo/web 양쪽 페이지에서 동일한 키를 쓴다 — 같은 도메인(서버)에서 열람하면
+// localStorage가 오리진 단위로 공유되므로, 두 사이트의 활동 기록이 자동으로 합쳐진다.
+// (file://로 각각 열면 브라우저별로 오리진이 분리돼 합쳐지지 않을 수 있음)
+const AK = 'uip_analytics_v1';
+function aGet() { try { return JSON.parse(localStorage.getItem(AK) || '{}'); } catch { return {}; } }
+function aSave(d) { try { localStorage.setItem(AK, JSON.stringify(d)); } catch {} }
+
+// 기존 오타 검색어 일괄 삭제 (1회 실행 후 플래그 설정)
+(function clearOldSearches() {
+  if (localStorage.getItem('uip_searches_cleared')) return;
+  const d = aGet(); d.searches = []; aSave(d);
+  localStorage.setItem('uip_searches_cleared', '1');
+})();
+
+function aTrack(event, payload) {
+  const d = aGet();
+  const today = new Date().toISOString().slice(0, 10);
+  d.daily = d.daily || {};
+  d.services = d.services || {};
+  d.categories = d.categories || {};
+  d.downloads = d.downloads || 0;
+  d.searches = d.searches || [];
+  // 플랫폼별 분리 집계 — '사용 현황'의 모바일/웹사이트 탭에서 사용.
+  // (기존 flat 필드는 '전체' 탭용으로 계속 함께 채워 하위호환 유지)
+  d.byPlatform = d.byPlatform || {};
+  const p = d.byPlatform[PLATFORM] = d.byPlatform[PLATFORM] || { daily: {}, services: {}, categories: {}, downloads: 0, searches: [] };
+  if (event === 'view_service') {
+    d.daily[today] = (d.daily[today] || 0) + 1;
+    p.daily[today] = (p.daily[today] || 0) + 1;
+    if (payload?.svc) {
+      d.services[payload.svc] = (d.services[payload.svc] || 0) + 1;
+      p.services[payload.svc] = (p.services[payload.svc] || 0) + 1;
+    }
+  }
+  if (event === 'filter_cat' && payload?.cat) {
+    d.categories[payload.cat] = (d.categories[payload.cat] || 0) + 1;
+    p.categories[payload.cat] = (p.categories[payload.cat] || 0) + 1;
+  }
+  if (event === 'download') {
+    d.downloads += (payload?.count || 1);
+    p.downloads += (payload?.count || 1);
+  }
+  if (event === 'search' && payload?.q?.length >= 2) {
+    d.searches = [payload.q, ...d.searches.filter(s => s !== payload.q)].slice(0, 30);
+    p.searches = [payload.q, ...p.searches.filter(s => s !== payload.q)].slice(0, 30);
+  }
+  aSave(d);
+}
+
+// ════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════
+async function openDashboard() {
+  dashTab = 'all';
+  await renderDashboard();
+  document.getElementById('dashboard').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDashboard() {
+  document.getElementById('dashboard').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function setDashTab(tab) {
+  if (dashTab === tab) return;
+  dashTab = tab;
+  renderDashboard();
+}
+
+// ── 사이드바 토글 (모바일) ─────────────────────────────────────────────
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  const isOpen = sb.classList.contains('open');
+  if (isOpen) { closeSidebar(); } else {
+    sb.classList.add('open');
+    ov.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function closeSidebarOnMobile() {
+  if (window.innerWidth <= 768) closeSidebar();
+}
+
+async function renderDashboard() {
+  // ── 통합 대시보드: 상대편 사이트 stats.js를 <script> 주입으로 로드 ──────────
+  // (fetch는 file://로 로컬에서 열었을 때 다른 폴더 파일을 못 읽으므로 script 주입 방식 사용 — version.js 자동새로고침과 동일 패턴)
+  const otherPlatform = PLATFORM === 'mo' ? 'web' : 'mo';
+  const otherStatsUrl = PLATFORM === 'mo' ? '../web/stats.js' : '../mo/stats.js';
+  let otherStats = null;
+  try {
+    otherStats = await new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = otherStatsUrl + '?_=' + Date.now();
+      s.onload = () => { const v = window.__STATS__; s.remove(); resolve(v || null); };
+      s.onerror = () => { s.remove(); resolve(null); };
+      document.head.appendChild(s);
+    });
+  } catch(_) {}
+
+  const myScreens  = DISPLAY_DATA.length;
+  const myServices = new Set(DISPLAY_DATA.map(i => extractService(i.name))).size;
+  const myCats     = new Set(DISPLAY_DATA.map(i => i.category)).size;
+  const myInfo     = { screens: myScreens, services: myServices, categories: myCats, ok: true };
+  const otherInfo  = otherStats
+    ? { screens: otherStats.totalScreens, services: otherStats.totalServices, categories: otherStats.totalCategories, ok: true }
+    : { screens: 0, services: 0, categories: 0, ok: false };
+
+  // 카탈로그 규모(스크린·서비스·카테고리 수)는 플랫폼마다 따로 집계한 값을 그대로 보여준다.
+  // (같은 서비스가 모바일·웹 양쪽에 있을 수 있어 서비스 수를 단순 합산하면 중복 집계되므로,
+  //  총 스크린 수만 두 사이트를 더하고 서비스·카테고리는 플랫폼별로 나란히 표기)
+  const platformStats = {
+    mo:  PLATFORM === 'mo'  ? myInfo : otherInfo,
+    web: PLATFORM === 'web' ? myInfo : otherInfo,
+  };
+  const allScreens = platformStats.mo.screens + platformStats.web.screens;
+
+  const data = aGet();
+  const body = document.getElementById('dash-body');
+
+  // ── 탭에 따라 활동 데이터 소스 결정 ──────────────────────────────
+  // '전체' = 지금까지 누적된 통합 집계(과거 데이터 포함, mo/web 공유 localStorage 기반)
+  // '모바일'/'웹사이트' = 이 갱신 이후 플랫폼별로 태깅되어 쌓인 활동만
+  let actData, tabLabel, hasPlatformActivity = true;
+  if (dashTab === 'mo' || dashTab === 'web') {
+    const p = (data.byPlatform || {})[dashTab];
+    hasPlatformActivity = !!p;
+    actData = p || { daily: {}, services: {}, categories: {}, downloads: 0, searches: [] };
+    tabLabel = dashTab === 'mo' ? '모바일' : '웹사이트';
+  } else {
+    actData = { daily: data.daily || {}, services: data.services || {}, categories: data.categories || {}, downloads: data.downloads || 0, searches: data.searches || [] };
+    tabLabel = '전체';
+  }
+
+  // 최근 7일
+  const weekDays = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    weekDays.push({ key, label: `${d.getMonth()+1}.${d.getDate()}`, count: (actData.daily || {})[key] || 0 });
+  }
+  const weekTotal = weekDays.reduce((s, d) => s + d.count, 0);
+  const weekMax = Math.max(...weekDays.map(d => d.count), 1);
+
+  // 인기 카테고리 — 선택된 탭의 활동 데이터에서 상위 6개 (플랫폼 고유 카테고리명도 그대로 반영)
+  const catEntries = Object.entries(actData.categories || {})
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, cnt]) => ({ name, cnt }));
+  const catMax = Math.max(...catEntries.map(c => c.cnt), 1);
+  const hasCatData = catEntries.length > 0;
+
+  // 인기 서비스
+  const svcEntries = Object.entries(actData.services || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  // '모바일'/'웹사이트' 탭은 지금 보고 있는 사이트가 아닌 쪽의 서비스일 수 있으므로,
+  // 아이콘은 그 서비스가 실제로 속한 사이트의 icons/ 폴더에서 가져와야 한다.
+  const rankIconBase = iconBase((dashTab === 'mo' || dashTab === 'web') ? dashTab : PLATFORM);
+
+  const searches = actData.searches || [];
+
+  // 비용 절감 계산 (7명, 타사 서비스 기준) — 선택된 탭 기준으로 계산
+  const TEAM = 7;
+  const UIBOWL_GROUP = 11900;
+  const monthlySave  = UIBOWL_GROUP * TEAM;   // 83,300
+  const annualSave   = monthlySave * 12;      // 999,600
+
+  const activeDays    = Object.keys(actData.daily || {}).filter(k => (actData.daily[k] || 0) > 0).length;
+  const allViews      = Object.values(actData.daily || {}).reduce((s, v) => s + v, 0);
+  const allDownloads  = actData.downloads || 0;
+  const allSvcViews   = Object.values(actData.services || {}).reduce((s, v) => s + v, 0);
+  const dailyRate     = monthlySave / 30;                     // ~2,777원/일
+  const accSavings    = Math.round(
+    activeDays * dailyRate +   // 매일 구독료 절감
+    allDownloads * 400 +        // 다운로드 1건당 400원 가치
+    allSvcViews  * 200          // 서비스 열람 1회당 200원 가치
+  );
+
+  const tabBtn = (key, label) => `<button class="dash-tab ${dashTab === key ? 'active' : ''}" onclick="setDashTab('${key}')">${label}</button>`;
+  const pill = (key, label) => {
+    const info = platformStats[key];
+    return `
+      <button type="button" class="dash-platform-pill ${dashTab === key ? 'active' : ''}" onclick="setDashTab('${key}')">
+        <span class="dash-platform-pill-label">${label}</span>
+        <span class="dash-platform-pill-val">${info.ok ? info.screens.toLocaleString() + '장' : '정보 없음'}</span>
+        <span class="dash-platform-pill-sub">${info.ok ? info.services + '개 서비스 · ' + info.categories + '개 카테고리' : '불러오지 못했어요'}</span>
+      </button>`;
+  };
+
+  body.innerHTML = `
+    <div class="dash-tabs">
+      ${tabBtn('all', '전체')}
+      ${tabBtn('mo', '모바일')}
+      ${tabBtn('web', '웹사이트')}
+    </div>
+
+    <div class="dash-hero">
+      <div class="dash-hero-big">총 <em>${allScreens.toLocaleString()}</em>장의 스크린이 있어요</div>
+      <div class="dash-platform-pills">
+        ${pill('mo', '모바일')}
+        ${pill('web', '웹사이트')}
+      </div>
+    </div>
+
+    ${!hasPlatformActivity ? `
+    <div class="dash-section">
+      <p class="dash-empty-msg">이 브라우저에서는 아직 ${tabLabel} 사이트 활동 기록이 없어요.<br>${tabLabel} 사이트를 둘러보면 여기에 열람·검색·다운로드 데이터가 쌓여요.</p>
+    </div>
+    ` : `
+    <!-- 비용 절감 섹션 -->
+    <div class="dash-cost-card">
+      <div class="dash-cost-headline">${tabLabel} 기준 <em>${accSavings.toLocaleString()}원</em>을 절감했어요</div>
+      <div class="dash-cost-sub">${activeDays}일 활용 · ${allViews}번 열람 · 다운로드 ${allDownloads}개</div>
+
+      <div class="dash-cost-2col">
+        <div class="dash-cost-stat">
+          <div class="dash-cost-stat-label">지금까지 절감</div>
+          <div class="dash-cost-stat-val">${accSavings.toLocaleString()}<span class="dash-cost-stat-unit">원</span></div>
+        </div>
+        <div class="dash-cost-stat">
+          <div class="dash-cost-stat-label">1년 뒤 예상 절감</div>
+          <div class="dash-cost-stat-val accent">${annualSave.toLocaleString()}<span class="dash-cost-stat-unit">원</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-cards">
+      <div class="dash-card">
+        <div class="dash-card-label">이번 주 열람</div>
+        <div class="dash-card-num">${weekTotal.toLocaleString()}<span class="dash-card-unit">번</span></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">누적 다운로드</div>
+        <div class="dash-card-num">${allDownloads.toLocaleString()}<span class="dash-card-unit">개</span></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">최근 검색</div>
+        <div class="dash-card-num">${searches.length}<span class="dash-card-unit">개</span></div>
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-week-card">
+        <div class="dash-week-headline">이번 주 <span style="color:var(--accent)">${weekTotal}번</span> 열람했어요</div>
+        <div class="dash-week-sub">일별 열람 현황 · ${tabLabel}</div>
+        <div class="dash-bars">
+          ${weekDays.map((d, i) => {
+            const h = Math.max((d.count / weekMax) * 100, 2);
+            const isToday = i === 6;
+            return `<div class="dash-bar-col">
+              <div class="dash-bar-val">${d.count > 0 ? d.count : ''}</div>
+              <div class="dash-bar-rect ${isToday ? 'active' : 'past'}" style="height:${h}%"></div>
+              <span class="dash-bar-date">${d.label}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid-2">
+      <div class="dash-hbar-card">
+        <div class="dash-section-title">인기 카테고리</div>
+        ${hasCatData ? `
+          <div class="dash-hbar-list">
+            ${catEntries.map(c => `
+              <div>
+                <div class="dash-hbar-top">
+                  <span class="dash-hbar-name">${c.name}</span>
+                  <span class="dash-hbar-cnt">${c.cnt}회</span>
+                </div>
+                <div class="dash-hbar-track">
+                  <div class="dash-hbar-fill" style="width:${Math.round((c.cnt/catMax)*100)}%"></div>
+                </div>
+              </div>`).join('')}
+          </div>
+        ` : `<p class="dash-empty-msg">아직 데이터가 없어요<br>카테고리를 선택하면 집계돼요</p>`}
+      </div>
+
+      <div class="dash-rank-card">
+        <div class="dash-section-title">인기 서비스</div>
+        ${svcEntries.length ? `
+          <div class="dash-rank-list">
+            ${svcEntries.map(([svc, cnt], i) => `
+              <div class="dash-rank-row">
+                <span class="dash-rank-num">${i+1}</span>
+                <img class="dash-rank-icon" src="${rankIconBase}${encodeURIComponent(svc)}.png" data-icon-base="${rankIconBase}" alt="${svc}" onerror="tryNextIconExt(this)">
+                <span class="dash-rank-name">${svc}</span>
+                <span class="dash-rank-cnt">${cnt}회</span>
+              </div>`).join('')}
+          </div>
+        ` : `<p class="dash-empty-msg">아직 데이터가 없어요<br>서비스를 클릭하면 집계돼요</p>`}
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section-title">최근 검색어</div>
+      ${searches.length ? `
+        <div class="dash-tags">${searches.slice(0,20).map(q=>`<span class="dash-tag">${q}</span>`).join('')}</div>
+      ` : `<p class="dash-empty-msg">아직 검색 기록이 없어요</p>`}
+    </div>
+    `}
+  `;
+}
+
+// __UIP_CHECK_START__  업로드 후 엑박 점검: index.html?check=20261021 (날짜) | ?check=서비스명 | ?check=all
+(function(){
+  var q = new URLSearchParams(location.search).get('check');
+  if (q === null) return;
+  window.addEventListener('load', async function(){
+    q = q.trim().normalize('NFC');
+    var test = /^\d{8}$/.test(q) ? function(n){ return n.endsWith('_' + q); }
+             : (q === '' || q === 'all') ? function(){ return true; }
+             : function(n){ return n.normalize('NFC').startsWith(q + '_'); };
+    var items = DATA.filter(function(x){ return x.category !== 'icons' && test(x.name); });
+    var box = document.createElement('div'); box.id = 'uip-check';
+    box.style.cssText = 'position:fixed;inset:auto 16px 16px auto;z-index:99999;width:min(460px,calc(100vw - 32px));max-height:70vh;overflow:auto;background:#fff;color:#111;border:2px solid #111;border-radius:12px;padding:16px;font:13px/1.5 sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.25)';
+    document.body.appendChild(box);
+    var bad = [], done = 0;
+    box.textContent = '서버 점검 중… 0 / ' + items.length;
+    for (var i = 0; i < items.length; i += 20) {
+      await Promise.all(items.slice(i, i + 20).map(async function(x){
+        var u = imgUrl(x.path) + '?check=' + Date.now();
+        var ok = await new Promise(function(r){ var im = new Image(); im.onload = function(){ r(true); }; im.onerror = function(){ r(false); }; im.src = u; });
+        if (!ok) bad.push(x.path);
+        done++;
+      }));
+      box.textContent = '서버 점검 중… ' + done + ' / ' + items.length;
+    }
+    bad.sort();
+    var byCat = {};
+    bad.forEach(function(p){ var c = p.split('/')[0]; byCat[c] = (byCat[c] || 0) + 1; });
+    box.innerHTML = '<b style="font-size:15px">' + (bad.length ? '❌ 엑박 ' + bad.length + '장' : '✅ 이상 없음') + '</b> (' + items.length + '장 점검, 조건: ' + (q || 'all') + ')' +
+      (bad.length ? '<div style="margin:8px 0">' + Object.keys(byCat).map(function(c){ return c + ' ' + byCat[c]; }).join(' · ') + '</div>' +
+        '<textarea readonly style="width:100%;height:160px;font:12px monospace">' + bad.join('\n') + '</textarea>' +
+        '<div style="color:#666">→ 서버에 파일이 없는 것. (업로드) zip을 다시 올리세요.</div>' : '') +
+      '<div style="text-align:right;margin-top:8px"><button onclick="document.getElementById(\'uip-check\').remove()">닫기</button></div>';
+    console.log('[UIP check]', items.length, 'checked,', bad.length, 'missing', bad);
+  });
+})();
+// __UIP_CHECK_END__
+</script>
+</body>
+</html>
