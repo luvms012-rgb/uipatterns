@@ -3,7 +3,7 @@
 // 필터 상태는 index.html의 S(checked · checkedComps · checkedTypes)를 그대로 쓴다.
 
 const SB_COLLAPSE_KEY = 'uip_sb_collapsed_v1';
-const SB = { q: { pat: '', comp: '' }, collapsed: null };
+const SB = { collapsed: null };
 
 // ㆍ(U+318D)·・·(U+00B7) 같은 가운뎃점과 띄어쓰기 차이를 무시하고 비교
 function normCat(s) {
@@ -53,7 +53,6 @@ function toggleSbGroup(id) {
 
 const CHECK_SVG = `<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="1.5 6 5 9.5 10.5 2.5"/></svg>`;
 const CHEVRON_SVG = `<svg class="sb-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
-const SEARCH_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`;
 
 function makeCatRow(label, count, isOn, onclickAttr, disabled) {
   return `<div class="cat-row${isOn ? ' on' : ''}${disabled ? ' disabled' : ''}" data-label="${label.replace(/"/g, '&quot;')}" ${disabled ? '' : onclickAttr}>
@@ -71,12 +70,6 @@ function sbGroup(id, title, rowsHtml, { sub = false, note = '' } = {}) {
     </button>
     <div class="sb-grp-body">${note}${rowsHtml}</div>
   </div>`;
-}
-
-function sbSearch(key, placeholder) {
-  return `<label class="sb-search">${SEARCH_SVG}
-    <input type="search" placeholder="${placeholder}" value="${SB.q[key].replace(/"/g, '&quot;')}" oninput="sbFilter('${key}', this.value)">
-  </label>`;
 }
 
 function buildSidebar() {
@@ -105,28 +98,11 @@ function buildSidebar() {
     makeCatRow(t, TYPE_COUNTS[t] || 0, S.checkedTypes.has(t), `onclick="toggleType('${encodeURIComponent(t)}')"`)
   ).join('');
 
+  // 검색은 사이드바에 두지 않는다 — 헤더 통합 검색으로 일원화 예정
   el.innerHTML =
-    `<section class="sb-sec" data-sec="pat"><div class="sb-sec-hdr">UI 패턴</div>${sbSearch('pat', '패턴 검색')}${patGroups}</section>` +
-    `<section class="sb-sec" data-sec="comp">${sbGroup('comp', '컴포넌트', sbSearch('comp', '컴포넌트 검색') + compRows, { note: compNote })}</section>` +
+    `<section class="sb-sec" data-sec="pat"><div class="sb-sec-hdr">UI 패턴</div>${patGroups}</section>` +
+    `<section class="sb-sec" data-sec="comp">${sbGroup('comp', '컴포넌트', compRows, { note: compNote })}</section>` +
     `<section class="sb-sec" data-sec="type">${sbGroup('type', '카테고리 유형', typeRows)}</section>`;
-
-  applySbFilter('pat'); applySbFilter('comp');
-}
-
-// 사이드바 검색 — 다시 그리지 않고 행만 숨긴다 (입력 중 포커스 유지)
-function sbFilter(key, v) { SB.q[key] = v; applySbFilter(key); }
-function applySbFilter(key) {
-  const sec = document.querySelector(`.sb-sec[data-sec="${key}"]`);
-  if (!sec) return;
-  const q = normCat(SB.q[key] || '');
-  sec.querySelectorAll('.cat-row').forEach(r => { r.style.display = !q || normCat(r.dataset.label).includes(q) ? '' : 'none'; });
-  if (key === 'pat') {
-    sec.querySelectorAll('.sb-grp').forEach(g => {
-      const any = [...g.querySelectorAll('.cat-row')].some(r => r.style.display !== 'none');
-      g.style.display = any ? '' : 'none';
-      g.classList.toggle('searching', !!q);  // 검색 중에는 접힌 그룹도 펼쳐 보여준다
-    });
-  }
 }
 
 function toggleComp(enc) {
