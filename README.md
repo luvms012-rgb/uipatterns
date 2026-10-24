@@ -5,6 +5,7 @@
 - 사이트: <https://luvms012-rgb.github.io/uipatterns/>
 - 저장소: <https://github.com/luvms012-rgb/uipatterns>
 - 이미지: 회사 서버 `imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/{mo,web}/` — **이미지만** 회사 서버, 나머지는 전부 여기
+- 작업 이어가기: [HANDOFF.md](HANDOFF.md) — 결정사항 · 발견한 것 · 남은 작업
 
 ## 업데이트 = `업데이트.bat` 더블클릭 (맥: `업데이트.command`)
 
