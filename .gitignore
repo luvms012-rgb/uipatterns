@@ -2,11 +2,30 @@
 /mo/*/
 /web/*/
 
+# 다른 폴더의 이미지도 저장소에 올리지 않는다 (공개 저장소)
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+/style/_montage/
+
 # 업로드용 압축 · 로컬 상태
 *.zip
 .update.lock
 업로드할 이미지.txt
 node_modules/
+.last-upload
+*.log
+
+# 키 · 비밀 값
+api-key.txt
+*.key
+.env
+
+# 검색 정보 생성 중간 결과 (OCR 원본·로그·검색 결과)
+/search/ocr/
+/search/results/
 
 Thumbs.db
 .DS_Store
