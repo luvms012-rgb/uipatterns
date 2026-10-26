@@ -1,5 +1,7 @@
 # UI Patterns — 운영 가이드
 
+> **2026-10-24 GitHub 이전 전 구조를 설명하는 문서입니다.** 지금 구조(이미지 목록은 `data.js`, 업데이트는 루트 `업데이트.bat`, 백업은 git 기록)는 `README.md` · `HANDOFF.md`, 자연어 검색은 `mcp/README.md` 를 먼저 볼 것. 캡처·분류 파이프라인(§0·§3) 설명은 아직 유효하지만 index.html 을 읽고 쓰는 부분은 새 구조에 맞게 고쳐야 함.
+
 모바일 앱·PC 웹 스크린샷을 카테고리별로 모아 보고, 검색·필터·다운로드하는 내부 레퍼런스 사이트.
 **모바일(`mo/`)과 웹(`web/`)은 완전히 독립된 두 개의 사이트**로, 각각 자체 `index.html`·DATA·SVC_TYPES·스크립트 세트를 가진다.
 
@@ -91,9 +93,8 @@ uipatterns/
 │   ├── (업로드)/                # classify-local 실행 시 자동 생성되는 서버 업로드용 스테이징 폴더
 │   ├── backups/                # index.html 자동 백업 최대 30개
 │   ├── classify-local.js / classify-local.bat   # 3단계 "명령 실행" 그 자체
-│   ├── update-index.js / update.bat             # classify-local이 내부적으로 호출 (수동 실행도 가능)
-│   ├── prepare-upload.js / prepare-upload.bat    # classify-local이 내부적으로 호출 (수동 실행도 가능)
-│   └── restore-backup.bat                        # 비상 복구용
+│   ├── update-index.js                          # 예전 명령 호환용 (→ scripts/update-index.js). 수동 실행은 루트 업데이트.bat
+│   └── prepare-upload.js / prepare-upload.bat    # classify-local이 내부적으로 호출 (수동 실행도 가능)
 └── web/                      # PC 웹사이트 스크린샷 사이트 — mo/와 스크립트 구성은 동일, 데이터는 완전 독립
     └── (mo/와 동일한 파일 구성)
 ```
@@ -213,7 +214,7 @@ classify-local.bat   ← 더블클릭 (api-key.txt 있으면 미분류까지 자
 
 ---
 
-### update-index.js / update.bat — DATA 갱신 (classify-local이 내부 호출, 수동 실행도 가능)
+### update-index.js — DATA 갱신 (classify-local이 내부 호출, 수동 실행은 루트 `업데이트.bat`)
 
 카테고리 폴더를 전체 스캔해 그 사이트의 `index.html` DATA 블록·`version.js`·`stats.json`/`stats.js`·`search-index.js`를 갱신한다.
 실행 전 `index.html`을 `backups/index_YYYYMMDD_HHMMSS.html`로 자동 백업 (최대 10개 보관(환경변수 `MAX_BACKUPS`로 변경 가능 — 백업 1개가 4~9MB라 30개면 수백 MB가 쌓인다), 초과분 삭제 실패해도 전체가 죽지 않도록 개별 try/catch로 방어).
@@ -230,7 +231,7 @@ classify-local.bat   ← 더블클릭 (api-key.txt 있으면 미분류까지 자
 **동시 실행 방지** — `.update.lock` 파일 기반 락 (5분 초과 시 stale 처리). 이 작업 폴더는 파일 삭제·이름변경이 제한될 수 있어, 락 해제는 파일을 지우는 대신 `{pid,status,ts}` JSON을 `running`↔`idle`로 덮어쓰는 방식으로 구현되어 있다.
 
 ```
-update.bat   ← 더블클릭 (classify-local.bat이 내부적으로 이미 호출하므로 평소엔 직접 실행할 일 없음)
+업데이트.bat (루트)   ← 더블클릭 (classify-local.bat이 내부적으로 이미 호출하므로 평소엔 직접 실행할 일 없음)
 ```
 
 ---
@@ -249,17 +250,9 @@ prepare-upload.bat   ← 더블클릭 (classify-local.bat이 내부적으로 이
 
 ---
 
-### restore-backup.bat — 비상 복구용
+### 복원 — git 기록으로
 
-그 사이트 `backups/` 폴더의 백업 목록을 출력하고, 선택한 파일명으로 `index.html`을 복원한다.
-복원 전 현재 `index.html`을 `backups/index_before_restore_…html`로 자동 보관.
-`copy /y`로 덮어쓰기 확인 프롬프트 없이 바로 진행한다(2026-07-09 수정 — `/y` 없이 실행하면 프롬프트가 콘솔 리다이렉트에 가려진 채 멈추면서 이상 동작이 날 수 있었음).
-
-```
-restore-backup.bat   ← 더블클릭 → 목록 출력 → 파일명 입력
-```
-
-목록이 길어서 원하는 백업이 화면에 안 보여도, 파일이 실제로 `backups/` 폴더에 있다면 파일명을 그대로 입력하면 된다 (목록에 보이는 것만 입력 가능한 게 아님).
+`restore-backup.bat`(예전 index.html 백업 복원)은 2026-10-26 삭제했다. 코드·데이터는 GitHub 커밋 기록에서 되돌린다 (§9).
 
 ---
 
@@ -909,11 +902,8 @@ AI, OTT, 교육&도서, 금융, 기타, 도구, 모빌리티, 배달&음식&주�
 
 ## 9. 백업·복원
 
-`mo/`, `web/` 각각 독립적으로 `classify-local.bat`(내부의 update-index.js) 실행마다 `backups/index_YYYYMMDD_HHMMSS.html`로 자동 백업 (최대 30개, 초과분 삭제 실패해도 크래시하지 않음).
-
-**복원**: 해당 사이트 폴더의 `restore-backup.bat` 더블클릭 → 목록 출력 → 파일명 입력 (목록에 안 보여도 실제 존재하는 파일명이면 입력 가능, §3).
-
-**임의 시점 백업이 필요할 때**는 사용자가 직접 `update.bat`을 실행하는 것이 가장 안전하다 — 신규 이미지가 없어도 재스캔 결과는 동일하게 나오고(무위험), 실행 즉시 그 시점의 `index.html`이 `backups/`에 백업된다. Claude가 대신 `cp` 등으로 대용량 `index.html`을 복사·재작성하는 방식은 **권장하지 않음**: 실행 환경의 브릿지(마운트)가 수 MB급 파일에 대해 오래된 캐시본을 보여주거나 쓰기 도중 잘린/중복된 사본을 만드는 문제가 실제로 여러 번 있었다 (§10). 백업·복원처럼 index.html 전체를 다루는 작업은 항상 `.bat` 실행으로 처리할 것.
+2026-10-24 GitHub 이전 후에는 **git 커밋 기록이 백업**이다. `업데이트.bat` 이 실행마다 커밋하므로, 이전 상태가 필요하면 GitHub 의 커밋 기록에서 해당 파일(`data.js` 등)을 되돌린다. 예전 `backups/index_*.html` 과 `restore-backup.bat` 은 2026-10-26 삭제했다.
+이미지는 git 에 없으므로(회사 서버·로컬 폴더에만) 이미지 폴더 자체는 따로 보관할 것.
 
 ---
 

@@ -61,7 +61,7 @@ try {
   // ── upload-list.txt 파싱 ─────────────────────────────────────────────────
   function parseUploadList() {
     if (!fs.existsSync(UPLOAD_LIST)) {
-      logErr('[오류] upload-list.txt를 찾을 수 없습니다. update.bat을 먼저 실행하세요.');
+      logErr('[오류] upload-list.txt를 찾을 수 없습니다. 루트의 업데이트.bat을 먼저 실행하세요.');
       process.exitCode = 1;
       return null;
     }
