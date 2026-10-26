@@ -92,7 +92,7 @@ function run(site) {
   const stage = path.join(ROOT, site, '(업로드)');
   if (!fs.existsSync(stage)) { console.log('  [zip-upload] ' + site + ': (업로드) 폴더 없음 — 건너뜀'); return; }
 
-  for (const f of fs.readdirSync(stage)) if (/\.zip$/i.test(f)) fs.rmSync(path.join(stage, f), { force: true });
+  for (const f of fs.readdirSync(stage)) if (/\.zip$/i.test(f)) fs.unlinkSync(path.join(stage, f)); // rmSync 는 Node 24 + 한글 경로에서 죽음
 
   const all = walk(stage, '', []);
   const skipped = all.filter(f => SITE_FILES.test(f.rel));

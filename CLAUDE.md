@@ -41,3 +41,5 @@
 - 회사 PC: 이미지 폴더를 Bash(git bash)로 대량 읽으면 느림 → PowerShell. 한글 든 `.ps1` 은 UTF-8 BOM, JSON 은 BOM 없이
 - `.gitattributes` 가 `* -text` (줄바꿈 변환 없음) — `.command` 는 LF, 실행 권한(`git update-index --chmod=+x`) 유지
 - 파일명에 `+` 가 있으면 회사 서버가 404
+- Node 24 의 `fs.rmSync` 는 한글 경로에서 메시지 없이 죽는다 → 지우기는 `unlinkSync`/`rmdirSync`
+- 새 uibowl 카테고리는 기존 폴더로 합치는 게 기본(사용자 결정 10/27) → `uibowl-category-map.json` alias

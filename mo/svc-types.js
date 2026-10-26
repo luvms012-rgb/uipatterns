@@ -280,6 +280,9 @@ const SVC_TYPES = {
 
   // 자동 매핑 (오프라인, update.bat, 2026-10-20)
   '석가머니':'커뮤니티',
+
+  // 자동 매핑 (오프라인, update, 2026-10-26)
+  '트립스토어':'여행',
 };
 
 const ALL_INDUSTRY_TYPES = [

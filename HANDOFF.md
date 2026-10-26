@@ -34,7 +34,7 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 | 항목 | 내용 |
 |---|---|
 | 운영 계획 | **최종: 회사 서버** `imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/` · 지금은 개발 기간 → <https://luvms012-rgb.github.io/uipatterns/> |
-| 데이터 | mo 57,263장 · web 26,377장 (10/26 Npay 증권 272장 추가) |
+| 데이터 | mo 57,526장 · web 26,481장 (10/26 Npay 증권 272장, 10/27 트립스토어 263장·대한항공 104장 추가) |
 | 화면 글자(OCR) | 전 화면 완료 (mo 1장 오류) — 회사 PC `search/ocr/` |
 | 컴포넌트 | 10/26 이후 캡처분만 (Npay 증권 213장) → `web/components.json` → `data.js` comps |
 | 자연어 검색 | 회사 PC 로컬 MCP 서버 등록됨 (`claude mcp` 이름 `uipatterns`) — 새 대화에서 "uipatterns 에서 ~ 찾아줘" |
@@ -48,13 +48,19 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 6. 다운로드: 2장 이상 선택하면 전부 한 번에 (운영 서버에서 동작, github.io 에선 새 창에 모아 보여줌)
 7. 미리보기 `미리보기.bat`/`.command` (집에서도), `CLAUDE.md`
 
+10/27 회사에서 한 일:
+1. 캡처: **트립스토어(mo) 269장** → 분류 263 · 앱스토어 홍보 컷 6 제외 / **대한항공(web) 104장** → 분류 104. 컴포넌트 정보 mo 163장 · web 84장
+2. 업로드 준비가 Node 24 에서 죽던 문제 수정 (`mo`·`web/prepare-upload.js`, `zip-upload.js` — 아래 "발견한 것")
+3. 새 uibowl 카테고리를 기존 폴더로 합침 (`uibowl-category-map.json`, 사용자 결정 "기존 폴더로 합치기"): mo 기획전·이벤트→혜택 · 지도뷰·내주변→내주변 · 목록 (PLP)→상품목록 · 상세정보 (PDP)→상품목록 · 탐색→큐레이션 · 크로스셀링·업셀링→추천 / web 라이브·플레이어→뷰어
+4. web Npay 증권(10/26) 회사 서버 업로드 확인 (2장 크기 일치)
+
 ## 2. 결정사항
 → [CLAUDE.md](CLAUDE.md) "결정사항" (바꾸지 말 것). 10/26 새로 정해진 것: 최종 운영은 회사 서버 · Cloudflare 가입 불가 · 사용 현황 안 씀 · 다운로드는 묶지 않고 전부
 
 ## 3. 남은 일
 
 ### 사용자가 직접
-1. **`web/(업로드)/20261026.zip` 회사 서버 업로드** (Npay 증권 272장 + 아이콘) → <https://luvms012-rgb.github.io/uipatterns/web/?check=20261026> 점검. 모바일은 10/21 분까지 다 올라가 있음 (확인함)
+1. **10/27 zip 3개 회사 서버 업로드** — `mo/(업로드)/20261027_1.zip`·`20261027_2.zip` (트립스토어 263장 + 아이콘), `web/(업로드)/20261027.zip` (대한항공 104장 + 아이콘) → 점검 <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261027> · <https://luvms012-rgb.github.io/uipatterns/web/?check=20261027>. 10/26 Npay 증권은 올라가 있음(확인함)
 2. **캡처 스킬 문구 반영**: claude.ai 설정 → 스킬 → uipatterns-capture 를 회사 PC `Desktop\works\uipatterns-capture-SKILL.md` 내용으로 (zip 은 이미지만, 마무리에 `업데이트.bat` 안내)
 
 ### 이어서 할 작업
@@ -72,4 +78,6 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 - `classify-local.js` 는 분류하며 파일명을 다시 매김 → 가져올 때 이름으로 매칭하면 틀림. 파일 안에 NUL 문자 있음
 - Chrome 은 바탕화면·다운로드 같은 최상위 폴더를 폴더 선택에서 막음. 여러 파일 다운로드는 사이트마다 처음 한 번 "자동 다운로드 허용"을 물음
 - 데이터 정렬은 문자 코드 순, 파일명은 NFC 로 통일 (`scripts/update-index.js`)
+- **Node 24 `fs.rmSync` 는 한글 경로에서 프로그램이 죽음**(종료 코드 -1073740791, 메시지 없음). 파일 하나여도 같음 → `unlinkSync`/`rmdirSync` 사용
+- 업로드 준비(`prepare-upload.js`)는 `(업로드)` 를 비우고 다시 담는다 → 분류 때 넣은 아이콘도 지워질 수 있음. zip 만들기 전에 `(업로드)/icons/` 확인
 - uibowl 하단 저작권 고지("무단 사용 시 법적 책임") — 공개 사이트 운영 시 참고

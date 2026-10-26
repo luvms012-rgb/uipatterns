@@ -133,6 +133,8 @@ try {
     // 의해 잠겨 있을 때 EPERM/EBUSY로 스크립트 전체가 중단된다. 그 대신 내용물만
     // 하나씩 지우고, 지워지지 않는 항목은 경고만 남기고 넘어간다.
     // RESUME=1 : 중간에 끊긴 준비를 이어서 한다 (폴더를 비우지 않고, 같은 크기로 이미 복사된 파일은 건너뜀)
+    // Node 24 의 fs.rmSync 는 한글 경로에서 프로그램이 죽는다(0xC0000409) → unlink/rmdir 로 하나씩 지운다
+    const rmTree = p => { if (fs.lstatSync(p).isDirectory()) { for (const c of fs.readdirSync(p)) rmTree(path.join(p, c)); fs.rmdirSync(p); } else fs.unlinkSync(p); };
     const RESUME = process.env.RESUME === '1';
     if (RESUME) log('[정보] RESUME=1 — 기존 (업로드) 내용을 유지하고 이어서 복사');
     if (!RESUME && fs.existsSync(STAGE_DIR)) {
@@ -142,7 +144,7 @@ try {
       for (const entry of entries) {
         const p = path.join(STAGE_DIR, entry);
         try {
-          fs.rmSync(p, { recursive: true, force: true });
+          rmTree(p);
         } catch (e) {
           log('[경고] 삭제 실패(건너뜀, 다른 프로그램이 사용 중일 수 있음): ' + p + ' -> ' + e.message);
         }
