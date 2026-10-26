@@ -6,7 +6,8 @@
 - 개발 기간 사이트: <https://luvms012-rgb.github.io/uipatterns/> (GitHub Pages — 이미지는 회사 서버에서 불러옴)
 - 저장소: <https://github.com/luvms012-rgb/uipatterns>
 - 이미지: 회사 서버 `.../uipatterns/{mo,web}/`. 개발 기간에는 **이미지만** 회사 서버, 나머지는 전부 여기
-- 작업 이어가기: [HANDOFF.md](HANDOFF.md) — 결정사항 · 발견한 것 · 남은 작업
+- 작업 이어가기: [HANDOFF.md](HANDOFF.md) — 지금 상태 · 남은 작업 · **집·회사 오가며 작업하기(동기화)** · Claude 규칙은 [CLAUDE.md](CLAUDE.md)
+- 미리보기: `미리보기.bat` / `미리보기.command` 더블클릭 → <http://localhost:5180/mo/> (이 PC 에 이미지가 없으면 회사 서버 이미지로)
 
 ## 업데이트 = `업데이트.bat` 더블클릭 (맥: `업데이트.command`)
 
