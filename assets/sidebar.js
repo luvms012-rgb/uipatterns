@@ -2,7 +2,7 @@
 // 분류 기준은 각 플랫폼의 taxonomy.js (PATTERN_GROUPS · CAT_ALIAS · COMPONENTS).
 // 필터 상태는 index.html의 S(checked · checkedComps · checkedTypes)를 그대로 쓴다.
 
-const SB_COLLAPSE_KEY = 'uip_sb_collapsed_v1';
+const SB_COLLAPSE_KEY = 'uip_sb_collapsed_v2';  // v2: 컴포넌트·카테고리 유형 기본 닫힘 (예전 저장값 무시)
 const SB = { collapsed: null };
 
 // ㆍ(U+318D)·・·(U+00B7) 같은 가운뎃점과 띄어쓰기 차이를 무시하고 비교
@@ -38,8 +38,8 @@ function sbCollapsed() {
   if (!SB.collapsed) {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(SB_COLLAPSE_KEY)); } catch (_) {}
-    // 처음 방문: 컴포넌트는 아직 데이터가 없으면 접어 둔다 (0개 목록이 길게 늘어지지 않도록)
-    SB.collapsed = new Set(Array.isArray(saved) ? saved : (Object.keys(compCounts()).length ? [] : ['comp']));
+    // 처음 방문: 컴포넌트·카테고리 유형은 닫아 둔다 (UI 패턴만 펼침). 열고 닫은 상태는 저장된다
+    SB.collapsed = new Set(Array.isArray(saved) ? saved : ['comp', 'type']);
   }
   return SB.collapsed;
 }
