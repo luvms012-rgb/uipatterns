@@ -955,10 +955,44 @@ function dlUrl(p, platform = PLATFORM) {
 }
 function iconBase(platform = PLATFORM) { return UIP_CONFIG.imgBase + platform + '/icons/'; }
 
+// 이미지 파일 내용을 읽을 수 있나 — 중계(imgProxy)가 있거나, 이미지가 이 페이지와 같은 출처일 때(로컬 미리보기)만.
+// 회사 서버는 다른 사이트에서 파일을 읽어 가는 것을 허용하지 않아(CORS 헤더 없음) github.io·file:// 에서는 못 읽는다.
+function canReadImages() {
+  return !!UIP_CONFIG.imgProxy || (location.protocol !== 'file:' && !/^https?:\/\//i.test(UIP_CONFIG.imgBase));
+}
+
+// 파일로 바로 저장할 수 없을 때: 새 창 하나에 이미지를 모아 보여준다 (오른쪽 클릭 → 이미지를 다른 이름으로 저장).
+// 여러 창을 차례로 열면 브라우저가 첫 창만 열고 나머지는 팝업으로 막으므로 한 창에 모은다.
+// 클릭 직후(기다림 없이) 불러야 팝업으로 막히지 않는다.
+function openImagesWindow(items) {
+  const win = window.open('', '_blank');
+  if (!win) { showToast('팝업이 막혔어요. 주소창 오른쪽에서 이 사이트의 팝업을 허용해 주세요'); return false; }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const one = items.length === 1;
+  const title = one ? items[0].path.split('/').pop() : items.length + '장';
+  win.document.write(`<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>${esc(title)}</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0c0c0e;color:#f0f0f2;font-family:Pretendard,system-ui,sans-serif;padding:72px 24px 40px}
+  .bar{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(12,12,14,.92);border-bottom:1px solid #32343e;z-index:1}
+  .bar p{flex:1;font-size:14px;color:#c9cbd4}.bar b{color:#f0f0f2}
+  .bar button{height:36px;padding:0 14px;border-radius:18px;background:rgba(255,255,255,.12);border:none;cursor:pointer;color:#fff;font-size:13px;font-family:inherit}
+  .bar button:hover{background:rgba(255,255,255,.22)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(${one ? '100%' : '240px'},1fr));gap:20px;align-items:start}
+  figure{display:flex;flex-direction:column;gap:8px;align-items:center}
+  img{max-width:100%;${one ? 'max-height:calc(100vh - 140px);' : ''}object-fit:contain;border-radius:8px;border:1px solid #32343e}
+  figcaption{font-size:12px;color:#9b9da8;word-break:break-all;text-align:center}</style></head>
+  <body><div class="bar"><p><b>이미지를 오른쪽 클릭 → '이미지를 다른 이름으로 저장'</b>으로 저장하세요${one ? '' : ' · ' + items.length + '장'}</p>
+  <button onclick="window.close()">닫기</button></div>
+  <div class="grid">${items.map(it => `<figure><img src="${esc(imgUrl(it.path))}" alt="${esc(it.name)}" loading="lazy"><figcaption>${esc(it.path.split('/').pop())}</figcaption></figure>`).join('')}</div>
+  </body></html>`);
+  win.document.close();
+  return true;
+}
+
 async function dlImg(encPath, encName) {
   const path = decodeURIComponent(encPath);
   const name = decodeURIComponent(encName) + '.png';
   aTrack('download', { count: 1 });
+  if (!canReadImages()) { openImagesWindow([{ path, name }]); return; }
   try {
     const res = await fetch(dlUrl(path));
     if (!res.ok) throw new Error();
@@ -969,23 +1003,7 @@ async function dlImg(encPath, encName) {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   } catch {
-    // fetch 실패(file:// 등) 시 이미지 뷰어 새창으로 열기 (닫기 버튼 포함)
-    const win = window.open('', '_blank');
-    if (win) {
-      win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${name}</title>
-      <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0c0c0e;display:flex;align-items:center;justify-content:center;min-height:100vh}
-      img{max-width:calc(100vw - 80px);max-height:calc(100vh - 80px);object-fit:contain;border-radius:8px}
-      .close-btn{position:fixed;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1}
-      .close-btn:hover{background:rgba(255,255,255,.22)}
-      .back-btn{position:fixed;top:16px;left:16px;height:36px;padding:0 14px;border-radius:18px;background:rgba(255,255,255,.12);border:none;cursor:pointer;color:#fff;font-size:13px;font-family:sans-serif}
-      .back-btn:hover{background:rgba(255,255,255,.22)}</style></head>
-      <body>
-      <button class="back-btn" onclick="window.close()">← 돌아가기</button>
-      <img src="${imgUrl(path)}" alt="${name}">
-      <button class="close-btn" onclick="window.close()">✕</button>
-      </body></html>`);
-      win.document.close();
-    }
+    openImagesWindow([{ path, name }]);
   }
 }
 
@@ -1356,10 +1374,9 @@ function updateSelectBar() {
 }
 
 // 선택 다운로드 — ZIP으로 묶지 않고 원래 파일명 그대로 저장한다.
-//  1) 크롬·엣지: 저장할 폴더를 한 번 고르면 선택한 이미지를 그 폴더에 한꺼번에 저장
-//  2) 그 외 브라우저: 한 장씩 순서대로 다운로드 (처음 한 번 '여러 파일 다운로드 허용' 필요)
-// 파일 내용을 읽어야 하므로 이미지 중계(UIP_CONFIG.imgProxy)가 있어야 한다. 없거나 실패하면
-// 남은 이미지는 예전처럼 새 창으로 연다.
+//  1) 이미지를 읽을 수 있으면(중계 있음·로컬 미리보기) — 크롬·엣지는 저장할 폴더를 한 번 고르면 그 폴더에 한꺼번에,
+//     그 외 브라우저는 한 장씩 순서대로 다운로드 (처음 한 번 '여러 파일 다운로드 허용' 필요)
+//  2) 못 읽으면(지금 github.io: 중계 없음) — 폴더를 묻지 않고 새 창 하나에 모아 보여준다 (오른쪽 클릭으로 저장)
 async function dlSelected() {
   const items = DISPLAY_DATA.filter(i => S.selected.has(i.path));
   if (!items.length) return;
@@ -1367,6 +1384,15 @@ async function dlSelected() {
   const btn = document.getElementById('sb-dl-btn');
   const DL_SVG_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
   const fileName = item => item.path.split('/').pop();
+  const finish = () => { if (btn) btn.innerHTML = `${DL_SVG_SM} 다운로드`; exitSelectMode(); updateSelectBar(); };
+
+  if (!canReadImages()) {
+    aTrack('download', { count: cnt });
+    if (openImagesWindow(items)) showToast(`${cnt}장을 새 창에 열었어요. 이미지를 오른쪽 클릭해 저장하세요`);
+    finish();
+    return;
+  }
+
   async function getBlob(item) {
     const res = await fetch(dlUrl(item.path));
     if (!res.ok) throw new Error('fetch ' + res.status);
@@ -1376,7 +1402,11 @@ async function dlSelected() {
   let dir = null;
   if (window.showDirectoryPicker) {
     try { dir = await window.showDirectoryPicker({ id: 'uip-download', mode: 'readwrite' }); }
-    catch (e) { if (e.name === 'AbortError') return; dir = null; }  // 폴더 선택 취소 → 아무것도 안 함
+    catch (e) {
+      if (e.name === 'AbortError') return;   // 폴더 선택 취소 → 아무것도 안 함
+      dir = null;                            // 바탕화면·다운로드 같은 최상위 폴더는 크롬이 막는다 → 한 장씩 다운로드로
+      showToast('그 폴더는 브라우저가 막아요. 한 장씩 다운로드할게요 (다음엔 그 안의 폴더를 골라 주세요)');
+    }
   }
 
   if (btn) btn.disabled = true;
@@ -1403,19 +1433,13 @@ async function dlSelected() {
     aTrack('download', { count: cnt });
     showToast(dir ? `${cnt}개를 '${dir.name}' 폴더에 저장했어요` : `${cnt}개 다운로드 완료`);
   } catch {
-    // 중계 없음·실패: 남은 이미지는 새 창으로 열기 (dlImg가 개별 집계)
+    // 중계 실패: 저장한 것까지만 세고, 남은 이미지는 새 창 하나에 모아 보여준다
     if (i > 0) aTrack('download', { count: i });
-    for (; i < cnt; i++) {
-      const item = items[i];
-      if (btn) btn.innerHTML = `${DL_SVG_SM} ${i + 1} / ${cnt}`;
-      await dlImg(encodeURIComponent(item.path), encodeURIComponent(item.name));
-      if (i < cnt - 1) await new Promise(r => setTimeout(r, 300));
-    }
-    showToast(`${cnt}개 다운로드 완료`);
+    const rest = items.slice(i);
+    if (openImagesWindow(rest)) showToast(`${i}개 저장 · 남은 ${rest.length}장은 새 창에 열었어요. 오른쪽 클릭해 저장하세요`);
   }
-  if (btn) btn.innerHTML = `${DL_SVG_SM} 다운로드`;
-  exitSelectMode();
-  updateSelectBar();
+  if (btn) btn.disabled = false;
+  finish();
 }
 
 // ── 렌더 ────────────────────────────────────────────────────────────────
