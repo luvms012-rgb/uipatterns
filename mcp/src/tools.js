@@ -152,7 +152,8 @@ async function listFilters(db, a) {
     out.services = svcs.map(s => `${s.svc} · ${s.industry} · ${s.sites.split(',').map(x => PLATFORM_NAME[x]).join('/')} ${s.n}장`);
   }
   const [meta] = await db.all(`SELECT v FROM meta WHERE k = 'built'`, []);
-  out.data = { built: meta?.v, text_coverage: await coverage(db, a.platform), components: '이미지별 컴포넌트 정보는 아직 없음 (캡처 개선 후 추가 예정)' };
+  const [cc] = await db.all(`SELECT COUNT(*) AS n FROM screens WHERE comps != '' AND site IN ${inList(ss)}`, []);
+  out.data = { built: meta?.v, text_coverage: await coverage(db, a.platform), components: `컴포넌트 정보가 있는 화면 ${cc.n}장 (2026-10-26 이후 캡처분)` };
   return out;
 }
 
@@ -228,7 +229,7 @@ export const TOOLS = [
         categories: STR_LIST('카테고리(패턴) 이름 일부 또는 패턴 그룹(진입·탐색·프로모션·활동·거래·관리·AI·도구). 예: ["장바구니"], ["로그인"]'),
         services: STR_LIST('서비스 이름 일부. 예: ["에어비앤비", "토스"]'),
         industries: STR_LIST('업종 (list_filters 로 확인). 예: ["모빌리티"]'),
-        components: STR_LIST('UI 컴포넌트 (아직 데이터 없음)'),
+        components: STR_LIST('UI 컴포넌트 (uibowl 태그. 예: 모달·바텀시트·드롭다운·탭). 2026-10-26 이후 캡처한 화면에만 있음 — 결과가 적으면 빼고 text·zone 으로'),
         platform: PLATFORM,
         limit: { type: 'integer', description: '결과 수 (기본 20, 최대 50)' },
         offset: { type: 'integer', description: '다음 결과를 볼 때 next_offset 값' },
@@ -288,7 +289,7 @@ export const TOOLS = [
 
 export const INSTRUCTIONS = `UI Patterns — 사내 UI 패턴 레퍼런스(uibowl 벤치마킹) 화면 검색. 읽기 전용.
 - 글자로 찾기("더보기" 들어간 화면): search_screens text
-- 컴포넌트+글자("바텀시트에 '선택 안 함' 버튼"): 컴포넌트 정보가 아직 없으므로 text + zone(bottom) 으로 찾고, get_screen 글자나 이미지로 바텀시트인지 확인해 답한다
+- 컴포넌트+글자("바텀시트에 '선택 안 함' 버튼"): components 로 먼저 찾고(최근 캡처분만 있음), 부족하면 text + zone(bottom) 으로 찾아 get_screen 글자나 이미지로 바텀시트인지 확인해 답한다
 - 상황("장바구니에서 재고 부족"): categories + 상황을 나타낼 만한 표현 여러 개를 text 에 | 로 (품절|재고|남은 수량|일시품절)
 - 서비스 비교("에어비앤비와 부킹닷컴"): service_overview 에 두 서비스
 - 대상·업종("30대 여성 모빌리티"): list_filters 로 업종·서비스를 확인한 뒤 industries 로 검색하고, 서비스 특성은 일반 지식으로 보완

@@ -113,7 +113,9 @@ async function main() {
         dest = path.join(destDir, name);
       }
       moveFile(src, dest);
-      meta.files[name] = { category: nfc(it.category), pattern: nfc(it.pattern), imgId: it.imgId, isPush: !!it.isPush, video: !!it.video };
+      // components: 화면 속 컴포넌트 (매니페스트 v5~). classify-local.js 가 최종 경로로 {site}/components.json 에 기록한다
+      meta.files[name] = { category: nfc(it.category), pattern: nfc(it.pattern), imgId: it.imgId, isPush: !!it.isPush, video: !!it.video,
+        components: [...new Set((it.components || []).map(c => nfc(c.name)).filter(Boolean))] };
       moved++;
     }
     if (m.icon) {
@@ -122,6 +124,8 @@ async function main() {
     }
     meta.svc = svc; meta.site = site; meta.url = m.url; meta.capturedAt = m.capturedAt;
     fs.writeFileSync(metaPath, JSON.stringify(meta, null, 1));
+    const withComps = want.filter(i => (i.components || []).length).length;
+    if (withComps) console.log('    컴포넌트 정보 ' + withComps + '장 (분류할 때 ' + site + '/components.json 에 기록)');
 
     // 매니페스트는 backups/captures 로 보관
     const arch = path.join(ROOT, site, 'backups', 'captures');

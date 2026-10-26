@@ -1,5 +1,5 @@
 /*
- * uibowl-capture.js  (v4, 2026-10-21)
+ * uibowl-capture.js  (v5, 2026-10-26 — 카드별 컴포넌트(이름·위치%)도 매니페스트에 기록)
  * uibowl 서비스 페이지의 스크린샷 전체 + 아이콘 + 매니페스트를 한 번에 다운로드한다.
  *   모바일: https://uibowl.io/name/{서비스명}
  *   웹    : https://uibowl.io/website/name/{서비스명}
@@ -53,6 +53,8 @@
       U.items.set(id, {
         imgId: id, app: (p && p.appName) || '', category: (p && p.patternCodeName) || '',
         pattern: (p && p.patternName) || '', isPush: !!(p && p.isPush), src: src, order: U.items.size,
+        // 화면 속 UI 컴포넌트 (uibowl 태그) — 사이드바 컴포넌트 필터·컴포넌트 검색 재료
+        components: ((p && p.components) || []).map(c => ({ name: c.componentCodeName, x: c.xPercent, y: c.yPercent })),
       });
     });
   }
@@ -160,7 +162,7 @@
       catch (e) { if (t === 1) U.fail.push({ n: i + 1, src: it.src, err: String(e && e.message || e) }); else await sleep(1500); }
     }
     if (ok) U.dl++;
-    out.push({ n: i + 1, file: ok ? file : null, imgId: it.imgId, category: it.category, pattern: it.pattern, isPush: it.isPush, video: /\.(mp4|webm|mov)(\?|$)/i.test(it.src) });
+    out.push({ n: i + 1, file: ok ? file : null, imgId: it.imgId, category: it.category, pattern: it.pattern, isPush: it.isPush, video: /\.(mp4|webm|mov)(\?|$)/i.test(it.src), components: it.components });
   }
 
   let iconFile = null;
@@ -172,7 +174,7 @@
 
   // ── 3) 매니페스트 (마지막에 저장 = 배치 완료 신호) ──
   const manifest = {
-    tool: 'uibowl-capture', version: 4, site: site, svc: svc, url: location.href,
+    tool: 'uibowl-capture', version: 5, site: site, svc: svc, url: location.href,
     capturedAt: now.toISOString(), date: today, tag: tag, icon: iconFile,
     count: items.length, downloaded: U.dl, failed: U.fail, items: out,
   };
