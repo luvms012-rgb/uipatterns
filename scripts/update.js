@@ -53,6 +53,21 @@ function ensureGitIdentity() {
   }
 }
 
+// Claude 자연어 검색용 데이터 갱신 (mcp/README.md) — 새 화면 글자 추출(OCR) → search/dist/ 다시 생성.
+// 글자 추출은 Windows 내장 OCR 이라 Windows 에서만. 실패해도 업데이트 자체는 계속한다.
+function updateSearch(results) {
+  const added = results.reduce((n, r) => n + r.newItems.length, 0);
+  if (!added && fs.existsSync(path.join(REPO, 'search', 'dist', 'uipatterns.db'))) return;
+  if (process.platform !== 'win32') { console.log('  검색 데이터: 화면 글자 추출은 Windows에서만 — 건너뜀'); return; }
+  try {
+    console.log(`  검색 데이터: 새 화면 ${added}장 글자 추출 중…`);
+    execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${path.join(REPO, 'search', 'run-ocr.ps1')}" -Workers 4`, { cwd: REPO, stdio: 'inherit' });
+    execSync(`node --no-warnings "${path.join(REPO, 'search', 'build-index.js')}"`, { cwd: REPO, stdio: 'inherit' });
+  } catch (e) {
+    console.log(`  ⚠ 검색 데이터 갱신 실패 (업데이트는 계속): ${e.message.split('\n')[0]}`);
+  }
+}
+
 async function main() {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -100,6 +115,8 @@ async function main() {
         releaseLock();
       }
     }
+
+    if (results.length) updateSearch(results);
 
     // 3) 회사 서버에 올릴 이미지 목록
     const newOnes = results.flatMap(r => r.newItems.map(i => `${r.platform}/${i.path}`));

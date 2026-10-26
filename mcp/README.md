@@ -22,24 +22,29 @@ mcp/local.mjs                  로컬 서버 (stdio) — 이 PC에서 바로 쓰
 ```
 
 - 글자 검색은 화면 글자를 두 글자씩 잘라 넣은 전문 검색 색인(SQLite FTS5)으로 찾습니다. 띄어쓰기·기호·대소문자는 무시하고, 위치 조건도 색인에서 바로 찾습니다.
-- Cloudflare 무료 요금(Worker 계산 요청당 10ms, D1 하루 읽기 500만 행) 안에서 돌도록 만들었습니다. 로컬 측정: 계산 2~15ms, 첫 요청이 한도 근처일 수 있음 → 배포 후 오류(1102)가 잦으면 Workers 유료($5/월)로.
-- `search/dist/` 는 저장소에 올리지 않습니다 (.gitignore). D1 에만 올립니다.
+- `search/dist/` 는 저장소에 올리지 않습니다 (.gitignore).
 
 ## 검색 데이터 만들기 (회사 PC)
 
+`업데이트.bat` 이 새 이미지가 있을 때 자동으로 합니다. 따로 돌릴 때:
 ```bash
 search/run-ocr.bat          # 새 이미지의 글자 추출 (이미 한 화면은 건너뜀)
 node search/build-index.js  # search/dist/ 생성 (Node 22.12 이상)
 ```
 
-## 이 PC에서 바로 쓰기 (로컬)
+## 이 PC에서 쓰기 (로컬) — 지금 쓰는 방식
 
 Claude Code:
 ```bash
 claude mcp add uipatterns -- node C:/Users/luvms/Desktop/works/uipatterns/mcp/local.mjs
 ```
+서버는 요청마다 검색 데이터를 열었다 닫으므로, 켜 둔 채로 `업데이트.bat` 을 돌려도 됩니다.
 
-## 팀원용 원격 서버 (처음 한 번)
+## 팀원용 원격 서버 — 보류 (2026-10-26 Cloudflare 가입 불가)
+
+코드는 준비돼 있어서 Cloudflare(또는 D1 과 같은 SQLite 를 쓰는 다른 서버)를 쓸 수 있게 되면 아래대로 배포합니다.
+Cloudflare 무료 요금(Worker 계산 요청당 10ms, D1 하루 읽기 500만 행) 안에서 돌도록 만들었고, 로컬 측정 계산 시간은 6ms 이하입니다.
+
 
 1. Cloudflare 가입 (무료) — 이미지 중계(`worker/`)와 같은 계정
 2. `mcp/` 폴더에서

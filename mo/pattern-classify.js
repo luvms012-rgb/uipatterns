@@ -3,7 +3,7 @@
 /**
  * pattern-classify.js — UI 패턴 파일명 → 카테고리 분류 엔진 (공용 모듈)
  *
- * classify-local.js 가 사용한다. mo/ web/ 어느 쪽에서든 그 폴더의 index.html DATA를
+ * classify-local.js 가 사용한다. mo/ web/ 어느 쪽에서든 그 폴더의 data.js DATA를
  * 학습 데이터로 삼으므로 카테고리 체계가 달라도 그대로 동작한다.
  *
  * 분류 단계 (위에서부터, 먼저 맞는 것이 이김)
@@ -106,8 +106,9 @@ function isMeaningless(p) {
 }
 
 // ─── DATA 로딩 ──────────────────────────────────────────────────────────────
-function loadData(indexHtmlPath) {
-  const html = fs.readFileSync(indexHtmlPath, 'utf-8');
+// data.js (예전엔 index.html) 의 __DATA_START__ ~ __DATA_END__ 사이 DATA 배열
+function loadData(dataFile) {
+  const html = fs.readFileSync(dataFile, 'utf-8');
   const s = html.indexOf('// __DATA_START__');
   const e = html.indexOf('// __DATA_END__');
   if (s === -1 || e === -1) throw new Error('DATA 마커를 찾을 수 없습니다.');
@@ -128,7 +129,7 @@ function parseDataName(name) {
 
 // ─── 모델 학습 ──────────────────────────────────────────────────────────────
 /**
- * @param {Array} DATA        index.html의 DATA 배열
+ * @param {Array} DATA        data.js의 DATA 배열
  * @param {Array} categories  현재 존재하는 카테고리 폴더명
  * @param {Object} opts       { excludePatterns: Set }  (홀드아웃 테스트용)
  */

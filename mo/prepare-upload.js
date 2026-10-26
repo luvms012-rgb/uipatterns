@@ -5,7 +5,7 @@
  *
  * upload-list.txt에서 아직 준비되지 않은 신규 파일만 추려
  * (업로드)/ 폴더에 카테고리 구조 그대로 복사한다.
- * index.html, version.js, stats.js도 항상 함께 포함.
+ * 회사 서버에는 이미지만 올린다 (2026-10-26~). 사이트 파일(index.html·data.js 등)은 GitHub Pages 가 배포하므로 담지 않는다.
  *
  * .last-upload 파일에 "이미 준비 완료된 파일 경로" 목록을 한 줄에 하나씩 기록한다
  * (2026-07-10 이전에는 날짜 문자열 하나만 기록했으나, 아래 버그로 인해 파일 단위로 전환).
@@ -174,16 +174,6 @@ try {
     }
     log('[정보] 복사한 이미지 수 = ' + totalFiles + ', 누락 = ' + missing.length);
 
-    for (const f of ['index.html', 'version.js', 'stats.js']) {
-      const src = path.join(BASE, f);
-      if (fs.existsSync(src)) {
-        fs.copyFileSync(src, path.join(STAGE_DIR, f));
-        log('[정보] 포함: ' + f);
-      } else {
-        log('[경고] 없음(스킵): ' + f);
-      }
-    }
-
     // 마커 갱신: 지금까지 "완료"로 확인된 파일 전체 집합을 파일 단위로 기록.
     // (레거시 마이그레이션만 일어나고 신규 파일이 없어도 항상 새 형식으로 다시 써서
     //  다음 실행부터는 파일 단위 로직만 타도록 한다.)
@@ -199,7 +189,6 @@ try {
 
     if (!hasNewImages) {
       log('  신규 이미지는 없습니다.');
-      log('  index.html / version.js / stats.js는 최신 상태로 포함했습니다.');
     } else {
       const catList = Array.from(catSet).sort();
       const entryDates = newEntries.map(function (e) { return e.date; }).sort();
@@ -221,7 +210,7 @@ try {
     log('');
     log('  (업로드) 폴더를 직접 올리지 말고, 이어서 만들어지는 zip 파일만 전부 올리세요.');
     log('  (폴더째 올리면 일부 카테고리 폴더가 통째로 빠지는 사고가 반복됨 — 2026-09-03, 2026-10-21)');
-    log('     index.html + version.js + stats.js + 신규 이미지가 포함되어 있습니다.');
+    log('     신규 이미지만 들어 있습니다 (사이트 파일은 GitHub 가 배포).');
     log('========================================');
     log('');
     log('  재준비가 필요하면 .last-upload 파일 삭제 후 재실행 (전체 이력 재포함)');

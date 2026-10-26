@@ -57,41 +57,28 @@ Claude에게 **"uipatterns 회사 PC 연결"** 이라고 하면 아래를 대신
 1. 기존 폴더 백업: `mo/index.html`, `web/index.html`, `mo/update-index.js`, `web/update-index.js`
 2. 그 폴더에서 `git init` → `git remote add origin https://github.com/luvms012-rgb/uipatterns.git` → `git fetch` → `git checkout -f -B main origin/main`
 3. 기존 캡처 스크립트(`uibowl-capture.js`, `capture-import.js`, `classify-local.js`, `prepare-upload.js`, `zip-upload.js`, `GUIDE.md` 등)는 그대로 남아 있고, 첫 `업데이트.bat` 때 함께 GitHub에 올라갑니다.
-4. **`prepare-upload.js`가 `index.html`·`version.js`·`stats.js`를 `(업로드)`에 넣지 않도록 수정** — 이제 회사 서버엔 이미지만 올립니다. 새 index.html을 서버에 올리면 서버 쪽 옛 페이지가 깨집니다.
+4. **`prepare-upload.js`가 `index.html`·`version.js`·`stats.js`를 `(업로드)`에 넣지 않도록 수정** — 이제 회사 서버엔 이미지만 올립니다. 새 index.html을 서버에 올리면 서버 쪽 옛 페이지가 깨집니다. (2026-10-26 완료 — `zip-upload.js` 도 사이트 파일은 빼고 압축)
 
 ## 다운로드
 
 - 카드/크게 보기: 1장 다운로드
 - 선택 다운로드: ZIP 없이 원래 파일명으로 저장. 크롬·엣지는 폴더를 한 번 고르면 그 폴더에 한꺼번에 저장
-- `config.js`의 `imgProxy`가 비어 있으면 다운로드 대신 새 창으로 열립니다 → `worker/README.md`로 설정
+- `config.js`의 `imgProxy`가 비어 있으면 다운로드 대신 새 창으로 열립니다. 중계(`worker/`)는 Cloudflare 계정이 필요해 보류 (2026-10-26 가입 불가)
 
-## 다음 작업 (2026-10-24 기준, 회사에서 이어서)
+## 자연어 검색 = Claude + MCP (`mcp/README.md`)
 
-### 남은 정리
-- [ ] 배포된 사이트에서 이미지 표시 확인 — 집 IP는 회사 웹방화벽(`error_web_fw`)에 막혀 확인 못 함. 이미지 몇 장으로만 조심스럽게
-- [ ] 회사 PC 연결 (위 "회사 PC 처음 연결")
-- [ ] `prepare-upload.js`: 이미지만 `(업로드)`에 담기
-- [ ] 캡처 시 이미지별 컴포넌트를 `components.json`에 저장 → 사이드바 컴포넌트 필터 활성화
+"바텀시트에 '선택 안 함' 버튼 있는 화면 찾아줘"처럼 **Claude에게 묻는 방식**입니다 (uibowl의 "AI에 유아이볼 데이터 연결하기"와 같은 개념). 사이트 검색바는 키워드 검색으로 단순하게 둡니다.
+- 화면 속 글자(Windows 내장 OCR, 전 화면 완료)·위치·카테고리·서비스·업종으로 찾고, 서비스 비교도 됩니다
+- `업데이트.bat` 이 새 이미지의 글자 추출과 검색 데이터(`search/dist/`, 저장소 제외) 갱신까지 합니다
+- 지금은 **회사 PC의 Claude에서 로컬 서버**(`mcp/local.mjs`)로 씁니다. 팀원 공용 원격 서버는 Cloudflare 계정이 없어 보류 — 코드(`mcp/src/worker.js`)는 준비돼 있음
+
+## 다음 작업 (2026-10-26 기준)
+
+- [x] 회사 PC 연결
+- [x] `prepare-upload.js`·`zip-upload.js`: 이미지만 `(업로드)`에 담기 · 분류 스크립트가 `data.js` 를 읽도록
+- [x] 로컬 미리보기로 새 화면 확인 (mo·web 이미지 표시, 회사 서버 요청 없음)
+- [ ] 배포된 사이트에서 이미지 표시 확인 — 회사 웹방화벽(`error_web_fw`) 주의, 이미지 몇 장으로만 조심스럽게
+- [ ] 캡처 시 이미지별 컴포넌트를 `components.json`에 저장 → 사이드바 컴포넌트 필터 + 컴포넌트 검색
 - [ ] 파일명에 `+`가 든 web 이미지 13장 이름 바꿔 재업로드 (회사 서버가 `+` 주소를 404 처리)
-
-### 자연어 검색 = Claude + MCP 서버 (팀 공용)
-검색은 사이트 검색바가 아니라 **Claude에게 묻는 방식**으로 합니다 (uibowl의 "AI에 유아이볼 데이터 연결하기"와 같은 개념). 사이트 검색바는 서비스·패턴명 키워드 검색으로 단순하게 둡니다.
-팀원 누구나 자기 Claude에 연결해 쓸 수 있도록 **원격 MCP 서버**로 만듭니다.
-
-목표 질문 예시:
-- 바텀시트에 "선택 안 함" 버튼이 있는 UI를 찾아줘
-- "더보기" 텍스트가 들어간 화면 찾아줘
-- 장바구니에서 재고 부족이 표현된 화면을 찾아줘
-- 에어비앤비와 부킹닷컴 UI/UX 차이 보여줘
-- 30대 여성을 위한 모빌리티 서비스 레퍼런스 찾아줘
-- 지금 첨부하는 이미지랑 비슷한 화면 보여줘
-
-구성안:
-1. **이미지별 검색 정보** — 업데이트 때 회사 PC에서 생성해 저장소에 올림
-   - 컴포넌트 태그·위치: uibowl 캡처 데이터(`images[].components`: componentCodeName, xPercent, yPercent)
-   - 화면 속 글자: 무료 OCR
-   - 이미지 유사도(임베딩): "비슷한 화면" 검색용
-2. **MCP 서버** — Cloudflare Worker(이미지 중계와 같은 계정)에 원격 MCP로 배포. 읽기 전용
-   - 도구 예: 화면 검색(플랫폼·서비스·패턴·컴포넌트·글자·업종 조건), 서비스 화면 묶음, 두 서비스 비교, 비슷한 화면, 화면 이미지 보기
-   - 팀원 연결: Claude 설정 → 커넥터 → 사용자 지정 커넥터 추가 → MCP 주소
-3. **사이트 딥링크** — Claude 답변에서 화면 1장으로 바로 가는 주소 (예: `mo/#img=카테고리/파일.png`)
+- [ ] 사이트 딥링크 — 화면 1장으로 바로 가는 주소 (예: `mo/#img=카테고리/파일.png`)
+- [ ] "비슷한 화면" 검색 (이미지 임베딩)
