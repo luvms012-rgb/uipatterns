@@ -958,7 +958,10 @@ function iconBase(platform = PLATFORM) { return UIP_CONFIG.imgBase + platform + 
 // 이미지 파일 내용을 읽을 수 있나 — 중계(imgProxy)가 있거나, 이미지가 이 페이지와 같은 출처일 때(로컬 미리보기)만.
 // 회사 서버는 다른 사이트에서 파일을 읽어 가는 것을 허용하지 않아(CORS 헤더 없음) github.io·file:// 에서는 못 읽는다.
 function canReadImages() {
-  return !!UIP_CONFIG.imgProxy || (location.protocol !== 'file:' && !/^https?:\/\//i.test(UIP_CONFIG.imgBase));
+  if (UIP_CONFIG.imgProxy) return true;
+  if (location.protocol === 'file:') return false;
+  // 운영(회사 서버)·로컬 미리보기처럼 페이지와 이미지가 같은 서버면 읽을 수 있다
+  try { return new URL(UIP_CONFIG.imgBase, location.href).origin === location.origin; } catch { return false; }
 }
 
 // 파일로 바로 저장할 수 없을 때: 새 창 하나에 이미지를 모아 보여준다 (오른쪽 클릭 → 이미지를 다른 이름으로 저장).
@@ -1373,10 +1376,10 @@ function updateSelectBar() {
   }
 }
 
-// 선택 다운로드 — ZIP으로 묶지 않고 원래 파일명 그대로 저장한다.
-//  1) 이미지를 읽을 수 있으면(중계 있음·로컬 미리보기) — 크롬·엣지는 저장할 폴더를 한 번 고르면 그 폴더에 한꺼번에,
-//     그 외 브라우저는 한 장씩 순서대로 다운로드 (처음 한 번 '여러 파일 다운로드 허용' 필요)
-//  2) 못 읽으면(지금 github.io: 중계 없음) — 폴더를 묻지 않고 새 창 하나에 모아 보여준다 (오른쪽 클릭으로 저장)
+// 선택 다운로드 — 묶지 않고 원래 파일명 그대로, 선택한 것을 전부 한 번에 다운로드 폴더로 받는다.
+//  1) 이미지를 읽을 수 있으면(운영: 회사 서버 · 로컬 미리보기 · 중계 있음) — 차례로 바로 다운로드
+//     (브라우저가 처음 한 번 '여러 파일 다운로드 허용'을 묻는다)
+//  2) 못 읽으면(개발 기간 github.io: 이미지가 다른 서버) — 새 창 하나에 모아 보여준다 (오른쪽 클릭으로 저장)
 async function dlSelected() {
   const items = DISPLAY_DATA.filter(i => S.selected.has(i.path));
   if (!items.length) return;
@@ -1399,45 +1402,25 @@ async function dlSelected() {
     return res.blob();
   }
 
-  let dir = null;
-  if (window.showDirectoryPicker) {
-    try { dir = await window.showDirectoryPicker({ id: 'uip-download', mode: 'readwrite' }); }
-    catch (e) {
-      if (e.name === 'AbortError') return;   // 폴더 선택 취소 → 아무것도 안 함
-      dir = null;                            // 바탕화면·다운로드 같은 최상위 폴더는 크롬이 막는다 → 한 장씩 다운로드로
-      showToast('그 폴더는 브라우저가 막아요. 한 장씩 다운로드할게요 (다음엔 그 안의 폴더를 골라 주세요)');
-    }
-  }
-
   if (btn) btn.disabled = true;
-  let i = 0;
-  try {
-    for (; i < cnt; i++) {
-      const item = items[i];
-      if (btn) btn.innerHTML = `${DL_SVG_SM} ${i + 1} / ${cnt} 저장 중`;
-      const blob = await getBlob(item);
-      if (dir) {
-        const fh = await dir.getFileHandle(fileName(item), { create: true });
-        const w = await fh.createWritable();
-        await w.write(blob);
-        await w.close();
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = fileName(item);
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 3000);
-        if (i < cnt - 1) await new Promise(r => setTimeout(r, 300));
-      }
-    }
-    aTrack('download', { count: cnt });
-    showToast(dir ? `${cnt}개를 '${dir.name}' 폴더에 저장했어요` : `${cnt}개 다운로드 완료`);
-  } catch {
-    // 중계 실패: 저장한 것까지만 세고, 남은 이미지는 새 창 하나에 모아 보여준다
-    if (i > 0) aTrack('download', { count: i });
-    const rest = items.slice(i);
-    if (openImagesWindow(rest)) showToast(`${i}개 저장 · 남은 ${rest.length}장은 새 창에 열었어요. 오른쪽 클릭해 저장하세요`);
+  if (cnt > 1) showToast(`${cnt}장을 다운로드 폴더로 받아요. '여러 파일 다운로드'를 물으면 허용해 주세요`);
+  const failed = [];
+  for (let i = 0; i < cnt; i++) {
+    const item = items[i];
+    if (btn) btn.innerHTML = `${DL_SVG_SM} ${i + 1} / ${cnt} 받는 중`;
+    try {
+      const url = URL.createObjectURL(await getBlob(item));
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName(item);
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    } catch { failed.push(item); }
+    if (i < cnt - 1) await new Promise(r => setTimeout(r, 250));   // 한꺼번에 몰아치면 브라우저가 일부를 빠뜨린다
   }
+  aTrack('download', { count: cnt - failed.length });
+  // 두 번째 파일부터는 브라우저가 사이트마다 처음 한 번 '자동 다운로드 허용'을 묻는다 (주소창 오른쪽)
+  if (!failed.length) showToast(cnt > 1 ? `${cnt}장 다운로드 완료 · 빠진 파일이 있으면 주소창 오른쪽에서 '자동 다운로드 허용'을 눌러 주세요` : `${cnt}장 다운로드 완료`);
+  else if (openImagesWindow(failed)) showToast(`${cnt - failed.length}장 받음 · 못 받은 ${failed.length}장은 새 창에 열었어요`);
   if (btn) btn.disabled = false;
   finish();
 }
