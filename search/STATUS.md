@@ -1,24 +1,17 @@
-# 자연어 검색 + GitHub 운영 — 진행 상황 (2026-10-23 중단)
+# 자연어 검색 (MCP) — 진행 상황 (2026-10-26)
 
-목표: "바텀시트에 '선택 안 함' 버튼이 있는 UI 찾아줘" 같은 질문을 Claude 프롬프트로 처리하고,
-uipatterns 를 GitHub 비공개 저장소(luvms012-rgb/uipatterns)로 운영. 이미지는 회사 서버에만 둔다.
-
-## 방식
-- 화면 텍스트: Windows 내장 OCR(한국어, 무료·오프라인)로 전 화면 텍스트+세로 위치(y 0~1000)를 뽑아 `search/ocr/{mo|web}/w*.jsonl` 에 저장
-- 검색: `search/find.js` 로 카테고리·서비스·업종·패턴명·텍스트·위치(top/bottom) 조건 검색
-- 확인: 후보를 `search/montage.ps1` 몽타주로 묶어 Claude 가 실제 화면을 보고 거른다 (바텀시트 여부, 재고 부족 표현 등)
-- 비교/페르소나/유사 이미지: Claude 가 find.js 통계 + 대표 화면 몽타주로 판단 (첨부 이미지는 Claude 가 보고 카테고리·텍스트 조건으로 바꿔 검색)
+목표: "바텀시트에 '선택 안 함' 버튼이 있는 UI 찾아줘" 같은 질문을 팀원 누구나 자기 Claude 에서 — 원격 MCP 서버 (HANDOFF.md §5).
+구성·사용법은 `mcp/README.md`.
 
 ## 완료
-- `search/ocr.ps1` (작업자 1개, 이어하기 지원, `-Minutes` 시간 제한), `search/run-ocr.ps1` / `run-ocr.bat` (작업자 12개 동시)
-- OCR 1차 실행: 2026-10-23 58분 제한으로 실행 (작업자 12개, 처음 5분 약 7,300장). 중간 확인 시점 mo 14,975장 / web 9장 완료 — 작업자는 mo → web 순서라 web 은 거의 남아 있음. 남은 건 `run-ocr.bat` 다시 실행하면 이어서 처리 (처리 수 확인: `search/ocr/{mo|web}/*.jsonl` 줄 수 합계, 전체 대상 mo 57,263 / web 약 26,700)
-- `search/find.js` 초안, `search/montage.ps1` 초안 (`--html` 결과 페이지, `--montage` 몽타주)
+- `search/ocr.ps1`: 저장 형식 수정(줄 1개·배열 감싸기 문제), 대상 목록을 `data.js`에서 읽도록 수정. 기존 결과 17,734줄 변환
+- OCR 2차 실행: 2026-10-26 60분 제한, 작업자 12개 → mo 57,262/57,263 · web 25,874/26,105 (남은 web 231장은 `run-ocr.bat` 다시 실행하면 이어서)
+- `search/build-index.js`: 검색 데이터(SQLite + 글자 전문 검색 색인) 생성 → `search/dist/` (저장소 제외, 약 160MB)
+- `mcp/`: 검색 도구 4개(search_screens · list_filters · service_overview · get_screen), Cloudflare Worker 서버, 로컬 stdio 서버
+- 로컬 확인 (전체 데이터): 바텀시트 "선택 안 함" 21장 · "더보기" 4,917장 · 장바구니 품절/재고 54장 · 에어비앤비 vs 부킹닷컴 비교 · 모빌리티 메인 368장. Worker 계산 6ms 이하. Worker HTTP 처리 가짜 D1 로 확인
+- 알려진 한계: 글자를 이어 붙여 찾으므로 "잠재고객"이 "재고"로 걸리는 식의 오탐이 있음 — Claude 가 결과 글자를 보고 거른다
 
 ## 다음 할 일
-1. find.js 버그: OCR 결과 줄이 1개뿐인 화면은 PowerShell ConvertTo-Json 이 `l` 을 펼쳐 저장해 `r.ocr.l.map` 에서 오류 → 읽을 때 형식 보정 (ocr.ps1 도 `-InputObject` 로 저장하도록 수정)
-2. montage.ps1 실제 실행 확인
-3. `uipatterns/CLAUDE.md` + `.claude/skills/uipatterns-search/SKILL.md` — 질문 유형별 검색 절차
-4. `.gitignore` (png/jpg·icons·backups·(업데이트)·(업로드)·로그·zip·.tools·search/results·search/ocr/logs), `git init`, 첫 커밋
-5. GitHub 웹에서 비공개 빈 저장소 `uipatterns` 생성(사용자) → remote 연결·푸시
-6. 예시 질문 6개로 검증, GUIDE.md 에 검색·저장소 절 추가 (GUIDE 의 작업 폴더 경로 `Desktop\ing` → `Desktop\works` 로 고칠 것)
-- 참고: `mo/backups/classify-local_v2_20260820.js` 에 `sk-ant` 문자열이 있음 — backups 는 git 제외라 올라가지 않지만 내용 확인 필요
+1. Cloudflare 가입(사용자) → D1 생성·데이터 올리기·배포 → 팀원 커넥터 연결 (mcp/README.md)
+2. `업데이트.bat` 에 새 이미지 OCR + 검색 데이터 갱신 붙이기
+3. 컴포넌트(캡처 개선), 사이트 `#img=` 딥링크, 비슷한 화면(임베딩)

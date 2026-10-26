@@ -26,6 +26,8 @@ api-key.txt
 # 검색 정보 생성 중간 결과 (OCR 원본·로그·검색 결과)
 /search/ocr/
 /search/results/
+# 검색 데이터 (생성물) — 저장소에 올릴지 정하기 전까지 제외
+/search/dist/
 
 Thumbs.db
 .DS_Store

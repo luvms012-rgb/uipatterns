@@ -58,6 +58,15 @@ function Read-Image([string]$full) {
   } finally { $stream.Dispose() }
 }
 
+# 한 줄 JSON 을 직접 만든다 — PowerShell 5.1 ConvertTo-Json 은 배열 속 배열을 {"value":..,"Count":..} 로 감싸거나
+# 줄이 1개일 때 펼쳐버려서 형식이 깨진다
+function Str([string]$s) { ConvertTo-Json -InputObject $s -Compress }
+function To-JsonLine([string]$p, $r) {
+  if ($r.err) { return '{"p":' + (Str $p) + ',"err":' + (Str $r.err) + '}' }
+  $ls = foreach ($x in $r.l) { '[' + [int]$x[0] + ',' + (Str ([string]$x[1])) + ']' }
+  return '{"p":' + (Str $p) + ',"w":' + $r.w + ',"h":' + $r.h + ',"l":[' + ($ls -join ',') + ']}'
+}
+
 $deadline = if ($Minutes -gt 0) { (Get-Date).AddMinutes($Minutes) } else { [datetime]::MaxValue }
 $total = 0
 foreach ($site in $Sites) {
@@ -66,8 +75,8 @@ foreach ($site in $Sites) {
   New-Item -ItemType Directory -Force $outDir | Out-Null
   $outFile = Join-Path $outDir ("w{0}.jsonl" -f $Worker)
 
-  # 대상 = index.html DATA 의 path (사이트에 실제로 노출되는 화면만)
-  $html = [IO.File]::ReadAllText((Join-Path $siteDir 'index.html'), $utf8)
+  # 대상 = data.js DATA 의 path (사이트에 실제로 노출되는 화면만)
+  $html = [IO.File]::ReadAllText((Join-Path $siteDir 'data.js'), $utf8)
   $paths = [regex]::Matches($html, '"path":\s*"([^"]+)"') | ForEach-Object { $_.Groups[1].Value }
 
   $done = New-Object 'System.Collections.Generic.HashSet[string]'
@@ -92,13 +101,8 @@ foreach ($site in $Sites) {
     if ((Get-Date) -gt $deadline) { break }
     $full = Join-Path $siteDir ($p -replace '/', '\')
     if (-not (Test-Path -LiteralPath $full)) { continue }
-    try {
-      $r = Read-Image $full
-      $obj = [ordered]@{ p = $p; w = $r.w; h = $r.h; l = @($r.l) }
-    } catch {
-      $obj = [ordered]@{ p = $p; err = $_.Exception.Message }
-    }
-    [void]$buf.AppendLine(($obj | ConvertTo-Json -Compress -Depth 4))
+    try { $r = Read-Image $full } catch { $r = @{ err = $_.Exception.Message } }
+    [void]$buf.AppendLine((To-JsonLine $p $r))
     $n++
     if ($n % 25 -eq 0) { [IO.File]::AppendAllText($outFile, $buf.ToString(), $utf8); [void]$buf.Clear() }
   }

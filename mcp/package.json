@@ -1,0 +1,6 @@
+{
+  "name": "uipatterns-mcp",
+  "private": true,
+  "type": "module",
+  "description": "UI Patterns 화면 검색 MCP 서버 (Cloudflare Worker + D1)"
+}

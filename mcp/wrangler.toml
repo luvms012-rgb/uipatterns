@@ -1,0 +1,9 @@
+name = "uipatterns-mcp"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+
+# 검색 데이터 — Cloudflare D1. database_id 는 `npx wrangler d1 create uipatterns` 결과로 바꾼다 (mcp/README.md)
+[[d1_databases]]
+binding = "DB"
+database_name = "uipatterns"
+database_id = "00000000-0000-0000-0000-000000000000"
