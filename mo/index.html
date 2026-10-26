@@ -816,8 +816,9 @@
   <nav class="hdr-tabs">
     <button class="hdr-tab active" onclick="switchTab('mobile',this)">모바일</button>
     <button class="hdr-tab" onclick="location.href='../web/index.html'">웹사이트</button>
-    <div class="hdr-divider"></div>
-    <button class="hdr-tab" onclick="openDashboard()">사용 현황</button>
+    <!-- 사용 현황: 2026-10-26 숨김 (안 씀). 다시 쓰려면 아래 두 줄의 style="display:none" 만 지우면 됨 -->
+    <div class="hdr-divider" style="display:none"></div>
+    <button class="hdr-tab" onclick="openDashboard()" style="display:none">사용 현황</button>
   </nav>
   <div class="hdr-right">
     <div class="hdr-search-wrap">
@@ -843,7 +844,7 @@
       </div>
       <button class="sb-mobile-tab active" onclick="switchTab('mobile',this);closeSidebar()">모바일</button>
       <button class="sb-mobile-tab" onclick="location.href='../web/index.html'">웹사이트</button>
-      <button class="sb-mobile-tab" onclick="openDashboard();closeSidebar()">사용 현황</button>
+      <button class="sb-mobile-tab" onclick="openDashboard();closeSidebar()" style="display:none">사용 현황</button>
     </div>
     <div id="cat-rows"></div>
   </aside>
