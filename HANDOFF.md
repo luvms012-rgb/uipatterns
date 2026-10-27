@@ -61,6 +61,7 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 
 ### 사용자가 직접
 1. **10/27 zip 3개 회사 서버 업로드** — `mo/(업로드)/20261027_1.zip`·`20261027_2.zip` (트립스토어 263장 + 아이콘), `web/(업로드)/20261027.zip` (대한항공 104장 + 아이콘) → 점검 <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261027> · <https://luvms012-rgb.github.io/uipatterns/web/?check=20261027>. 10/26 Npay 증권은 올라가 있음(확인함)
+   - 같이 올릴 것: `mo/(업로드)/20260825_네이버페이.zip` — 8/25 네이버페이 36장이 서버에 빠져 엑박 (계좌·메인·글쓰기 등). 올린 뒤 <https://luvms012-rgb.github.io/uipatterns/mo/?check=20260825>
 2. **캡처 스킬 문구 반영**: claude.ai 설정 → 스킬 → uipatterns-capture 를 회사 PC `Desktop\works\uipatterns-capture-SKILL.md` 내용으로 (zip 은 이미지만, 마무리에 `업데이트.bat` 안내)
 
 ### 이어서 할 작업
