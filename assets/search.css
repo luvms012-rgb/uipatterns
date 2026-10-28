@@ -12,10 +12,5 @@
 .ac-ic { width: 16px; display: flex; justify-content: center; color: var(--text-3); flex-shrink: 0; }
 .ac-title { flex: 1; min-width: 0; font-size: 14px; font-weight: 400; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ac-title b { font-weight: 700; color: var(--text-1); }
-.ac-sub { margin-left: 6px; font-size: 12px; color: var(--text-3); }
 .ac-cnt { flex-shrink: 0; font-size: 12px; color: var(--text-3); }
 .ac-empty { padding: 18px 16px; font-size: 13px; color: var(--text-3); }
-.ac-foot {
-  display: flex; justify-content: space-between; padding: 8px 16px;
-  border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3);
-}

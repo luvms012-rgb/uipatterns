@@ -124,7 +124,8 @@ function setToolbarTitle(html) {
 }
 
 // ── 검색 자동완성 — 시안 A "추천 검색어 중심" (2026-10-28 결정) ──────────────
-// 종류 제목 없이 한 목록, 최대 6줄: ① 카테고리(모바일·웹 개수를 한 줄에) ② 서비스 ③ 이어지는 검색어
+// 종류 제목·종류 글자·아래 안내 없이 한 목록(종류는 아이콘으로만 구분), 최대 6줄:
+// ① 카테고리(모바일·웹 개수를 한 줄에) ② 서비스 ③ 이어지는 검색어
 // (화면 이름 — 같은 이름은 서비스가 달라도 한 줄로 합치고 화면 수). 입력한 글자는 보통 굵기, 이어지는 말만 굵게.
 // 아이콘은 그림 기호만 쓴다 — 입력할 때마다 회사 서버 이미지를 부르지 않도록 (웹방화벽)
 const AC_MAX = 6;
@@ -174,7 +175,7 @@ function buildAutocomplete(q) {
     catMap.set(k, e);
   }
   for (const e of [...catMap.values()].slice(0, 2)) rows.push({
-    icon: 'cat', title: acBold(e.label, q), sub: '카테고리', cnt: acCounts(e.n),
+    icon: 'cat', title: acBold(e.label, q), cnt: acCounts(e.n),
     pick: () => e.mine ? searchSelectCat(encodeURIComponent(e.mine)) : crossSearchSelectCat(other, encodeURIComponent(e.theirs)),
   });
 
@@ -192,7 +193,7 @@ function buildAutocomplete(q) {
   }
   const svcs = [...svcMap.values()].sort((a, b) => (normCat(a.svc) === nq ? -1 : 0) - (normCat(b.svc) === nq ? -1 : 0) || sortMixed(a.svc, b.svc));
   for (const e of svcs.slice(0, 2)) rows.push({
-    icon: 'svc', title: acBold(e.svc, q), sub: '서비스', cnt: acCounts(e.n),
+    icon: 'svc', title: acBold(e.svc, q), cnt: acCounts(e.n),
     pick: () => e.theirsOnly ? crossSearchSelectSvc(other, encodeURIComponent(e.svc)) : searchSelectSvc(encodeURIComponent(e.svc)),
   });
 
@@ -212,14 +213,13 @@ function buildAutocomplete(q) {
   });
 
   AC.rows = rows; AC.active = -1;
-  const foot = `<div class="ac-foot"><span>↑↓ 이동</span><span>Enter 전체 결과</span></div>`;
-  if (!rows.length) return `<div class="ac-empty">'${acEsc(q)}'와 이름이 맞는 항목이 없어요</div>` + foot;
+  if (!rows.length) return `<div class="ac-empty">'${acEsc(q)}'와 이름이 맞는 항목이 없어요</div>`;
   return `<div class="ac-list">` + rows.map((r, i) => `
     <div class="ac-row" data-i="${i}" onmousedown="event.preventDefault()" onmouseenter="acSetActive(${i})" onclick="acPick(${i})">
       <span class="ac-ic">${AC_SVG[r.icon]}</span>
-      <span class="ac-title">${r.title}${r.sub ? `<span class="ac-sub">${r.sub}</span>` : ''}</span>
+      <span class="ac-title">${r.title}</span>
       <span class="ac-cnt">${r.cnt || ''}</span>
-    </div>`).join('') + `</div>` + foot;
+    </div>`).join('') + `</div>`;
 }
 
 function acSetActive(i) {
