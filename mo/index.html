@@ -27,6 +27,7 @@
   @media (max-width: 360px) { :root { --grid-cols: 2; } }
 </style>
 <link rel="stylesheet" href="../assets/sidebar.css">
+<link rel="stylesheet" href="../assets/search.css">
 </head>
 <body>
 
@@ -48,7 +49,7 @@
   <div class="hdr-right">
     <div class="hdr-search-wrap">
       <i data-lucide="search" class="hdr-search-icon" width="14" height="14"></i>
-      <input class="hdr-search" id="hdrSearchInput" type="text" placeholder="패턴 검색"
+      <input class="hdr-search" id="hdrSearchInput" type="text" placeholder="패턴, 서비스 검색"
         oninput="onSearchInput(this.value)"
         onfocus="onSearchInput(this.value)"
         onkeydown="onSearchKey(event)" autocomplete="off" />
@@ -138,6 +139,7 @@
 <script src="icons.js"></script>
 <script src="taxonomy.js"></script>
 <script src="../assets/sidebar.js"></script>
+<script src="../assets/search.js"></script>
 <script>
 window.DATA = DATA;
 
@@ -154,7 +156,7 @@ const ALL_CATS = [...new Set(DISPLAY_DATA.map(i => i.category))].sort(sortMixed)
 const CAT_COUNTS = {};
 DISPLAY_DATA.forEach(i => { CAT_COUNTS[i.category] = (CAT_COUNTS[i.category]||0)+1; });
 
-const S = { checked: new Set(), checkedComps: new Set(), checkedTypes: new Set(), selected: new Set(), view: 'index', svc: null };
+const S = { checked: new Set(), checkedComps: new Set(), checkedTypes: new Set(), selected: new Set(), view: 'index', svc: null, q: '' };
 
 // SVC_TYPES에 없는 새 서비스는 '미분류'로 자동 분류 (수동 매핑 전까지 사이드바에 자동 노출)
 const UNCLASSIFIED = '미분류';
@@ -329,7 +331,8 @@ function onSearchInput(v) {
   if (!crossSearchIndex) {
     loadCrossSearchIndex().then(() => {
       const cur = document.getElementById('hdrSearchInput');
-      if (cur && cur.value.trim() === q) onSearchInput(q);
+      // 검색창에 커서가 있을 때만 (엔터로 결과 페이지로 넘어간 뒤 드롭다운이 다시 열리지 않도록)
+      if (cur && cur.value.trim() === q && document.activeElement === cur) onSearchInput(q);
     });
   }
 
@@ -439,6 +442,11 @@ function onSearchInput(v) {
     html += `</div>`;
   }
 
+  // 맨 위: 결과가 많아 드롭다운이 길어져도 보이도록
+  html = `<div class="sd-section"><div class="sd-row sd-enter" onclick="runSearch(document.getElementById('hdrSearchInput').value)">
+    <div class="sd-icon">${SEARCH_SVG}</div><div class="sd-body"><div class="sd-title">엔터로 전체 결과 보기</div></div><kbd>Enter</kbd>
+  </div></div>` + html;
+
   drop.innerHTML = html;
   drop.classList.add('open');
 }
@@ -448,6 +456,7 @@ function closeSearchDrop() {
 }
 
 function onSearchKey(e) {
+  if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); runSearch(e.target.value); return; }
   if (e.key === 'Escape') {
     closeSearchDrop();
     e.target.blur();
@@ -685,6 +694,10 @@ function render() {
     </div>`;
     return;
   }
+
+  // ── 검색 결과: 검색창에서 엔터 (../assets/search.js) ─────────────────────
+  if (S.view === 'search' && S.q) { renderSearch(); return; }
+  setToolbarTitle(null);
 
   // ── 디테일 모드: 선택된 서비스의 전체 스크린 ─────────────────────────────
   if (S.view === 'detail' && S.svc) {
@@ -1029,6 +1042,7 @@ function syncUrl() {
   if (S.checkedComps.size) params.set('comp', [...S.checkedComps].join(','));
   if (S.checkedTypes.size) params.set('type', [...S.checkedTypes].join(','));
   if (S.view === 'detail' && S.svc) params.set('svc', S.svc);
+  if (S.view === 'search' && S.q)   params.set('q', S.q);
   const qs = params.toString();
   history.replaceState(null, '', qs ? '#' + qs : location.pathname + location.search);
 }
@@ -1042,10 +1056,12 @@ function readUrl() {
     const comp = params.get('comp');
     const type = params.get('type');
     const svc  = params.get('svc');
+    const q    = params.get('q');
     if (cat)  cat.split(',').forEach(c => { if (c && ALL_CATS.includes(c)) S.checked.add(c); });
     if (comp) comp.split(',').forEach(c => { if (c && COMPONENTS.includes(c)) S.checkedComps.add(c); });
     if (type) type.split(',').forEach(t => { if (t) S.checkedTypes.add(t); });
     if (svc)  { S.view = 'detail'; S.svc = svc.trim().normalize('NFC'); }
+    if (q && q.trim()) { S.view = 'search'; S.q = q.trim(); document.getElementById('hdrSearchInput').value = S.q; }
   } catch(e) {}
 }
 

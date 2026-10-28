@@ -1,0 +1,13 @@
+/* 검색 결과 페이지 (mo/web 공용) — 시안 1 */
+.sr-sec { margin-top: 56px; }
+.sr-sec.first { margin-top: 0; }
+.sr-sec-hdr { display: flex; align-items: baseline; gap: 10px; margin-bottom: 24px; }
+.sr-sec-title { font-size: 18px; font-weight: 700; color: var(--text-1); }
+.sr-sec-cnt { font-size: 14px; color: var(--text-3); }
+
+/* 검색 드롭다운 맨 아래 "엔터로 전체 결과 보기" */
+.sd-enter .sd-title { color: var(--text-2); }
+.sd-enter kbd {
+  margin-left: auto; padding: 1px 6px; border: 1px solid var(--border); border-radius: 4px;
+  font: inherit; font-size: 11px; color: var(--text-3);
+}
