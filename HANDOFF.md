@@ -34,7 +34,7 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 | 항목 | 내용 |
 |---|---|
 | 운영 계획 | **최종: 회사 서버** `imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/` · 지금은 개발 기간 → <https://luvms012-rgb.github.io/uipatterns/> |
-| 데이터 | mo 57,526장 · web 26,481장 (10/26 Npay 증권 272장, 10/27 트립스토어 263장·대한항공 104장 추가) |
+| 데이터 | mo 57,534장 · web 26,712장 (10/26 Npay 증권 272장, 10/27 트립스토어 263장·대한항공 104장, 10/28 삼성생명다이렉트 231장·퍼블리 8장 추가) |
 | 화면 글자(OCR) | 전 화면 완료 (mo 1장 오류) — 회사 PC `search/ocr/` |
 | 컴포넌트 | 10/26 이후 캡처분만 (Npay 증권 213장) → `web/components.json` → `data.js` comps |
 | 자연어 검색 | 회사 PC 로컬 MCP 서버 등록됨 (`claude mcp` 이름 `uipatterns`) — 새 대화에서 "uipatterns 에서 ~ 찾아줘" |
@@ -54,14 +54,20 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 3. 새 uibowl 카테고리를 기존 폴더로 합침 (`uibowl-category-map.json`, 사용자 결정 "기존 폴더로 합치기"): mo 기획전·이벤트→혜택 · 지도뷰·내주변→내주변 · 목록 (PLP)→상품목록 · 상세정보 (PDP)→상품목록 · 탐색→큐레이션 · 크로스셀링·업셀링→추천 / web 라이브·플레이어→뷰어
 4. web Npay 증권(10/26) 회사 서버 업로드 확인 (2장 크기 일치)
 
+10/28 회사에서 한 일:
+1. 캡처: **삼성생명다이렉트(web) 231장** → 분류 231 (영상 6개는 가운데 장면 PNG), 컴포넌트 118장 / **퍼블리(mo) 13장** → 분류 8 · 앱스토어 홍보 컷 5 제외, 컴포넌트 8장
+2. **캡처 방식 변경**: 브라우저에서 파일을 내려받지 않는다 (내장 브라우저에서 다운로드 창이 수십 개 떠 PC 재부팅 — 사용자 "다신 이렇게 하지 말 것"). 브라우저는 이미지 주소 목록만 읽고, 내려받기는 node 가 주소로 직접, 영상 장면은 Windows 내장 미디어 기능으로. 그 뒤 `capture-import.js --downloads <폴더>` 부터는 그대로
+3. 10/27 zip·8/25 네이버페이 이미지 회사 서버에 올라가 있음 확인 (크기 일치) — 예전 zip 은 새 zip 만들 때 지워짐
+4. **검색 시안** `mockups/search.html` — 사용자 결정: 시안 1 ("장바구니" 검색 → 장바구니 카테고리 화면 전체가 스크롤로 이어짐, 칩·탭·설명 없음). 데이터는 `mockups/search-data.js` (검색 데이터에서 뽑은 고정값)
+5. **ybm-ds 치환 1단계: 공통 CSS 분리** — mo/web `index.html` 에 두 벌 있던 CSS 를 `assets/site.css` 하나로. 사이트마다 다른 값(열 수·화면 비율·자르기 기준·크게 보기 크기)만 각 `index.html` 의 `:root` 변수로 남김. 전후 계산된 스타일 비교로 화면 같음 확인. 다음은 사이트 색·글자·간격 변수를 ybm-ds 토큰에 연결
+
 ## 2. 결정사항
 → [CLAUDE.md](CLAUDE.md) "결정사항" (바꾸지 말 것). 10/26 새로 정해진 것: 최종 운영은 회사 서버 · Cloudflare 가입 불가 · 사용 현황 안 씀 · 다운로드는 묶지 않고 전부
 
 ## 3. 남은 일
 
 ### 사용자가 직접
-1. **10/27 zip 3개 회사 서버 업로드** — `mo/(업로드)/20261027_1.zip`·`20261027_2.zip` (트립스토어 263장 + 아이콘), `web/(업로드)/20261027.zip` (대한항공 104장 + 아이콘) → 점검 <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261027> · <https://luvms012-rgb.github.io/uipatterns/web/?check=20261027>. 10/26 Npay 증권은 올라가 있음(확인함)
-   - 같이 올릴 것: `mo/(업로드)/20260825_네이버페이.zip` — 8/25 네이버페이 36장이 서버에 빠져 엑박 (계좌·메인·글쓰기 등). 올린 뒤 <https://luvms012-rgb.github.io/uipatterns/mo/?check=20260825>
+1. **10/28 zip 2개 회사 서버 업로드** — `web/(업로드)/20261028.zip` (삼성생명다이렉트 231장 + 아이콘, 13.7MB), `mo/(업로드)/20261028.zip` (퍼블리 8장 + 아이콘) → 먼저 `업데이트.bat`, 올린 뒤 점검 <https://luvms012-rgb.github.io/uipatterns/web/?check=20261028> · <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261028>
 2. **캡처 스킬 문구 반영**: claude.ai 설정 → 스킬 → uipatterns-capture 를 회사 PC `Desktop\works\uipatterns-capture-SKILL.md` 내용으로 (zip 은 이미지만, 마무리에 `업데이트.bat` 안내)
 
 ### 이어서 할 작업

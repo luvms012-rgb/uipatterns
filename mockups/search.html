@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>검색 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<!-- 사이트 CSS 를 그대로 쓴다: 공통 CSS + 사이드바 CSS, 사이트별 값은 mo 와 같게 -->
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/sidebar.css">
+<style>
+  :root { --grid-cols: 5; --shot-ratio: 375/812; --shot-h: 642px; --shot-pos: 50% 50%; --lb-max-w: 420px; --lb-max-h: 80vh; --dash-cols: 3; }
+  /* ── 시안에서 새로 필요한 것만 (sx-) ── */
+  .sx-switch {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 500;
+    display: flex; gap: 4px; padding: 6px; background: #1a1b20; border: 1px solid var(--border);
+    border-radius: 999px; box-shadow: 0 12px 32px rgba(0,0,0,.5);
+  }
+  .sx-switch button {
+    height: 40px; padding: 0 18px; border: none; border-radius: 999px; background: transparent;
+    color: var(--text-2); font: 600 14px/1 inherit; font-family: inherit; cursor: pointer;
+  }
+  .sx-switch button.on { background: var(--accent); color: #fff; }
+  .sx-note { margin: 4px 0 0; font-size: 14px; color: var(--text-3); }
+
+  .sx-tabs { display: flex; gap: 24px; margin-top: 20px; border-bottom: 1px solid var(--border); }
+  .sx-tab { padding: 0 2px 12px; font-size: 15px; font-weight: 600; color: var(--text-3); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; }
+  .sx-tab b { margin-left: 6px; font-weight: 600; color: var(--text-3); }
+  .sx-tab.on { color: var(--text-1); border-color: var(--text-1); }
+  .sx-tab.on b { color: var(--accent); }
+  .sx-tab.zero { opacity: .4; cursor: default; }
+
+  .sx-bar { display: flex; align-items: center; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+  .sx-bar .sp { flex: 1; }
+  .sx-seg { display: inline-flex; background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+  .sx-seg span { height: 30px; padding: 0 12px; display: inline-flex; align-items: center; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--text-3); cursor: pointer; }
+  .sx-seg span.on { background: #2c2e38; color: var(--text-1); }
+  .sx-pill { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: var(--bg-card); border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; white-space: nowrap; }
+  .sx-pill b { font-weight: 500; color: var(--text-3); }
+  .sx-pill.on { background: rgba(49,130,246,.14); border-color: rgba(49,130,246,.5); color: #8db8ff; }
+  .sx-pill.dash { border-style: dashed; }
+
+  .sx-sec { margin-top: 40px; }
+  .sx-sec-hdr { display: flex; align-items: baseline; gap: 10px; }
+  .sx-sec-title { font-size: 18px; font-weight: 700; }
+  .sx-sec-cnt { font-size: 14px; color: var(--text-3); }
+  .sx-more { margin-left: auto; font-size: 14px; color: var(--text-2); cursor: pointer; }
+  .sx-more:hover { color: var(--text-1); }
+
+  .sx-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 40px 32px; margin-top: 24px; }
+  .sx-grid > * { min-width: 0; }
+  .sx-cap { margin-top: 12px; }
+  .sx-cap-svc { font-size: 14px; font-weight: 700; color: var(--text-1); }
+  .sx-cap-cat { font-size: 13px; color: var(--text-3); margin-left: 6px; font-weight: 500; }
+  .sx-snip { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .sx-snip mark { background: rgba(49,130,246,.22); color: #8db8ff; font-weight: 700; border-radius: 3px; padding: 0 2px; }
+  .sx-hl { position: absolute; left: 4%; right: 4%; height: 5.2%; transform: translateY(-50%); border: 2px solid var(--accent); border-radius: 6px; background: rgba(49,130,246,.12); box-shadow: 0 0 0 9999px rgba(0,0,0,.28); z-index: 5; pointer-events: none; }
+  .sx-pos { position: absolute; right: 10px; bottom: 10px; z-index: 6; font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,.6); padding: 3px 8px; border-radius: 999px; }
+
+  .sx-chip-k { font-weight: 500; color: #6b6d7e; margin-right: 2px; }
+  .sx-add { position: relative; }
+  .sx-menu { position: absolute; top: calc(100% + 8px); left: 0; width: 240px; background: #1a1b20; border: 1px solid var(--border); border-radius: 14px; padding: 6px 0; box-shadow: 0 12px 32px rgba(0,0,0,.5); z-index: 50; }
+  .sx-menu .sd-row { padding: 9px 16px; }
+  .sx-funnel { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 14px; color: var(--text-3); flex-wrap: wrap; }
+  .sx-funnel b { color: var(--text-1); font-weight: 700; }
+  .sx-funnel .arr { color: var(--border); }
+  .sx-tag-new { font-size: 10px; font-weight: 700; color: var(--accent); background: rgba(49,130,246,.14); border: 1px solid rgba(49,130,246,.32); padding: 1px 6px; border-radius: 999px; margin-left: 6px; }
+  .sx-ac { width: 380px; }
+  #sxAc { display: none; }
+  .sx-show-ac #sxAc { display: block; }
+  .sx-sb-hint { margin: 4px 8px 0; padding: 10px 12px; border-radius: 10px; background: rgba(49,130,246,.1); color: #8db8ff; font-size: 12px; line-height: 1.5; }
+</style>
+<script src="search-data.js"></script>
+</head>
+<body>
+
+<header id="header">
+  <div class="logo">UI Patterns</div>
+  <nav class="hdr-tabs">
+    <button class="hdr-tab active">모바일</button>
+    <button class="hdr-tab">웹사이트</button>
+  </nav>
+  <div class="hdr-right">
+    <div class="hdr-search-wrap">
+      <span class="hdr-search-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+      <input class="hdr-search" id="sxQ" type="text" placeholder="패턴, 서비스, 화면 속 글자 검색" autocomplete="off" />
+      <div class="search-drop sx-ac" id="sxAc"></div>
+    </div>
+  </div>
+</header>
+
+<div id="app">
+  <aside id="sidebar"><div id="cat-rows"></div></aside>
+  <main id="main"><div id="sxMain"></div></main>
+</div>
+
+<div class="sx-switch">
+  <button data-v="1">시안 1  검색 결과 페이지</button>
+  <button data-v="2">시안 2  화면 속 글자</button>
+  <button data-v="3">시안 3  조건 칩 쌓기</button>
+</div>
+
+<script>
+// ── 고정 데이터 (시안용) ─────────────────────────────────────────
+const GROUPS = {
+  '진입': [['로그인·회원가입',2760],['온보딩',1487],['인증하기',979],['약관동의',685],['튜토리얼',597],['스플래시',200]],
+  '탐색': [['메인',4387],['필터',1372],['검색',1359],['북마크·위시리스트',1117],['큐레이션',1082],['뷰어',1024],['메뉴',929],['스토어',870]],
+  '거래': [['예약·결제',4321],['신청하기',2133],['조회하기',1069],['계좌',950],['간편결제',916],['취소하기',717],['선물하기',367],['장바구니',338]],
+  '관리': [['마이페이지',2657],['설정',2297],['내역',1534],['통계·리포트',897],['문의하기',886],['고객센터·FAQ',654],['알림',627],['공지사항',575]],
+};
+const INDS = [['금융',9586],['모빌리티',5623],['커머스',4957],['배달&음식&주류',4261],['도구',2856],['일상',2788],['교육&도서',2749]];
+const SVG_X = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+const SVG_CHK = '<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2 5 8.5l4.5-5"/></svg>';
+const SVG_CHEV = '<svg class="sb-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>';
+const SVG_RESET = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
+const SVG_PLUS = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const SVG_SEARCH = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+const SVG_TEXT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>';
+const SVG_GRID = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const img = p => '../mo/' + p.split('/').map(encodeURIComponent).join('/');
+const n = v => v.toLocaleString('ko-KR');
+const mark = (t, re) => esc(t).replace(re, m => '<mark>' + m + '</mark>');
+const posName = y => y < 350 ? '위' : y < 650 ? '가운데' : '아래';
+
+function row(label, cnt, on, disabled) {
+  return `<div class="cat-row${on ? ' on' : ''}${disabled ? ' disabled' : ''}"><div class="cb-box">${on ? SVG_CHK : ''}</div><span class="cat-label">${esc(label)}</span><span class="cat-cnt">(${n(cnt)})</span></div>`;
+}
+function grp(title, body, sub) {
+  return `<div class="sb-grp${sub ? ' sub' : ''}"><button class="sb-grp-hdr" aria-expanded="true"><span class="sb-grp-title">${title}</span>${SVG_CHEV}</button><div class="sb-grp-body">${body}</div></div>`;
+}
+// 사이드바: counts 가 있으면 그 개수로(없는 항목은 0, 흐리게), on 은 선택된 항목
+function sidebar(counts, onCat, onInd, indCounts, hint) {
+  let h = `<section class="sb-sec" data-sec="pat"><div class="sb-sec-hdr">UI 패턴</div>` + (hint || '');
+  for (const [g, list] of Object.entries(GROUPS)) {
+    h += grp(g, list.map(([c, v]) => { const k = counts ? (counts[c] || 0) : v; return row(c, k, c === onCat, counts && !k); }).join(''), true);
+  }
+  h += `</section><section class="sb-sec" data-sec="type">` + grp('카테고리 유형', INDS.map(([c, v]) => { const k = indCounts ? (indCounts[c] || 0) : v; return row(c, k, c === onInd, indCounts && !k); }).join('')) + `</section>`;
+  document.getElementById('cat-rows').innerHTML = h;
+}
+function card(it, opt) {
+  opt = opt || {};
+  const h = it.hits && it.hits[0];
+  const hl = opt.hl && h ? `<div class="sx-hl" style="top:${h.y / 10}%"></div><span class="sx-pos">${posName(h.y)}</span>` : '';
+  const snip = opt.snip && h ? `<div class="sx-snip">${mark(h.t, opt.re)}</div>` : '';
+  return `<div><div class="card"><div class="card-img-wrap"><img class="card-img loaded" src="${img(it.path)}" alt="" loading="lazy">${hl}</div></div>
+    <div class="sx-cap"><span class="sx-cap-svc">${esc(it.svc)}</span><span class="sx-cap-cat">${esc(it.cat)}</span></div>${snip}</div>`;
+}
+
+// ── 시안 1: 검색 결과 페이지 ("장바구니" 입력 후 엔터) ─────────────
+function v1() {
+  const D = MOCK.cart;
+  document.getElementById('sxQ').value = '장바구니';
+  sidebar();
+  document.getElementById('sxMain').innerHTML = `
+    <div id="toolbar"><span class="tb-title">'장바구니' 검색 결과</span></div>
+
+    <div class="sx-sec">
+      <div class="sx-sec-hdr"><span class="sx-sec-title">'장바구니' 카테고리</span><span class="sx-sec-cnt">${n(D.cat.n)}장</span></div>
+      <div class="sx-grid">${D.cat.items.map(it => card(Object.assign({ cat: '장바구니' }, it))).join('')}</div>
+    </div>
+
+    <div style="height:120px"></div>`;
+  // 드롭다운: 엔터 전 입력 중 모습 (검색창에 마우스를 올리면 보임)
+  document.getElementById('sxAc').innerHTML = `
+    <div class="sd-section"><div class="sd-label">카테고리</div>
+      <div class="sd-row"><div class="sd-icon">${SVG_GRID}</div><div class="sd-body"><div class="sd-title"><mark>장바구니</mark></div><div class="sd-sub">거래</div></div><span class="sd-cnt">${n(D.cat.n)}</span></div></div>
+    <div class="sd-section"><div class="sd-row"><div class="sd-icon">${SVG_SEARCH}</div><div class="sd-body"><div class="sd-title">엔터로 전체 결과 보기</div></div></div></div>`;
+}
+
+// ── 시안 2: 화면 속 글자 검색 ("품절") ─────────────────────────────
+function v2() {
+  const D = MOCK.sold, re = /품\s*절/g;
+  document.getElementById('sxQ').value = '품절';
+  sidebar(Object.fromEntries(D.byCat), null, null, Object.fromEntries(D.byInd));
+  document.getElementById('sxMain').innerHTML = `
+    <div id="toolbar"><span class="tb-title">화면 속 글자 '품절'</span><span class="sx-sec-cnt" style="margin-left:10px">${n(D.total)}장</span></div>
+    <p class="sx-note">카테고리 이름에 없어도, 화면에 그 글자가 적혀 있으면 찾습니다. 글자가 있는 줄을 이미지 위에 표시하고, 아래에 그 문장을 보여 줍니다.</p>
+    <div class="sx-bar">
+      <span style="font-size:13px;color:var(--text-3);margin-right:4px">글자 위치</span>
+      <span class="sx-seg"><span class="on">전체</span><span>위</span><span>가운데</span><span>아래</span></span>
+      <span style="width:16px"></span>
+      <span style="font-size:13px;color:var(--text-3);margin-right:4px">비슷한 말도 함께</span>
+      <span class="sx-pill on">일시품절</span><span class="sx-pill">재고 없음</span><span class="sx-pill">입고 알림</span><span class="sx-pill">판매 종료</span>
+      <span class="sp"></span>
+      <span class="sx-seg"><span class="on">화면별</span><span>서비스별</span></span>
+    </div>
+    <div class="sx-grid">${D.items.slice(0, 15).map(it => card(it, { hl: true, snip: true, re })).join('')}</div>
+    <div style="height:120px"></div>`;
+  document.getElementById('sxAc').innerHTML = '';
+}
+
+// ── 시안 3: 조건 칩 쌓기 (품절 + 커머스 + 예약·결제) ─────────────────
+function v3() {
+  const D = MOCK.chips, re = /품\s*절/g;
+  document.getElementById('sxQ').value = '';
+  const hint = `<div class="sx-sb-hint">지금 조건에서 나오는 개수입니다. 0개인 항목은 흐리게 바뀝니다.</div>`;
+  sidebar(Object.fromEntries(D.byCatInInd), '예약·결제', '커머스', { '커머스': D.afterInd }, hint);
+  document.getElementById('sxMain').innerHTML = `
+    <div id="toolbar"><span class="tb-title">모바일</span></div>
+    <div id="chips-row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="chip"><span class="sx-chip-k">글자</span>품절<span class="chip-x">${SVG_X}</span></span>
+      <span class="chip"><span class="sx-chip-k">업종</span>커머스<span class="chip-x">${SVG_X}</span></span>
+      <span class="chip"><span class="sx-chip-k">패턴</span>예약·결제<span class="chip-x">${SVG_X}</span></span>
+      <span class="sx-add">
+        <button class="chip-reset" style="border-style:dashed">${SVG_PLUS}조건 추가</button>
+        <div class="sx-menu">
+          <div class="sd-label" style="padding:8px 16px 6px">조건 종류</div>
+          <div class="sd-row"><div class="sd-icon">${SVG_TEXT}</div><div class="sd-body"><div class="sd-title">화면 속 글자</div><div class="sd-sub">한 번 더 좁히기, 예: 환불</div></div></div>
+          <div class="sd-row"><div class="sd-icon">${SVG_GRID}</div><div class="sd-body"><div class="sd-title">글자 위치</div><div class="sd-sub">위, 가운데, 아래</div></div></div>
+          <div class="sd-row"><div class="sd-icon">${SVG_GRID}</div><div class="sd-body"><div class="sd-title">컴포넌트<span class="sx-tag-new">일부</span></div><div class="sd-sub">바텀시트, 모달, 탭 등</div></div></div>
+          <div class="sd-row"><div class="sd-icon">${SVG_SEARCH}</div><div class="sd-body"><div class="sd-title">서비스</div><div class="sd-sub">무신사, 29cm 등</div></div></div>
+          <div class="sd-row"><div class="sd-icon">${SVG_TEXT}</div><div class="sd-body"><div class="sd-title">빼고 찾기</div><div class="sd-sub">이 글자가 있는 화면 제외</div></div></div>
+        </div>
+      </span>
+      <button class="chip-reset">${SVG_RESET}초기화</button>
+    </div>
+    <div class="sx-funnel">
+      <span>글자 '품절' <b>${n(MOCK.chips.totalText)}</b></span><span class="arr">›</span>
+      <span>커머스 <b>${n(D.afterInd)}</b></span><span class="arr">›</span>
+      <span>예약·결제 <b>${n(D.total)}</b>장</span>
+    </div>
+    <div class="sx-grid" style="margin-top:32px">${D.items.map(it => card(it, { hl: true, snip: true, re })).join('')}</div>
+    <div style="height:120px"></div>`;
+  document.getElementById('sxAc').innerHTML = '';
+}
+
+const VIEWS = { 1: v1, 2: v2, 3: v3 };
+function show(v) {
+  document.querySelectorAll('.sx-switch button').forEach(b => b.classList.toggle('on', b.dataset.v === String(v)));
+  document.body.classList.remove('sx-show-ac');
+  VIEWS[v]();
+  window.scrollTo(0, 0);
+  try { history.replaceState(null, '', '#v' + v); } catch (e) {}
+}
+document.querySelectorAll('.sx-switch button').forEach(b => b.onclick = () => show(b.dataset.v));
+// 시안 1 에서 검색창을 누르면 입력 중 드롭다운 모습
+document.getElementById('sxQ').addEventListener('focus', () => { if (document.getElementById('sxAc').innerHTML.trim()) document.body.classList.add('sx-show-ac'); });
+document.getElementById('sxQ').addEventListener('blur', () => document.body.classList.remove('sx-show-ac'));
+show((location.hash.match(/v(\d)/) || [0, 1])[1]);
+</script>
+</body>
+</html>
