@@ -59,7 +59,8 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 2. **캡처 방식 변경**: 브라우저에서 파일을 내려받지 않는다 (내장 브라우저에서 다운로드 창이 수십 개 떠 PC 재부팅 — 사용자 "다신 이렇게 하지 말 것"). 브라우저는 이미지 주소 목록만 읽고, 내려받기는 node 가 주소로 직접, 영상 장면은 Windows 내장 미디어 기능으로. 그 뒤 `capture-import.js --downloads <폴더>` 부터는 그대로
 3. 10/27 zip·8/25 네이버페이 이미지 회사 서버에 올라가 있음 확인 (크기 일치) — 예전 zip 은 새 zip 만들 때 지워짐
 4. **검색 시안** `mockups/search.html` — 사용자 결정: 시안 1 ("장바구니" 검색 → 장바구니 카테고리 화면 전체가 스크롤로 이어짐, 칩·탭·설명 없음). 데이터는 `mockups/search-data.js` (검색 데이터에서 뽑은 고정값)
-5. **ybm-ds 치환 1단계: 공통 CSS 분리** — mo/web `index.html` 에 두 벌 있던 CSS 를 `assets/site.css` 하나로. 사이트마다 다른 값(열 수·화면 비율·자르기 기준·크게 보기 크기)만 각 `index.html` 의 `:root` 변수로 남김. 전후 계산된 스타일 비교로 화면 같음 확인. 다음은 사이트 색·글자·간격 변수를 ybm-ds 토큰에 연결
+5. **ybm-ds 치환 1단계: 공통 CSS 분리** — mo/web `index.html` 에 두 벌 있던 CSS 를 `assets/site.css` 하나로. 사이트마다 다른 값(열 수·화면 비율·자르기 기준·크게 보기 크기)만 각 `index.html` 의 `:root` 변수로 남김. 전후 계산된 스타일 비교로 화면 같음 확인
+6. **ybm-ds 치환 2단계: 토큰 연결** — mo/web/시안 페이지가 ybm-ds CSS(`luvms012-rgb.github.io/ybm-ds/dist/ybm-ds.css`)를 불러오고 `<html data-theme="dark">`. `site.css` 의 사이트 색 변수 12개가 ybm-ds 다크 토큰을 가리킴 (바탕 bg-canvas, 카드 bg-layer-default, 글자 fg-neutral/muted/subtle, 강조 bg-brand-solid 등). 글꼴은 ybm-ds 의 Pretendard (CDN 글꼴 링크 삭제). 줄 높이는 사이트 값 유지 → 요소 위치·크기 전후 같음 확인. 남은 것: `site.css`·`sidebar.css` 에 직접 적힌 색 → 토큰, 글자 크기·간격 토큰, 부품 교체
 
 ## 2. 결정사항
 → [CLAUDE.md](CLAUDE.md) "결정사항" (바꾸지 말 것). 10/26 새로 정해진 것: 최종 운영은 회사 서버 · Cloudflare 가입 불가 · 사용 현황 안 씀 · 다운로드는 묶지 않고 전부
@@ -72,7 +73,7 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 
 ### 이어서 할 작업
 1. **`+` 파일명 web 13장** (아고다 4·트립닷컴 4·클래스101 5) — 회사 서버가 404. 이름 바꾸고(`+` → 다른 글자) `업데이트` 후 재업로드 — 회사 PC
-2. **회사 서버로 운영 옮길 때**: 사이트 파일(index.html·data.js·config.js·assets 등)도 서버에 올리는 흐름 필요 — 지금 `prepare-upload`/`zip-upload` 는 이미지만 담음. `config.js` imgBase 를 같은 서버 기준으로
+2. **회사 서버로 운영 옮길 때**: 사이트 파일(index.html·data.js·config.js·assets 등)도 서버에 올리는 흐름 필요 — 지금 `prepare-upload`/`zip-upload` 는 이미지만 담음. `config.js` imgBase 를 같은 서버 기준으로. ybm-ds CSS(글꼴 포함)도 지금은 github.io 에서 불러오므로 운영 서버에 함께 두고 주소를 바꿔야 함
 3. 예전 캡처 화면(약 8.3만 장) 컴포넌트 — uibowl 이미지 ID 가 없어 자동으로 못 채움. 자주 찾는 것(바텀시트·모달·하단 네비 등)만 글자·이미지로 추정하는 방안
 4. 사이트에서 화면 1장으로 바로 가는 링크(`#img=`), "비슷한 화면" 검색(이미지 임베딩)
 5. (집에서 검색까지 쓰고 싶다면) 검색 데이터를 집으로 옮기는 방법 정하기 — 지금은 회사 PC 에만 있음

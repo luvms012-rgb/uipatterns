@@ -1,23 +1,25 @@
 /* UI Patterns 사이트 공통 스타일 (mo/web 같이 씀)
    사이트마다 다른 값(열 수, 화면 비율 등)은 각 index.html 의 :root 변수로 정한다 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* 사이트 색은 ybm-ds 토큰을 따른다 (페이지 <html data-theme="dark">) */
 :root {
-  --bg:        #0c0c0e;
-  --bg-nav:    #101013;
-  --bg-side:   #101013;
-  --bg-card:   #17181c;
-  --bg-hover:  #1c1d22;
-  --bg-input:  #1a1b1f;
-  --border:    #32343e;
-  --text-1:    #f0f0f2;
-  --text-2:    #9b9da8;
-  --text-3:    #6b6d7e;
-  --accent:    #3182f6;
-  --acc-h:     #2272eb;
+  --bg:        var(--ybm-color-bg-canvas);
+  --bg-nav:    var(--ybm-color-bg-canvas);
+  --bg-side:   var(--ybm-color-bg-canvas);
+  --bg-card:   var(--ybm-color-bg-layer-default);
+  --bg-hover:  var(--ybm-color-bg-layer-floating);
+  --bg-input:  var(--ybm-color-bg-layer-floating);
+  --border:    var(--ybm-color-stroke-neutral-muted);
+  --text-1:    var(--ybm-color-fg-neutral);
+  --text-2:    var(--ybm-color-fg-neutral-muted);
+  --text-3:    var(--ybm-color-fg-neutral-subtle);
+  --accent:    var(--ybm-color-bg-brand-solid);
+  --acc-h:     var(--ybm-color-bg-brand-solid-pressed);
   --sidebar-w: 256px;
   --header-h:  80px;
 }
-html, body { height: 100%; font-family: 'Pretendard', -apple-system, sans-serif; font-size: 16px; background: var(--bg); color: var(--text-1); }
+/* 줄 높이는 아직 사이트 값(normal) 유지 - 글자 크기 토큰 연결 때 함께 정리 */
+html, body { height: 100%; font-family: var(--ybm-font-family-base); font-size: 16px; line-height: normal; background: var(--bg); color: var(--text-1); }
 svg, i[data-lucide] { display: block; flex-shrink: 0; }
 i[data-lucide] { display: flex; align-items: center; justify-content: center; }
 

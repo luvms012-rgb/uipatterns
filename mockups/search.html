@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>검색 시안</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <!-- 사이트 CSS 를 그대로 쓴다: 공통 CSS + 사이드바 CSS, 사이트별 값은 mo 와 같게 -->
+<!-- YBM 디자인 시스템 (색·글꼴 토큰). 사이트 CSS 가 항상 이긴다 -->
+<link rel="stylesheet" href="https://luvms012-rgb.github.io/ybm-ds/dist/ybm-ds.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="../assets/sidebar.css">
 <style>
@@ -19,7 +20,7 @@
   }
   .sx-switch button {
     height: 40px; padding: 0 18px; border: none; border-radius: 999px; background: transparent;
-    color: var(--text-2); font: 600 14px/1 inherit; font-family: inherit; cursor: pointer;
+    color: var(--text-2); font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
   }
   .sx-switch button.on { background: var(--accent); color: #fff; }
   .sx-note { margin: 4px 0 0; font-size: 14px; color: var(--text-3); }
