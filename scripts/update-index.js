@@ -427,9 +427,14 @@ function updatePlatform(platform, imageDir, opts = {}) {
   }
   const searchPats = [...patMapForSearch.values()];
 
+  // 카테고리별 화면 수 — 검색 자동완성의 "모바일 338 · 웹 255" 표시용
+  const catCounts = {};
+  for (const item of items) if (item.category !== 'icons') catCounts[item.category] = (catCounts[item.category] || 0) + 1;
+
   const searchIndexObj = {
     platform,
     cats: searchCats,
+    catCounts,
     svcs: searchSvcs,
     pats: searchPats,
   };

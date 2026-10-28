@@ -5,9 +5,17 @@
 .sr-sec-title { font-size: 18px; font-weight: 700; color: var(--text-1); }
 .sr-sec-cnt { font-size: 14px; color: var(--text-3); }
 
-/* 검색 드롭다운 맨 아래 "엔터로 전체 결과 보기" */
-.sd-enter .sd-title { color: var(--text-2); }
-.sd-enter kbd {
-  margin-left: auto; padding: 1px 6px; border: 1px solid var(--border); border-radius: 4px;
-  font: inherit; font-size: 11px; color: var(--text-3);
+/* 검색 자동완성 — 시안 A (한 목록, 최대 6줄) */
+.ac-list { padding: 6px 0; }
+.ac-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; }
+.ac-row.on, .ac-row:hover { background: rgba(255,255,255,.07); }
+.ac-ic { width: 16px; display: flex; justify-content: center; color: var(--text-3); flex-shrink: 0; }
+.ac-title { flex: 1; min-width: 0; font-size: 14px; font-weight: 400; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ac-title b { font-weight: 700; color: var(--text-1); }
+.ac-sub { margin-left: 6px; font-size: 12px; color: var(--text-3); }
+.ac-cnt { flex-shrink: 0; font-size: 12px; color: var(--text-3); }
+.ac-empty { padding: 18px 16px; font-size: 13px; color: var(--text-3); }
+.ac-foot {
+  display: flex; justify-content: space-between; padding: 8px 16px;
+  border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3);
 }

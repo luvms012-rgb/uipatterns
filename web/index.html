@@ -301,12 +301,6 @@ function toggleCat(enc) {
 function onSbSearch(v) { render(); }
 
 // ── 검색 드롭다운 ────────────────────────────────────────────────────────
-function hl(text, q) {
-  if (!q) return text;
-  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
-  return text.replace(re, '<mark>$1</mark>');
-}
-
 // ── 통합검색: 상대편 사이트 검색 인덱스 (지연 로딩, script 주입 방식) ──────
 let crossSearchIndex = null;
 let crossSearchPromise = null;
@@ -328,7 +322,7 @@ function onSearchInput(v) {
   const drop = document.getElementById('searchDrop');
   if (q.length < 2) { drop.classList.remove('open'); return; }
 
-  // 상대 사이트 인덱스가 아직 없으면 백그라운드로 불러온 뒤, 입력값이 그대로면 재검색
+  // 상대 사이트 인덱스가 아직 없으면 백그라운드로 불러온 뒤, 입력값이 그대로면 다시 그린다
   if (!crossSearchIndex) {
     loadCrossSearchIndex().then(() => {
       const cur = document.getElementById('hdrSearchInput');
@@ -337,118 +331,8 @@ function onSearchInput(v) {
     });
   }
 
-  // 카테고리 매칭
-  const cats = ALL_CATS.filter(c => c.toLowerCase().includes(q.toLowerCase()));
-
-  // 서비스 매칭 (서비스명 유니크)
-  const svcMap = new Map();
-  DISPLAY_DATA.forEach(item => {
-    const svc = extractService(item.name);
-    if (!svc.toLowerCase().includes(q.toLowerCase())) return;
-    if (!svcMap.has(svc)) svcMap.set(svc, { cat: item.category, count: 0 });
-    svcMap.get(svc).count++;
-  });
-  const svcs = [...svcMap.entries()].sort((a,b) => sortMixed(a[0],b[0]));
-
-  // 패턴명 매칭 (유니크 패턴명 기준)
-  const patMap = new Map();
-  DISPLAY_DATA.forEach(item => {
-    const pat = extractPattern(item.name);
-    if (!pat || !pat.toLowerCase().includes(q.toLowerCase())) return;
-    const key = pat + '|' + extractService(item.name);
-    if (!patMap.has(key)) patMap.set(key, { pat, svc: extractService(item.name), cat: item.category, item });
-  });
-  const pats = [...patMap.values()].slice(0, 8);
-
-  // ── 상대 사이트 매칭 (모바일·웹사이트 통합검색) ────────────────────────
-  const otherPlatform = PLATFORM === 'mo' ? 'web' : 'mo';
-  const otherLabel = otherPlatform === 'mo' ? '모바일' : '웹사이트';
-  let crossCats = [], crossSvcs = [], crossPats = [];
-  if (crossSearchIndex) {
-    crossCats = (crossSearchIndex.cats || []).filter(c => c.toLowerCase().includes(q.toLowerCase())).slice(0, 4);
-    crossSvcs = (crossSearchIndex.svcs || []).filter(s => s.svc.toLowerCase().includes(q.toLowerCase())).slice(0, 4);
-    crossPats = (crossSearchIndex.pats || []).filter(p => p.pat.toLowerCase().includes(q.toLowerCase())).slice(0, 4);
-  }
-
-  const total = cats.length + svcs.length + pats.length + crossCats.length + crossSvcs.length + crossPats.length;
-  if (!total) {
-    drop.innerHTML = `<div class="sd-empty">검색 결과가 없어요</div>`;
-    drop.classList.add('open');
-    return;
-  }
-
-  const SEARCH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`;
-  const IMG_SVG   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>`;
-  const GRID_SVG  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`;
-
-  let html = '';
-
-  if (cats.length) {
-    html += `<div class="sd-section"><div class="sd-label">카테고리</div>`;
-    html += cats.map(c => `
-      <div class="sd-row" onclick="searchSelectCat('${encodeURIComponent(c)}')">
-        <div class="sd-body"><div class="sd-title">${hl(c, q)}</div></div>
-        <span class="sd-cnt">${CAT_COUNTS[c]||0}</span>
-      </div>`).join('');
-    html += `</div>`;
-  }
-
-  if (svcs.length) {
-    html += `<div class="sd-section"><div class="sd-label">서비스</div>`;
-    html += svcs.map(([svc, info]) => `
-      <div class="sd-row" onclick="searchSelectSvc('${encodeURIComponent(svc)}')">
-        <div class="sd-body">
-          <div class="sd-title">${hl(svc, q)}</div>
-          <div class="sd-sub">${info.cat} · ${info.count}장</div>
-        </div>
-      </div>`).join('');
-    html += `</div>`;
-  }
-
-  if (pats.length) {
-    html += `<div class="sd-section"><div class="sd-label">패턴</div>`;
-    html += pats.map(({pat, svc, cat, item}) => `
-      <div class="sd-row" onclick="searchOpenItem('${encodeURIComponent(item.path)}','${encodeURIComponent(item.name)}','${encodeURIComponent(cat)}')">
-        <div class="sd-body">
-          <div class="sd-title">${hl(pat, q)}</div>
-          <div class="sd-sub">${svc} · ${cat}</div>
-        </div>
-      </div>`).join('');
-    html += `</div>`;
-  }
-
-  if (crossCats.length || crossSvcs.length || crossPats.length) {
-    html += `<div class="sd-section"><div class="sd-label">${otherLabel}에서</div>`;
-    html += crossCats.map(c => `
-      <div class="sd-row" onclick="crossSearchSelectCat('${otherPlatform}','${encodeURIComponent(c)}')">
-        <div class="sd-body"><div class="sd-title">${hl(c, q)}</div></div>
-        <span class="sd-badge">${otherLabel}</span>
-      </div>`).join('');
-    html += crossSvcs.map(s => `
-      <div class="sd-row" onclick="crossSearchSelectSvc('${otherPlatform}','${encodeURIComponent(s.svc)}')">
-        <div class="sd-body">
-          <div class="sd-title">${hl(s.svc, q)}</div>
-          <div class="sd-sub">${s.cat} · ${s.count}장</div>
-        </div>
-        <span class="sd-badge">${otherLabel}</span>
-      </div>`).join('');
-    html += crossPats.map(p => `
-      <div class="sd-row" onclick="crossSearchOpenItem('${otherPlatform}','${encodeURIComponent(p.path)}','${encodeURIComponent(p.name)}','${encodeURIComponent(p.cat)}')">
-        <div class="sd-body">
-          <div class="sd-title">${hl(p.pat, q)}</div>
-          <div class="sd-sub">${p.svc} · ${p.cat}</div>
-        </div>
-        <span class="sd-badge">${otherLabel}</span>
-      </div>`).join('');
-    html += `</div>`;
-  }
-
-  // 맨 위: 결과가 많아 드롭다운이 길어져도 보이도록
-  html = `<div class="sd-section"><div class="sd-row sd-enter" onclick="runSearch(document.getElementById('hdrSearchInput').value)">
-    <div class="sd-icon">${SEARCH_SVG}</div><div class="sd-body"><div class="sd-title">엔터로 전체 결과 보기</div></div><kbd>Enter</kbd>
-  </div></div>` + html;
-
-  drop.innerHTML = html;
+  // 시안 A: 카테고리 → 서비스 → 이어지는 검색어, 최대 6줄 (../assets/search.js)
+  drop.innerHTML = buildAutocomplete(q);
   drop.classList.add('open');
 }
 
@@ -457,7 +341,7 @@ function closeSearchDrop() {
 }
 
 function onSearchKey(e) {
-  if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); runSearch(e.target.value); return; }
+  if (acKey(e)) return;  // ↑↓·Enter — ../assets/search.js
   if (e.key === 'Escape') {
     closeSearchDrop();
     e.target.blur();
