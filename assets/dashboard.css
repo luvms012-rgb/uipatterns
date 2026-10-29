@@ -1,0 +1,189 @@
+/* 사용 현황(대시보드) - 2026-10-26 숨김 (안 씀). 다시 쓸 때를 위해 옛 스타일 그대로 둔다 */
+#dashboard {
+  --bg: var(--ybm-color-bg-canvas); --bg-card: var(--ybm-color-bg-layer-default); --bg-hover: var(--ybm-color-bg-layer-floating);
+  --border: var(--ybm-color-stroke-neutral-muted); --text-1: var(--ybm-color-fg-neutral); --text-2: var(--ybm-color-fg-neutral-muted);
+  --text-3: var(--ybm-color-fg-neutral-subtle); --accent: var(--ybm-color-bg-brand-solid); --acc-h: var(--ybm-color-bg-brand-solid-pressed);
+}
+#dashboard {
+  position: fixed; inset: 0; background: var(--bg); z-index: 500;
+  overflow-y: auto; opacity: 0; pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity .3s ease, transform .3s ease;
+}
+#dashboard.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+.dash-hdr {
+  position: sticky; top: 0; height: 64px;
+  background: var(--bg-nav); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; z-index: 10;
+}
+.dash-hdr-title { font-size: 20px; font-weight: 700; color: var(--text-1); }
+.dash-hdr-close {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s, color .12s;
+}
+.dash-hdr-close:hover { background: var(--bg-hover); color: var(--text-1); }
+
+.dash-body { max-width: 960px; margin: 0 auto; padding: 48px 40px 80px; }
+
+.dash-hero { margin-bottom: 40px; }
+.dash-hero-big { font-size: 36px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; line-height: 1.2; }
+.dash-hero-big em { color: var(--accent); font-style: normal; }
+.dash-hero-sub { font-size: 18px; color: var(--text-2); }
+
+.dash-cards { display: grid; grid-template-columns: repeat(var(--dash-cols), 1fr); gap: 14px; margin-bottom: 40px; }
+.dash-card { background: var(--bg-card); border-radius: 20px; padding: 34px 32px; }
+.dash-card-label { font-size: 15px; color: var(--text-2); margin-bottom: 14px; font-weight: 500; }
+.dash-card-num { font-size: 38px; font-weight: 700; color: var(--text-1); line-height: 1; }
+.dash-card-unit { font-size: 18px; font-weight: 500; color: var(--text-3); margin-left: 3px; }
+.dash-card-sub { font-size: 14px; color: var(--text-3); margin-top: 8px; }
+
+.dash-section { margin-bottom: 40px; }
+.dash-section-title { font-size: 19px; font-weight: 700; color: var(--text-1); margin-bottom: 16px; }
+
+.dash-week-card { background: var(--bg-card); border-radius: 20px; padding: 36px 36px 40px; }
+.dash-week-headline { font-size: 24px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.dash-week-sub { font-size: 15px; color: var(--text-2); margin-bottom: 32px; }
+.dash-bars {
+  display: flex; align-items: flex-end; gap: 8px;
+  height: 150px; padding-bottom: 28px; position: relative;
+}
+.dash-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end; }
+.dash-bar-val { font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 4px; min-height: 15px; text-align: center; }
+.dash-bar-rect { width: 100%; border-radius: 6px 6px 0 0; min-height: 4px; }
+.dash-bar-rect.active { background: var(--accent); }
+.dash-bar-rect.past { background: #252737; }
+.dash-bar-date { position: absolute; bottom: -22px; font-size: 13px; color: var(--text-3); white-space: nowrap; }
+
+.dash-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 40px; }
+
+.dash-hbar-card, .dash-rank-card { background: var(--bg-card); border-radius: 20px; padding: 34px 32px; }
+.dash-hbar-list { display: flex; flex-direction: column; gap: 16px; }
+.dash-hbar-top { display: flex; justify-content: space-between; margin-bottom: 7px; }
+.dash-hbar-name { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.dash-hbar-cnt { font-size: 14px; color: var(--text-2); }
+.dash-hbar-track { height: 7px; border-radius: 4px; background: var(--bg-hover); overflow: hidden; }
+.dash-hbar-fill { height: 100%; border-radius: 4px; background: var(--accent); }
+
+.dash-rank-list { display: flex; flex-direction: column; }
+.dash-rank-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+}
+.dash-rank-row:last-child { border-bottom: none; }
+.dash-rank-num { font-size: 15px; font-weight: 700; color: var(--accent); width: 20px; flex-shrink: 0; }
+.dash-rank-icon { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; background: var(--bg-hover); flex-shrink: 0; }
+.dash-rank-name { font-size: 15px; font-weight: 600; color: var(--text-1); flex: 1; }
+.dash-rank-cnt { font-size: 14px; color: var(--text-2); }
+
+.dash-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.dash-tag {
+  padding: 6px 14px; border-radius: 999px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  font-size: 13px; color: var(--text-2);
+}
+.dash-empty-msg { font-size: 15px; color: var(--text-3); padding: 8px 0; line-height: 1.8; }
+
+/* Cost savings */
+.dash-cost-card {
+  background: linear-gradient(135deg, #0f1729 0%, #131a2e 100%);
+  border: 1px solid #1e2d50; border-radius: 20px;
+  padding: 40px 36px; margin-bottom: 40px;
+  position: relative; overflow: hidden;
+}
+.dash-cost-card::before {
+  content: ''; position: absolute; top: -40px; right: -40px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(49,130,246,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.dash-cost-eyebrow {
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;
+}
+.dash-cost-headline {
+  font-size: 28px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; line-height: 1.2;
+}
+.dash-cost-headline em { color: var(--accent); font-style: normal; }
+.dash-cost-sub { font-size: 16px; color: var(--text-2); margin-bottom: 32px; }
+
+/* 절감 2열 stat */
+.dash-cost-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.dash-cost-stat {
+  background: rgba(255,255,255,.04); border: 1px solid #1e2d50;
+  border-radius: 14px; padding: 18px 18px 14px;
+}
+.dash-cost-stat-label { font-size: 13px; color: var(--text-3); margin-bottom: 8px; font-weight: 600; letter-spacing:.04em; text-transform:uppercase; }
+.dash-cost-stat-val { font-size: 26px; font-weight: 700; color: var(--text-1); line-height: 1.15; }
+.dash-cost-stat-val.accent { color: var(--accent); }
+.dash-cost-stat-unit { font-size: 16px; font-weight: 500; margin-left: 2px; }
+.dash-cost-stat-note { font-size: 13px; color: var(--text-3); margin-top: 6px; }
+
+/* 진행 바 */
+.dash-cost-prog-wrap { margin-top: 20px; }
+.dash-cost-prog-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--text-3); margin-bottom: 8px;
+}
+.dash-cost-prog-track {
+  height: 5px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden;
+}
+.dash-cost-prog-fill {
+  height: 100%; background: var(--accent); border-radius: 999px;
+}
+
+/* 비교 행 */
+.dash-cost-divider { height: 1px; background: #1e2d50; }
+.dash-cost-compare { display: flex; flex-direction: column; gap: 10px; }
+.dash-cost-compare-row { display: flex; justify-content: space-between; align-items: center; }
+.dash-cost-compare-label { font-size: 15px; color: var(--text-2); }
+.dash-cost-compare-val { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.dash-cost-compare-note { font-size: 13px; color: var(--text-3); margin-left: 6px; font-weight: 400; }
+
+/* 사용현황 통합 탭 + 플랫폼 요약 */
+.dash-tabs { display: inline-flex; gap: 4px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 4px; margin-bottom: 28px; }
+.dash-tab { appearance: none; border: none; background: transparent; color: var(--text-3); font-size: 14px; font-weight: 600; padding: 9px 18px; border-radius: 10px; cursor: pointer; transition: background .15s, color .15s; }
+.dash-tab:hover { color: var(--text-1); }
+.dash-tab.active { background: var(--accent); color: #fff; }
+
+.dash-platform-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; max-width: 460px; }
+.dash-platform-pill { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; transition: border-color .15s, background .15s; cursor: pointer; text-align: left; font-family: inherit; width: 100%; appearance: none; }
+.dash-platform-pill:hover { background: var(--bg-hover); }
+.dash-platform-pill.active { border-color: var(--accent); }
+.dash-platform-pill-label { display: block; font-size: 13px; color: var(--text-3); font-weight: 600; margin-bottom: 4px; }
+.dash-platform-pill-val { display: block; font-size: 20px; color: var(--text-1); font-weight: 700; line-height: 1.3; }
+.dash-platform-pill-sub { display: block; font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+@media (max-width: 768px) {
+  /* 대시보드 */
+  .dash-body { max-width: 100%; padding: 24px 16px 60px; }
+  .dash-hdr { padding: 0 16px; }
+  .dash-hero-big { font-size: 28px; }
+  .dash-cost-headline { font-size: 24px; }
+  .dash-cards { grid-template-columns: 1fr; gap: 10px; }
+  .dash-grid-2 { grid-template-columns: 1fr; }
+  .dash-cost-2col { grid-template-columns: 1fr; gap: 10px; }
+  .dash-tab { padding: 8px 14px; font-size: 13px; }
+  .dash-platform-pills { max-width: 100%; }
+}
+@media (max-width: 480px) {
+  .dash-body { max-width: 100%; padding: 20px 16px 60px; }
+  .dash-hdr { padding: 0 16px; }
+  .dash-hero-big { font-size: 24px; line-height: 1.3; }
+  .dash-hero-sub { font-size: 16px; }
+  .dash-cards { grid-template-columns: 1fr; gap: 10px; }
+  .dash-cost-2col { grid-template-columns: 1fr; gap: 10px; }
+  .dash-grid-2 { grid-template-columns: 1fr; }
+  .dash-cost-headline { font-size: 21px; }
+  .dash-cost-card { padding: 32px 26px; }
+  .dash-card { padding: 28px 26px; }
+  .dash-card-num { font-size: 30px; }
+  .dash-week-card { padding: 28px 24px 36px; }
+  .dash-week-headline { font-size: 20px; }
+  .dash-platform-pills { grid-template-columns: 1fr; }
+  .dash-platform-pill-val { font-size: 18px; }
+}

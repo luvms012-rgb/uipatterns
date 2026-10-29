@@ -283,6 +283,9 @@ const SVC_TYPES = {
 
   // 자동 매핑 (오프라인, update, 2026-10-26)
   '트립스토어':'여행',
+
+  // 자동 매핑 (오프라인, update, 2026-10-28)
+  '퍼블리':'커뮤니티',
 };
 
 const ALL_INDUSTRY_TYPES = [

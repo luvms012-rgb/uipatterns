@@ -71,13 +71,25 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 5. **검색 자동완성 개편 — 시안 A "추천 검색어 중심"** (사용자 결정): 종류 제목·배지·"모바일에서" 섹션 없이 한 목록 최대 6줄. ① 카테고리 — 두 사이트를 한 줄로, 오른쪽에 "모바일 338 · 웹 255" ② 서비스(최대 2) ③ 이어지는 검색어 — 화면 이름을 서비스 구분 없이 합쳐 화면 수 많은 순. 입력한 글자는 보통, 이어지는 말만 굵게. 종류 글자("카테고리"·"서비스")·아래 안내 줄은 없음 — 종류는 아이콘으로만 구분 (사용자 요청). 키보드 ↑↓·Enter 로 고르기. 아이콘은 그림 기호만(입력마다 회사 서버 이미지를 부르지 않도록). 코드 `assets/search.js` 의 `buildAutocomplete`·`acKey`
 6. 상대편 카테고리 개수를 위해 `search-index.js` 에 `catCounts` 추가 (`scripts/update-index.js` 가 업데이트 때 계속 생성, 이번엔 기존 파일에 개수만 넣음)
 
+10/29 회사에서 한 일:
+1. **ybm-ds 치환 3단계: 부품 교체** (사용자 요청 "버튼들도 모두 범용 CSS, 자체 CSS 는 최소로") - 사이트의 조작 요소를 전부 ybm-ds 부품으로 바꿈. 헤더 모바일/웹사이트 전환·사이드바 메뉴 = Segmented Control, 검색창 = Text Field Input(outline), 자동완성 = Select Content/Item, 카테고리 줄·화면 고르기 = Checkbox, 고른 필터·초기화 = Chip, 목록/닫기/이전/다음/다운로드/전체 선택 등 = Action Button, 빈 화면 = Empty, 알림 = Snackbar. 아이콘은 ybm-ds 아이콘(lucide 스크립트 삭제), ybm-ds 에 없는 다운로드·격자 2개만 `site.css` 에서 같은 방식으로 정의
+2. `site.css` 792줄 → 232줄: 부품이 맡는 스타일·안 쓰던 옛 스타일 삭제, 남은 배치(헤더, 사이드바, 화면 목록, 크게 보기)는 글자·간격·모서리·색 모두 토큰. 직접 적힌 색은 Claude 로고 색, 카드 위 그림자, 크게 보기 배경 3개만. 숨긴 사용 현황 스타일은 `assets/dashboard.css` 로 분리(옛 스타일 그대로)
+3. 사이트의 `* { margin:0; padding:0 }` 삭제 - 레이어 밖 규칙이라 ybm-ds 부품의 여백을 전부 지워 버림. 기본 초기화는 ybm-ds 가 함
+4. 검색 시안 `mockups/search.html` 은 10/28 스타일 사본(`mockups/site-1028.css`, `sidebar-1028.css`)을 보도록 고정
+5. 확인: mo/web 넓은 화면·375 화면에서 필터 선택, 칩 해제, 화면 고르기·고른 화면 바, 크게 보기, 자동완성(↑↓), 검색 결과, 결과 없음, 알림, 사이드바 열기
+- ybm-ds 에 새로 만드는 중인 Top Navigation, Search Field 가 배포되면 헤더와 검색창을 그것으로 바꿀 것
+6. 캡처: **퍼블리(mo) 다시** - uibowl 에 127장으로 늘어남(10/28 엔 13장). 10/28 에 받은 13장은 빼고 새 114장(영상 5개는 가운데 장면 PNG) → 분류 114, 컴포넌트 81장. 10/28 퍼블리 8장이 회사 서버에 없어(404) 오늘 zip 에 함께 넣음
+7. **아이콘 없는 서비스 채움** (uibowl 검색 API `/api/v2/apps/search?keyword=..&type=PC|MOBILE` 의 `iconImg`): mo 포스티(.webp) / web Campsite, 엠파크, 찐빵, KT UX 디자인 시스템(원본 3475px → 256px), 우아콘 - WOOWACON 2024(uibowl 원본이 28px). 대소문자 문제: mo `redbus.png` → `redBus.png`, `nh pay` 는 `NH Pay` 와 다른 서비스로 잡혀 있어 같은 아이콘을 `nh pay.webp` 로 추가 (Windows 는 대소문자가 같은 이름 두 개를 못 둠)
+8. **검색 자동완성 다시 개편** (사용자 첨부 그림대로, AI 이미지 분석 줄은 뺌): ① "'검색어' 전체보기 / N개의 패턴" (결과 페이지와 같은 화면 수) ② "UX 패턴" 묶음 - "'검색어' 패턴 전체보기"(결과 페이지의 화면 이름 섹션으로 내려감) 다음 "카테고리 - 화면 이름" 최대 6줄, 화면 수 많은 순. 검색어는 파란 글자, 왼쪽 네모 칸에 ALL / 휴대폰(웹은 모니터) 그림. 10/28 시안 A 의 카테고리, 서비스 줄과 상대편 사이트 개수는 없어짐. 코드 `assets/search.js` `buildAutocomplete`, `runSearch(q, { focus: 'pat' })`
+- 남은 것: mo `nh pay` 43장과 `NH Pay` 172장은 같은 서비스인데 파일 이름 대소문자가 달라 사이트에 두 서비스로 나옴 - 합치려면 파일 이름 변경 + 재업로드 필요
+
 ## 2. 결정사항
 → [CLAUDE.md](CLAUDE.md) "결정사항" (바꾸지 말 것). 10/26 새로 정해진 것: 최종 운영은 회사 서버 · Cloudflare 가입 불가 · 사용 현황 안 씀 · 다운로드는 묶지 않고 전부
 
 ## 3. 남은 일
 
 ### 사용자가 직접
-1. **10/28 zip 2개 회사 서버 업로드** — `web/(업로드)/20261028.zip` (삼성생명다이렉트 231장 + 아이콘, 13.7MB), `mo/(업로드)/20261028.zip` (퍼블리 8장 + 아이콘) → 먼저 `업데이트.bat`, 올린 뒤 점검 <https://luvms012-rgb.github.io/uipatterns/web/?check=20261028> · <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261028>
+1. **10/29 zip 2개 회사 서버 업로드** (10/28 zip 은 이 안에 합쳐짐) — `mo/(업로드)/20261029.zip` (퍼블리 114장 + 10/28 퍼블리 8장 + 아이콘 4개, 15.4MB, 126개), `web/(업로드)/20261029.zip` (10/28 삼성생명다이렉트 231장 + 아이콘 6개, 13.7MB, 237개) → 먼저 `업데이트.bat`, 올린 뒤 점검 <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261029> · <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261028> · <https://luvms012-rgb.github.io/uipatterns/web/?check=20261028>
 2. **캡처 스킬 문구 반영**: claude.ai 설정 → 스킬 → uipatterns-capture 를 회사 PC `Desktop\works\uipatterns-capture-SKILL.md` 내용으로 (zip 은 이미지만, 마무리에 `업데이트.bat` 안내)
 
 ### 이어서 할 작업

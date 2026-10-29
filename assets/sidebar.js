@@ -51,15 +51,14 @@ function toggleSbGroup(id) {
   if (el) el.classList.toggle('collapsed', c.has(id));
 }
 
-const CHECK_SVG = `<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="1.5 6 5 9.5 10.5 2.5"/></svg>`;
-const CHEVRON_SVG = `<svg class="sb-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
+const CHEVRON_SVG = `<i class="ds-icon ds-icon--sm ds-icon--chevron-up sb-chev" aria-hidden="true"></i>`;
 
-function makeCatRow(label, count, isOn, onclickAttr, disabled) {
-  return `<div class="cat-row${isOn ? ' on' : ''}${disabled ? ' disabled' : ''}" data-label="${label.replace(/"/g, '&quot;')}" ${disabled ? '' : onclickAttr}>
-    <div class="cb-box">${isOn ? CHECK_SVG : ''}</div>
-    <span class="cat-label">${label}</span>
+function makeCatRow(label, count, isOn, action, disabled) {
+  return `<label class="ds-checkbox cat-row" data-label="${label.replace(/"/g, '&quot;')}">
+    <input type="checkbox" class="ds-checkbox__control"${isOn ? ' checked' : ''}${disabled ? ' disabled' : ''} onchange="${action}">
+    <span class="ds-checkbox__label">${label}</span>
     <span class="cat-cnt">(${count})</span>
-  </div>`;
+  </label>`;
 }
 
 function sbGroup(id, title, rowsHtml, { sub = false, note = '' } = {}) {
@@ -83,19 +82,19 @@ function buildSidebar() {
   groups.forEach(g => g.cats.sort((a, b) => g.order.indexOf(normCat(meta[a].label)) - g.order.indexOf(normCat(meta[b].label))));
   const patGroups = [...groups, etc].filter(g => g.cats.length).map(g => sbGroup('pat:' + g.name, g.name,
     g.cats.map(cat => makeCatRow(meta[cat].label, CAT_COUNTS[cat] || 0, S.checked.has(cat),
-      `onclick="toggleCat('${encodeURIComponent(cat)}')"`)).join(''), { sub: true })).join('');
+      `toggleCat('${encodeURIComponent(cat)}')`)).join(''), { sub: true })).join('');
 
   // 2) 컴포넌트 — 수집된 이미지가 없으면 목록만 보여주고 선택은 막는다
   const cc = compCounts();
   const hasComps = Object.keys(cc).length > 0;
   const compRows = COMPONENTS.map(c => makeCatRow(c, cc[c] || 0, S.checkedComps.has(c),
-    `onclick="toggleComp('${encodeURIComponent(c)}')"`, !cc[c])).join('');
+    `toggleComp('${encodeURIComponent(c)}')`, !cc[c])).join('');
   const compNote = hasComps ? '' : `<p class="sb-note">컴포넌트 정보는 새로 캡처하는 이미지부터 모입니다.</p>`;
 
   // 3) 카테고리 유형 — 맨 아래. 미분류(SVC_TYPES 미등록) 항목이 있으면 목록 끝에 자동 추가
   const typeList = TYPE_COUNTS[UNCLASSIFIED] ? [...ALL_INDUSTRY_TYPES, UNCLASSIFIED] : ALL_INDUSTRY_TYPES;
   const typeRows = typeList.map(t =>
-    makeCatRow(t, TYPE_COUNTS[t] || 0, S.checkedTypes.has(t), `onclick="toggleType('${encodeURIComponent(t)}')"`)
+    makeCatRow(t, TYPE_COUNTS[t] || 0, S.checkedTypes.has(t), `toggleType('${encodeURIComponent(t)}')`)
   ).join('');
 
   // 검색은 사이드바에 두지 않는다 — 헤더 통합 검색으로 일원화 예정

@@ -1,16 +1,6 @@
-/* 검색 결과 페이지 (mo/web 공용) — 시안 1 */
-.sr-sec { margin-top: 56px; }
+/* 검색 결과 페이지 (mo/web 공용) - 시안 1. 자동완성은 ds-select-content (site.css) */
+.sr-sec { margin-top: var(--ybm-space-x14); scroll-margin-top: calc(var(--header-h) + var(--ybm-space-x5)); }
 .sr-sec.first { margin-top: 0; }
-.sr-sec-hdr { display: flex; align-items: baseline; gap: 10px; margin-bottom: 24px; }
-.sr-sec-title { font-size: 18px; font-weight: 700; color: var(--text-1); }
-.sr-sec-cnt { font-size: 14px; color: var(--text-3); }
-
-/* 검색 자동완성 — 시안 A (한 목록, 최대 6줄) */
-.ac-list { padding: 6px 0; }
-.ac-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; }
-.ac-row.on, .ac-row:hover { background: rgba(255,255,255,.07); }
-.ac-ic { width: 16px; display: flex; justify-content: center; color: var(--text-3); flex-shrink: 0; }
-.ac-title { flex: 1; min-width: 0; font-size: 14px; font-weight: 400; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ac-title b { font-weight: 700; color: var(--text-1); }
-.ac-cnt { flex-shrink: 0; font-size: 12px; color: var(--text-3); }
-.ac-empty { padding: 18px 16px; font-size: 13px; color: var(--text-3); }
+.sr-sec-hdr { display: flex; align-items: baseline; gap: var(--ybm-space-x2_5); margin-bottom: var(--ybm-space-x6); }
+.sr-sec-title { font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); font-weight: var(--ybm-font-weight-bold); }
+.sr-sec-cnt { color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
