@@ -133,4 +133,6 @@ function run(site) {
   console.log('    ' + URL);
 }
 
-for (const s of SITES) run(s);
+// scripts/pack-site.js 가 압축 함수만 빌려 쓴다
+if (require.main === module) for (const s of SITES) run(s);
+module.exports = { writeZip, today };

@@ -35,3 +35,6 @@ desktop.ini
 
 # 로컬 미리보기 설정
 .claude/
+
+# 서버에 올릴 사이트 파일 묶음 (scripts/pack-site.js)
+/(사이트업로드)/

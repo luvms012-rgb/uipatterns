@@ -82,6 +82,11 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 7. **아이콘 없는 서비스 채움** (uibowl 검색 API `/api/v2/apps/search?keyword=..&type=PC|MOBILE` 의 `iconImg`): mo 포스티(.webp) / web Campsite, 엠파크, 찐빵, KT UX 디자인 시스템(원본 3475px → 256px), 우아콘 - WOOWACON 2024(uibowl 원본이 28px). 대소문자 문제: mo `redbus.png` → `redBus.png`, `nh pay` 는 `NH Pay` 와 다른 서비스로 잡혀 있어 같은 아이콘을 `nh pay.webp` 로 추가 (Windows 는 대소문자가 같은 이름 두 개를 못 둠)
 8. **검색 자동완성 다시 개편** (사용자 첨부 그림대로, AI 이미지 분석 줄은 뺌): ① "'검색어' 전체보기 / N개의 패턴" (결과 페이지와 같은 화면 수) ② "UX 패턴" 묶음 - "'검색어' 패턴 전체보기"(결과 페이지의 화면 이름 섹션으로 내려감) 다음 "카테고리 - 화면 이름" 최대 6줄, 화면 수 많은 순. 검색어는 파란 글자, 왼쪽 네모 칸에 ALL / 휴대폰(웹은 모니터) 그림. 10/28 시안 A 의 카테고리, 서비스 줄과 상대편 사이트 개수는 없어짐. 코드 `assets/search.js` `buildAutocomplete`, `runSearch(q, { focus: 'pat' })`
 - 남은 것: mo `nh pay` 43장과 `NH Pay` 172장은 같은 서비스인데 파일 이름 대소문자가 달라 사이트에 두 서비스로 나옴 - 합치려면 파일 이름 변경 + 재업로드 필요
+9. **사이트 파일도 회사 서버로** (사용자 결정 10/29: 실행 파일까지 서버에 올림, 이미지는 이미 올라가 있음)
+   - ybm-ds 를 github.io 에서 부르지 않고 사이트 안 `ybm-ds/` 사본을 씀 (`node scripts/sync-ybm-ds.js` = ybm-ds 저장소 origin/main 의 CSS 6개 + Pretendard 4굵기 복사, 직접 고치지 말 것). mo/web/시안 페이지 주소 `../ybm-ds/ybm-ds.css`
+   - `node scripts/pack-site.js` → `(사이트업로드)/site_YYYYMMDD.zip` (35개, 16.3MB): 루트 index.html·config.js·robots.txt, assets 6개, ybm-ds 10개, mo·web 각 8개(index.html, data.js, svc-types.js, icons.js, taxonomy.js, search-index.js, version.js, stats.js). 압축을 uipatterns/ 바로 아래에 풀면 됨
+   - `config.js` 는 그대로 (이미지 주소가 같은 서버라 다운로드도 됨)
+   - **앞으로**: 새 이미지를 넣으면 data.js 등이 바뀌므로 이미지 zip 과 함께 `pack-site.js` 의 사이트 zip 도 올려야 함 (아직 `업데이트.bat` 에 안 붙임)
 
 ## 2. 결정사항
 → [CLAUDE.md](CLAUDE.md) "결정사항" (바꾸지 말 것). 10/26 새로 정해진 것: 최종 운영은 회사 서버 · Cloudflare 가입 불가 · 사용 현황 안 씀 · 다운로드는 묶지 않고 전부
@@ -90,11 +95,12 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 
 ### 사용자가 직접
 1. **10/29 zip 2개 회사 서버 업로드** (10/28 zip 은 이 안에 합쳐짐) — `mo/(업로드)/20261029.zip` (퍼블리 114장 + 10/28 퍼블리 8장 + 아이콘 4개, 15.4MB, 126개), `web/(업로드)/20261029.zip` (10/28 삼성생명다이렉트 231장 + 아이콘 6개, 13.7MB, 237개) → 먼저 `업데이트.bat`, 올린 뒤 점검 <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261029> · <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261028> · <https://luvms012-rgb.github.io/uipatterns/web/?check=20261028>
-2. **캡처 스킬 문구 반영**: claude.ai 설정 → 스킬 → uipatterns-capture 를 회사 PC `Desktop\works\uipatterns-capture-SKILL.md` 내용으로 (zip 은 이미지만, 마무리에 `업데이트.bat` 안내)
+2. **사이트 파일 업로드**: `(사이트업로드)/site_20261029.zip` 을 회사 서버 `uipatterns/` 바로 아래에 풀어 올리기 → <https://imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/mo/index.html> · `web/index.html` 열어 확인 (글꼴·색이 나오는지 = ybm-ds 가 올라갔는지)
+3. **캡처 스킬 문구 반영**: claude.ai 설정 → 스킬 → uipatterns-capture 를 회사 PC `Desktop\works\uipatterns-capture-SKILL.md` 내용으로 (zip 은 이미지만, 마무리에 `업데이트.bat` 안내)
 
 ### 이어서 할 작업
 1. **`+` 파일명 web 13장** (아고다 4·트립닷컴 4·클래스101 5) — 회사 서버가 404. 이름 바꾸고(`+` → 다른 글자) `업데이트` 후 재업로드 — 회사 PC
-2. **회사 서버로 운영 옮길 때**: 사이트 파일(index.html·data.js·config.js·assets 등)도 서버에 올리는 흐름 필요 — 지금 `prepare-upload`/`zip-upload` 는 이미지만 담음. `config.js` imgBase 를 같은 서버 기준으로. ybm-ds CSS(글꼴 포함)도 지금은 github.io 에서 불러오므로 운영 서버에 함께 두고 주소를 바꿔야 함
+2. **회사 서버 운영 흐름 마무리**: 사이트 zip(`scripts/pack-site.js`)을 `업데이트.bat` 이나 분류 마지막 단계에 붙여 이미지 zip 과 같이 나오게 하기. CLAUDE.md 결정사항("개발 기간에는 회사 서버에 이미지만")도 사용자 확인 후 고치기
 3. 예전 캡처 화면(약 8.3만 장) 컴포넌트 — uibowl 이미지 ID 가 없어 자동으로 못 채움. 자주 찾는 것(바텀시트·모달·하단 네비 등)만 글자·이미지로 추정하는 방안
 4. 사이트에서 화면 1장으로 바로 가는 링크(`#img=`), "비슷한 화면" 검색(이미지 임베딩)
 5. (집에서 검색까지 쓰고 싶다면) 검색 데이터를 집으로 옮기는 방법 정하기 — 지금은 회사 PC 에만 있음
