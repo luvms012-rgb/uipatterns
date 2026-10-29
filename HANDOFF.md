@@ -87,6 +87,8 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
    - `node scripts/pack-site.js` → `(사이트업로드)/site_YYYYMMDD.zip` (35개, 16.3MB): 루트 index.html·config.js·robots.txt, assets 6개, ybm-ds 10개, mo·web 각 8개(index.html, data.js, svc-types.js, icons.js, taxonomy.js, search-index.js, version.js, stats.js). 압축을 uipatterns/ 바로 아래에 풀면 됨
    - `config.js` 는 그대로 (이미지 주소가 같은 서버라 다운로드도 됨)
    - **앞으로**: 새 이미지를 넣으면 data.js 등이 바뀌므로 이미지 zip 과 함께 `pack-site.js` 의 사이트 zip 도 올려야 함 (아직 `업데이트.bat` 에 안 붙임)
+   - **사용자 결정 10/29: 평소엔 GitHub 기준으로만 작업, 서버용 zip 은 사용자가 서버에 올릴 때 말하면 그때만 만든다**
+10. **ybm-ds 사본 갱신** 81f28dd → 6cde41f: 모션 값(빠름 150ms, 느림 300ms, 곡선), 반응형 기준점 토큰과 `.u-hide-from-*`/`.u-show-from-*`, 새 부품 14종과 아이콘 4개(share, link, trash, copy) 추가. 기존 부품은 그대로라 사이트 수정 없음, 미리보기 mo/web 확인
 
 ## 2. 결정사항
 → [CLAUDE.md](CLAUDE.md) "결정사항" (바꾸지 말 것). 10/26 새로 정해진 것: 최종 운영은 회사 서버 · Cloudflare 가입 불가 · 사용 현황 안 씀 · 다운로드는 묶지 않고 전부

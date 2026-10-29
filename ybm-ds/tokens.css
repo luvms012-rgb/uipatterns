@@ -2,7 +2,7 @@
    YBM Design System — TOKENS
    --------------------------------------------------------------------------
    ⚠ 이 파일은 tokens/build.mjs 가 figma-variables.json 에서 생성한다. 직접 고치지 말 것.
-   생성: 2026-10-27 · Figma file 1VCEsFU3xMWuXIntIrZz9i
+   생성: 2026-10-29 · Figma file 1VCEsFU3xMWuXIntIrZz9i
           컬렉션 「YBM DS」 Light/Dark · Typography · Shape · Elevation
           (모드는 Light/Dark 하나뿐 — 2026-10-27 글자 배율·모양 테마 모드 삭제)
 
@@ -493,7 +493,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   7. SYSTEM — elevation · motion · z-index  (Figma 에 없고 CSS 에만 있는 층)
+   7. SYSTEM — elevation · motion · z-index · breakpoint  (Figma 에 없고 CSS 에만 있는 층)
    -------------------------------------------------------------------------- */
 :root {
   /* 2겹 구조(key + ambient). 기하값은 여기 한 번만, 색은 테마 블록에서 바뀐다.
@@ -513,11 +513,13 @@
   --ybm-elevation-modal:    var(--ybm-elevation-5);  /* dialog, alert dialog, bottom sheet */
 
   /* Motion */
-  --ybm-duration-fast: 120ms;
+  --ybm-duration-fast: 150ms;
   --ybm-duration-normal: 200ms;
-  --ybm-duration-slow: 320ms;
-  --ybm-easing-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ybm-easing-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --ybm-duration-slow: 300ms;
+  --ybm-easing-standard: cubic-bezier(0.35, 0, 0.35, 1);
+  --ybm-easing-emphasized: cubic-bezier(0.03, 0.4, 0.1, 1);
+  --ybm-easing-enter: cubic-bezier(0, 0, 0.15, 1);
+  --ybm-easing-exit: cubic-bezier(0.35, 0, 1, 1);
 
   /* Z-index */
   --ybm-z-base: 0;
@@ -526,4 +528,10 @@
   --ybm-z-dialog: 1100;
   --ybm-z-toast: 1200;
   --ybm-z-tooltip: 1300;
+
+  /* Breakpoint — @media 안에서는 변수를 쓸 수 없어 값 확인과 JS 용. 미디어 쿼리에는 같은 숫자를 직접 쓴다 */
+  --ybm-breakpoint-sm: 480px;
+  --ybm-breakpoint-md: 768px;
+  --ybm-breakpoint-lg: 1280px;
+  --ybm-breakpoint-xl: 1440px;
 }

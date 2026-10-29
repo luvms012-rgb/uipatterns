@@ -73,6 +73,20 @@
      55 Top Navigation       .ds-topnav
      56 Search Suggestion    .ds-search-anchor / .ds-search-suggest
      57 File Attach          .ds-fileattach / .ds-fileitem
+     58 Menu Sheet           .ds-menusheet
+     59 Result Section       .ds-result
+     60 Timer                .ds-timer
+     61 Status Dot           .ds-statusdot
+     62 Checkbox Group       .ds-checkbox-group
+     63 Scroll Fog           .ds-scrollfog
+     64 Pull To Refresh      .ds-ptr
+     65 Side Panel           .ds-sidepanel
+     66 Image Frame          .ds-imageframe
+     67 Carousel             .ds-carousel
+     68 Markdown             .ds-markdown
+     69 Code Block           .ds-codeblock
+     70 Citation             .ds-citation
+     71 Multi Select         .ds-multiselect
    ========================================================================== */
 
 
@@ -3486,3 +3500,558 @@ a.ds-card:active, button.ds-card:active { background: linear-gradient(var(--ybm-
 .ds-fileitem__remove > .ds-icon { --ds-icon-size: 10px; }
 .ds-fileitem__remove::after { content: ""; position: absolute; inset: calc((var(--ybm-space-x5) - 40px) / 2); }
 .ds-fileitem[data-readonly] .ds-fileitem__remove { display: none; }
+
+
+/* --------------------------------------------------------------------------
+   58 Menu Sheet - 모바일 화면 아래에서 올라오는 고르기 목록 (2026-10-29 추가)
+   Bottom Sheet 와 같이 네이티브 <dialog> 를 쓴다. data-ds-open 으로 열고, data-ds-close 와 바깥 누르기로 닫는다.
+   Item tone: 기본 neutral / data-tone="critical"(되돌릴 수 없는 동작)   labelAlign: 기본 left / data-label-align="center"
+     <dialog class="ds-menusheet" id="ms" aria-labelledby="ms-t">
+       [<div class="ds-menusheet__header"><h2 class="ds-menusheet__title" id="ms-t">제목</h2>[<p class="ds-menusheet__desc">설명</p>]</div>]
+       <div class="ds-menusheet__list">
+         <div class="ds-menusheet__group" role="group">
+           <button type="button" class="ds-menusheet__item" [data-tone="critical"] [data-label-align="center"]>
+             [<i class="ds-icon ds-icon--share" aria-hidden="true"></i>]
+             <span class="ds-menusheet__content"><span class="ds-menusheet__label">공유하기</span>[<span class="ds-menusheet__item-desc">보조 설명</span>]</span>
+           </button>
+         </div>
+       </div>
+       <div class="ds-menusheet__footer"><button type="button" class="ds-menusheet__close" data-ds-close>닫기</button></div>
+     </dialog>
+   Figma: 최대 폭 480 / 위쪽 shape/2xl / bg/layer-floating / padding 위 x6, 좌우 global gutter, 아래 x4
+     header gap x1, 아래 x4, 제목 t06 Bold, 설명 t04 fg/neutral-muted / 묶음 사이 x2_5 / 묶음 shape/xl, 줄 사이 1px stroke/neutral-muted
+     Item 최소 높이 52, padding x3_5 x4, gap x3_5, bg/neutral(pressed bg/neutral-weak-pressed), 아이콘 22, 글자 t05, 설명 t03 Medium fg/neutral-subtle
+     critical 아이콘과 글자 fg/critical / footer 위 x2_5 / Close Button 높이 52, padding x3_5 x5, shape/lg, t05 Medium
+   -------------------------------------------------------------------------- */
+.ds-menusheet {
+  position: fixed;
+  inset: auto env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+  width: auto;
+  max-width: 480px;
+  max-height: min(90%, calc(100% - env(safe-area-inset-top, 0px)));
+  margin: 0 auto;
+  padding: var(--ybm-space-x6) var(--ybm-space-x-global-gutter) calc(var(--ybm-space-x4) + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  border-radius: var(--ybm-shape-2xl) var(--ybm-shape-2xl) 0 0;
+  background: var(--ybm-color-bg-layer-floating);
+  color: var(--ybm-color-fg-neutral);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex-direction: column;
+}
+.ds-menusheet:focus { outline: none; }
+.ds-menusheet[open] { display: flex; animation: ds-sheet-in var(--ybm-duration-slow) var(--ybm-easing-emphasized); }
+.ds-menusheet::backdrop { background: var(--ybm-color-bg-overlay); animation: ds-fade-in var(--ybm-duration-normal) var(--ybm-easing-standard); }
+.ds-menusheet__header { display: flex; flex-direction: column; gap: var(--ybm-space-x1); padding-bottom: var(--ybm-space-x4); }
+.ds-menusheet__title { margin: 0; font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); font-weight: var(--ybm-font-weight-bold); }
+.ds-menusheet__desc { margin: 0; color: var(--ybm-color-fg-neutral-muted); font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
+.ds-menusheet__list { display: flex; flex-direction: column; gap: var(--ybm-space-x2_5); }
+.ds-menusheet__group { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--ybm-shape-xl); }
+.ds-menusheet__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ybm-space-x3_5);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--ybm-space-x3_5) var(--ybm-space-x4);
+  background: var(--ybm-color-bg-neutral);
+  color: var(--ybm-color-fg-neutral);
+  font-size: var(--ybm-font-size-t05);
+  line-height: var(--ybm-line-height-t05);
+  text-align: start;
+}
+.ds-menusheet__item + .ds-menusheet__item { box-shadow: inset 0 1px 0 var(--ybm-color-stroke-neutral-muted); }
+.ds-menusheet__item:active { background: var(--ybm-color-bg-neutral-weak-pressed); }
+.ds-menusheet__item > .ds-icon { --ds-icon-size: 22px; }
+.ds-menusheet__item[data-tone="critical"] { color: var(--ybm-color-fg-critical); }
+.ds-menusheet__item[data-label-align="center"] { justify-content: center; text-align: center; }
+.ds-menusheet__content { display: flex; flex-direction: column; gap: var(--ybm-space-x0_5); min-width: 0; }
+.ds-menusheet__item:not([data-label-align="center"]) .ds-menusheet__content { flex: 1 1 auto; }
+.ds-menusheet__item-desc { color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); font-weight: var(--ybm-font-weight-medium); }
+.ds-menusheet__footer { padding-top: var(--ybm-space-x2_5); }
+.ds-menusheet__close {
+  width: 100%;
+  min-height: 52px;
+  padding: var(--ybm-space-x3_5) var(--ybm-space-x5);
+  border-radius: var(--ybm-shape-lg);
+  background: var(--ybm-color-bg-neutral);
+  color: var(--ybm-color-fg-neutral);
+  font-size: var(--ybm-font-size-t05);
+  line-height: var(--ybm-line-height-t05);
+  font-weight: var(--ybm-font-weight-medium);
+}
+.ds-menusheet__close:active { background: var(--ybm-color-bg-neutral-weak-pressed); }
+
+
+/* --------------------------------------------------------------------------
+   59 Result Section - 사용자 행동의 결과를 아이콘, 제목, 설명, 버튼으로 알려 주는 묶음 (2026-10-29 추가)
+   size: 기본 large(화면 전체) / data-size="medium"(화면 일부)
+   위쪽 그림은 40 아이콘(완료 fg/positive, 오류 fg/critical)이나 Progress Circle 40 으로 바꿔 쓴다.
+     <section class="ds-result" [data-size="medium"]>
+       [<div class="ds-result__asset"><i class="ds-icon ds-icon--circle-check-solid" aria-hidden="true"></i></div>]
+       <div class="ds-result__texts">
+         <h2 class="ds-result__title">신청을 마쳤어요</h2>
+         [<p class="ds-result__desc">처리 결과는 알림으로 알려 드릴게요</p>]
+       </div>
+       <div class="ds-result__actions">
+         <button type="button" class="ds-btn" data-variant="neutralWeak" data-size="medium">확인</button>
+         [<button type="button" class="ds-btn" data-variant="ghost" data-size="small">신청 내역 보기</button>]
+       </div>
+     </section>
+   Figma: 가운데 정렬, padding x4 x12 / 그림 아래 x4, 아이콘 40
+     large 글자 사이 x3, 아래 x7, 제목 t08 Bold, 설명 t05 fg/neutral-muted / medium 글자 사이 x2, 아래 x6, 제목 t05 Bold, 설명 t04
+     버튼 사이 x5, 위 Action Button neutralWeak medium, 아래 ghost small
+   -------------------------------------------------------------------------- */
+.ds-result {
+  --ds-result-gap: var(--ybm-space-x3);
+  --ds-result-text-bottom: var(--ybm-space-x7);
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ybm-space-x4) var(--ybm-space-x12);
+  text-align: center;
+}
+.ds-result[data-size="medium"] { --ds-result-gap: var(--ybm-space-x2); --ds-result-text-bottom: var(--ybm-space-x6); }
+.ds-result__asset { padding-bottom: var(--ybm-space-x4); }
+.ds-result__asset > .ds-icon { --ds-icon-size: var(--ybm-space-x10); }
+.ds-result__texts { display: flex; flex-direction: column; gap: var(--ds-result-gap); padding-bottom: var(--ds-result-text-bottom); }
+.ds-result__title { margin: 0; color: var(--ybm-color-fg-neutral); font-size: var(--ybm-font-size-t08); line-height: var(--ybm-line-height-t08); font-weight: var(--ybm-font-weight-bold); white-space: pre-line; }
+.ds-result__desc { margin: 0; color: var(--ybm-color-fg-neutral-muted); font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); white-space: pre-line; }
+.ds-result[data-size="medium"] .ds-result__title { font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); }
+.ds-result[data-size="medium"] .ds-result__desc { font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
+.ds-result__actions { display: flex; flex-direction: column; align-items: center; gap: var(--ybm-space-x5); }
+
+
+/* --------------------------------------------------------------------------
+   60 Timer - 흐른 시간이나 남은 시간을 숫자로 보여 주는 글자 (2026-10-29 추가)
+   format: 기본 clock(12:34, 1시간 넘으면 1:02:34) / data-format="elapsed"(12분 34초)
+   흐른 시간: data-start="시작 시각" / 남은 시간: data-end="끝 시각" (ISO 문자열 또는 밀리초)
+   ybm-ds.js 가 1초마다 글자와 datetime 을 바꾸고, 남은 시간이 0 이 되면 ds-timer-end 이벤트를 한 번 보낸다.
+     <time class="ds-timer" data-end="2026-10-29T15:00:00+09:00" [data-format="elapsed"]>0:00</time>
+   Figma: t02 fg/neutral-muted, 숫자 폭 고정 / 크기와 색은 놓이는 자리에 맞춰 바꿔 쓴다
+   -------------------------------------------------------------------------- */
+.ds-timer {
+  color: var(--ybm-color-fg-neutral-muted);
+  font-size: var(--ybm-font-size-t02);
+  line-height: var(--ybm-line-height-t02);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* --------------------------------------------------------------------------
+   61 Status Dot - 상태를 색으로 알려 주는 작은 점 (2026-10-29 추가)
+   tone: positive / warning / critical / brand / neutral(기본)   data-pulse: 진행 중일 때 깜빡임
+     <span class="ds-statusdot" data-tone="positive" [data-pulse]></span> <span>연결됨</span>
+   Figma: x2 원 / positive bg/positive-solid, warning bg/warning-solid, critical bg/critical-solid, brand bg/brand-solid, neutral fg/neutral-subtle
+     깜빡임 2초, 투명도 1 → 0.5 → 1 (동작 줄이기 설정에서는 멈춤)
+   -------------------------------------------------------------------------- */
+.ds-statusdot {
+  display: inline-block;
+  flex: none;
+  width: var(--ybm-space-x2);
+  height: var(--ybm-space-x2);
+  border-radius: var(--ybm-shape-pill);
+  background: var(--ybm-color-fg-neutral-subtle);
+  vertical-align: middle;
+}
+.ds-statusdot[data-tone="positive"] { background: var(--ybm-color-bg-positive-solid); }
+.ds-statusdot[data-tone="warning"] { background: var(--ybm-color-bg-warning-solid); }
+.ds-statusdot[data-tone="critical"] { background: var(--ybm-color-bg-critical-solid); }
+.ds-statusdot[data-tone="brand"] { background: var(--ybm-color-bg-brand-solid); }
+.ds-statusdot[data-pulse] { animation: ds-statusdot-pulse 2s ease-in-out infinite; }
+@keyframes ds-statusdot-pulse { 50% { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .ds-statusdot[data-pulse] { animation: none; } }
+
+
+/* --------------------------------------------------------------------------
+   62 Checkbox Group - 관련된 체크박스를 한 묶음으로 세로로 쌓는 틀 (2026-10-29 추가)
+   묶음 이름, 설명, 오류 문구는 03 Field Label 로 감싼다.
+     <fieldset class="ds-checkbox-group">
+       <label class="ds-checkbox" data-tone="neutral"><input type="checkbox" class="ds-checkbox__control"><span class="ds-checkbox__label">이메일</span></label>
+     </fieldset>
+   Figma: 항목 사이 x1
+   -------------------------------------------------------------------------- */
+.ds-checkbox-group { display: flex; flex-direction: column; gap: var(--ybm-space-x1); min-width: 0; margin: 0; padding: 0; border: 0; }
+
+
+/* --------------------------------------------------------------------------
+   63 Scroll Fog - 스크롤 영역의 끝을 흐리게 해 내용이 더 있음을 알리는 효과 (2026-10-29 추가)
+   direction: 기본 세로 / data-direction="horizontal"   흐려지는 쪽에 최소 20 의 여백을 둔다(화면 전체 세로 스크롤은 위 20, 아래 80)
+     <div class="ds-scrollfog" [data-direction="horizontal"]>…스크롤 되는 내용…</div>
+   Figma: 끝 20 을 투명 → 불투명으로 / 코드는 배경색 덮개가 아니라 mask 라 어떤 배경 위에서도 쓴다
+   -------------------------------------------------------------------------- */
+.ds-scrollfog {
+  --ds-scrollfog-size: 20px;
+  --ds-scrollfog-direction: to bottom;
+  overflow: auto;
+  -webkit-mask-image: linear-gradient(var(--ds-scrollfog-direction), transparent, #000 var(--ds-scrollfog-size), #000 calc(100% - var(--ds-scrollfog-size)), transparent);
+          mask-image: linear-gradient(var(--ds-scrollfog-direction), transparent, #000 var(--ds-scrollfog-size), #000 calc(100% - var(--ds-scrollfog-size)), transparent);
+}
+.ds-scrollfog[data-direction="horizontal"] { --ds-scrollfog-direction: to right; }
+
+
+/* --------------------------------------------------------------------------
+   64 Pull To Refresh - 목록 맨 위에서 아래로 당겨 새로 고치는 동작 (2026-10-29 추가)
+   ybm-ds.js 가 터치로 당긴 거리를 --ds-ptr-displacement 에 넣고, 88 을 넘겨 놓으면 data-state="refreshing" 과 ds-refresh 이벤트.
+   새로 고침이 끝나면 YBM.endRefresh(요소) 로 되돌린다. data-disabled 로 끈다.
+     <div class="ds-ptr">
+       <div class="ds-ptr__indicator">
+         <span class="ds-progress-circle" role="progressbar" aria-label="새로 고침"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ds-progress-circle__track" pathLength="100"/><circle class="ds-progress-circle__range" pathLength="100"/></svg></span>
+       </div>
+       <div class="ds-ptr__content">…목록…</div>
+     </div>
+   Figma: 위쪽 영역 높이 x6 + x8 × 2 / Progress Circle 24 neutral, 당기는 동안 차오르고 새로 고치는 동안 회전
+   -------------------------------------------------------------------------- */
+.ds-ptr {
+  --ds-ptr-size: calc(var(--ybm-space-x6) + var(--ybm-space-x8) * 2);
+  --ds-ptr-displacement: 0px;
+  position: relative;
+  overflow: hidden;
+}
+.ds-ptr__indicator {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ds-ptr-size);
+  transform: translateY(min(calc(var(--ds-ptr-displacement) - var(--ds-ptr-size)), 0px));
+  transition: transform var(--ybm-duration-slow) var(--ybm-easing-standard);
+}
+.ds-ptr__content { overscroll-behavior-y: contain; transform: translateY(var(--ds-ptr-displacement)); transition: transform var(--ybm-duration-slow) var(--ybm-easing-standard); }
+.ds-ptr[data-dragging] :is(.ds-ptr__indicator, .ds-ptr__content) { transition: none; }
+
+
+/* --------------------------------------------------------------------------
+   65 Side Panel - PC 화면 가장자리에서 밀려 나오는 패널 (2026-10-29 추가)
+   네이티브 <dialog> 를 쓴다. data-ds-open 으로 열고, data-ds-close 와 바깥 누르기로 닫는다.
+   size: small 480 / 기본 medium 720 / large 960 (화면의 80% 를 넘지 않음)   direction: 기본 오른쪽 / data-direction="left"
+   본문이 스크롤되면 ybm-ds.js 가 data-scrolled 를 붙여 본문 위에 1px 선이 생긴다. 화면이 좁으면 Bottom Sheet 로 바꿔 쓴다.
+     <dialog class="ds-sidepanel" id="sp" aria-labelledby="sp-t" [data-size="small"] [data-direction="left"]>
+       <div class="ds-sidepanel__header">
+         <div class="ds-sidepanel__texts"><h2 class="ds-sidepanel__title" id="sp-t">제목</h2>[<p class="ds-sidepanel__desc">설명</p>]</div>
+         <button type="button" class="ds-sidepanel__close" data-ds-close aria-label="닫기"><i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>
+       </div>
+       <div class="ds-sidepanel__body">…</div>
+       [<div class="ds-sidepanel__footer">…버튼…</div>]
+     </dialog>
+   Figma: bg/layer-floating / header 최소 높이 70, padding x6 x6 x4, gap x1_5, 제목 t08 Bold, 설명 t05 fg/neutral-muted
+     body 좌우 x6, 아래 x12 / footer padding x4 x6 x6 / Close Button 52, shape/lg, x 22 fg/neutral-subtle
+   -------------------------------------------------------------------------- */
+.ds-sidepanel {
+  --ds-sidepanel-width: 720px;
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(var(--ds-sidepanel-width), 80%);
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--ybm-color-bg-layer-floating);
+  color: var(--ybm-color-fg-neutral);
+  flex-direction: column;
+}
+.ds-sidepanel[data-size="small"] { --ds-sidepanel-width: 480px; }
+.ds-sidepanel[data-size="large"] { --ds-sidepanel-width: 960px; }
+.ds-sidepanel[data-direction="left"] { inset: 0 auto 0 0; }
+.ds-sidepanel:focus { outline: none; }
+.ds-sidepanel[open] { display: flex; animation: ds-sidepanel-in var(--ybm-duration-slow) var(--ybm-easing-emphasized); }
+.ds-sidepanel[data-direction="left"][open] { animation-name: ds-sidepanel-in-left; }
+.ds-sidepanel::backdrop { background: var(--ybm-color-bg-overlay); animation: ds-fade-in var(--ybm-duration-normal) var(--ybm-easing-standard); }
+@keyframes ds-sidepanel-in { from { transform: translateX(100%); } }
+@keyframes ds-sidepanel-in-left { from { transform: translateX(-100%); } }
+.ds-sidepanel__header { display: flex; align-items: flex-start; gap: var(--ybm-space-x1_5); min-height: 70px; padding: var(--ybm-space-x6) var(--ybm-space-x6) var(--ybm-space-x4); }
+.ds-sidepanel__texts { display: flex; flex: 1 1 auto; flex-direction: column; gap: var(--ybm-space-x1_5); min-width: 0; }
+.ds-sidepanel__title { margin: 0; font-size: var(--ybm-font-size-t08); line-height: var(--ybm-line-height-t08); font-weight: var(--ybm-font-weight-bold); }
+.ds-sidepanel__desc { margin: 0; color: var(--ybm-color-fg-neutral-muted); font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); }
+.ds-sidepanel__close { display: grid; place-items: center; flex: none; width: var(--ybm-space-x13); height: var(--ybm-space-x13); margin-block: calc(var(--ybm-space-x3) * -1); border-radius: var(--ybm-shape-lg); color: var(--ybm-color-fg-neutral-subtle); }
+.ds-sidepanel__close > .ds-icon { --ds-icon-size: 22px; }
+.ds-sidepanel__close:active { background: var(--ybm-color-bg-transparent-pressed); }
+.ds-sidepanel__body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--ybm-space-x6) var(--ybm-space-x12); transition: box-shadow var(--ybm-duration-fast) var(--ybm-easing-standard); }
+.ds-sidepanel__body[data-scrolled] { box-shadow: inset 0 1px 0 var(--ybm-color-stroke-neutral-muted); }
+.ds-sidepanel__footer { display: flex; justify-content: flex-end; gap: var(--ybm-space-x2); padding: var(--ybm-space-x4) var(--ybm-space-x6) var(--ybm-space-x6); }
+
+
+/* --------------------------------------------------------------------------
+   66 Image Frame - 사용자가 올린 사진을 정해진 비율로 보여 주는 틀 (2026-10-29 추가)
+   ratio: 기본 1:1 / data-ratio="4:3" / data-ratio="16:9" (그 밖은 --ds-imageframe-ratio)   stroke: data-stroke
+     <div class="ds-imageframe" data-ratio="4:3" [data-stroke]>
+       <img src="…" alt="…">
+       [<div class="ds-imageframe__floater" data-position="bottom-end"><span class="ds-imageframe__indicator">1/5</span></div>]
+     </div>
+   Figma: shape/sm / 빈 자리 bg/neutral / stroke 안쪽 1px stroke/neutral-subtle
+     얹는 표시는 가장자리에서 x1_5 / indicator padding x0_5 x1_5, pill, palette/static-black-alpha-800, Static t01 Medium 흰색
+   -------------------------------------------------------------------------- */
+.ds-imageframe { --ds-imageframe-ratio: 1; position: relative; overflow: hidden; aspect-ratio: var(--ds-imageframe-ratio); border-radius: var(--ybm-shape-sm); background: var(--ybm-color-bg-neutral); }
+.ds-imageframe[data-ratio="4:3"] { --ds-imageframe-ratio: 4 / 3; }
+.ds-imageframe[data-ratio="16:9"] { --ds-imageframe-ratio: 16 / 9; }
+.ds-imageframe > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ds-imageframe[data-stroke]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-subtle); pointer-events: none; }
+.ds-imageframe__floater { position: absolute; z-index: 1; display: flex; gap: var(--ybm-space-x1); }
+.ds-imageframe__floater[data-position^="top"] { top: var(--ybm-space-x1_5); }
+.ds-imageframe__floater[data-position^="bottom"], .ds-imageframe__floater:not([data-position]) { bottom: var(--ybm-space-x1_5); }
+.ds-imageframe__floater[data-position$="start"] { left: var(--ybm-space-x1_5); }
+.ds-imageframe__floater[data-position$="end"], .ds-imageframe__floater:not([data-position]) { right: var(--ybm-space-x1_5); }
+.ds-imageframe__indicator {
+  padding: var(--ybm-space-x0_5) var(--ybm-space-x1_5);
+  border-radius: var(--ybm-shape-pill);
+  background: var(--ybm-color-palette-static-black-alpha-800);
+  color: var(--ybm-color-palette-static-white);
+  font-size: var(--ybm-font-size-t01-static);
+  line-height: var(--ybm-line-height-t01-static);
+  font-weight: var(--ybm-font-weight-medium);
+}
+
+
+/* --------------------------------------------------------------------------
+   67 Carousel - 가로로 넘기며 보는 묶음 (2026-10-29 추가)
+   항목은 넘길 때 시작 위치에 맞춰 멈춘다. 이미지 넘기기 배너는 Image Frame 을 항목으로 넣어 만든다.
+   ybm-ds.js 가 처음/끝에 닿으면 data-at-start / data-at-end 를 붙여 그쪽 흐림과 버튼을 감추고, 버튼을 누르면 한 화면씩 넘긴다.
+     <div class="ds-carousel" role="region" aria-roledescription="carousel" aria-label="추천">
+       <div class="ds-carousel__scroller">
+         <div class="ds-carousel__item">…</div>
+       </div>
+       <button type="button" class="ds-carousel__button" data-direction="previous" aria-label="이전"><i class="ds-icon ds-icon--chevron-left ds-icon--sm" aria-hidden="true"></i></button>
+       <button type="button" class="ds-carousel__button" data-direction="next" aria-label="다음"><i class="ds-icon ds-icon--chevron-right ds-icon--sm" aria-hidden="true"></i></button>
+     </div>
+   Figma: 항목 사이 x2 / 양 끝 흐림 x1 / Carousel Button 32 pill, bg/layer-floating, elevation overlay, 아이콘 16, 가장자리에서 x2
+   -------------------------------------------------------------------------- */
+.ds-carousel { --ds-carousel-gap: var(--ybm-space-x2); --ds-carousel-padding: 0px; --ds-carousel-fade: var(--ybm-space-x1); position: relative; min-width: 0; max-width: 100%; }
+.ds-carousel__scroller {
+  --ds-carousel-fade-start: var(--ds-carousel-fade);
+  --ds-carousel-fade-end: var(--ds-carousel-fade);
+  display: flex;
+  gap: var(--ds-carousel-gap);
+  padding-inline: var(--ds-carousel-padding);
+  scroll-padding-inline: var(--ds-carousel-padding);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--ds-carousel-fade-start), #000 calc(100% - var(--ds-carousel-fade-end)), transparent);
+          mask-image: linear-gradient(to right, transparent, #000 var(--ds-carousel-fade-start), #000 calc(100% - var(--ds-carousel-fade-end)), transparent);
+}
+.ds-carousel__scroller::-webkit-scrollbar { display: none; }
+.ds-carousel[data-at-start] .ds-carousel__scroller { --ds-carousel-fade-start: 0px; }
+.ds-carousel[data-at-end] .ds-carousel__scroller { --ds-carousel-fade-end: 0px; }
+.ds-carousel__item { display: flex; flex: none; scroll-snap-align: start; }
+.ds-carousel__button {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--ybm-space-x8);
+  height: var(--ybm-space-x8);
+  border-radius: var(--ybm-shape-pill);
+  background: var(--ybm-color-bg-layer-floating);
+  box-shadow: var(--ybm-elevation-overlay);
+  color: var(--ybm-color-fg-neutral);
+  translate: 0 -50%;
+  transition: opacity var(--ybm-duration-fast) var(--ybm-easing-standard);
+}
+.ds-carousel__button[data-direction="previous"] { left: var(--ybm-space-x2); }
+.ds-carousel__button[data-direction="next"] { right: var(--ybm-space-x2); }
+.ds-carousel[data-at-start] .ds-carousel__button[data-direction="previous"],
+.ds-carousel[data-at-end] .ds-carousel__button[data-direction="next"] { opacity: 0; pointer-events: none; }
+
+
+/* --------------------------------------------------------------------------
+   68 Markdown - AI 답변 같은 서식 있는 글을 보여 주는 틀 (2026-10-29 추가)
+   변환된 HTML 을 감싸기만 하면 제목, 문단, 목록, 인용, 표, 코드의 크기와 간격이 맞춰진다. 코드 묶음은 Code Block, 출처는 Citation.
+     <div class="ds-markdown">…변환된 HTML…</div>
+   Figma: 본문 t04 / h1 t09 Bold, h2 t07 Bold (앞뒤 x6 / x3) / h3 t06, h4 t05, h5·h6 t04 SemiBold (앞뒤 x4 / x2)
+     문단, 목록, 그림 x3 / 코드, 인용, 표 x4 / 구분선 x6 / 인용 왼쪽 2px stroke/neutral-weak, fg/neutral-muted
+   -------------------------------------------------------------------------- */
+.ds-markdown {
+  --ds-font-mono: ui-monospace, "Roboto Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  color: var(--ybm-color-fg-neutral);
+  font-size: var(--ybm-font-size-t04);
+  line-height: var(--ybm-line-height-t04);
+}
+.ds-markdown > :first-child { margin-top: 0; }
+.ds-markdown > :last-child { margin-bottom: 0; }
+.ds-markdown :is(h1, h2) { margin: var(--ybm-space-x6) 0 var(--ybm-space-x3); font-weight: var(--ybm-font-weight-bold); }
+.ds-markdown h1 { font-size: var(--ybm-font-size-t09); line-height: var(--ybm-line-height-t09); }
+.ds-markdown h2 { font-size: var(--ybm-font-size-t07); line-height: var(--ybm-line-height-t07); }
+.ds-markdown :is(h3, h4, h5, h6) { margin: var(--ybm-space-x4) 0 var(--ybm-space-x2); font-weight: var(--ybm-font-weight-semibold); }
+.ds-markdown h3 { font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); }
+.ds-markdown h4 { font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); }
+.ds-markdown :is(p, ul, ol, img) { margin: var(--ybm-space-x3) 0; }
+.ds-markdown :is(ul, ol) { padding-left: var(--ybm-space-x5); }
+.ds-markdown ul { list-style: disc; }
+.ds-markdown ol { list-style: decimal; }
+.ds-markdown li + li { margin-top: var(--ybm-space-x1); }
+.ds-markdown :is(pre, blockquote, table, .ds-codeblock) { margin: var(--ybm-space-x4) 0; }
+.ds-markdown blockquote { padding-left: var(--ybm-space-x3); box-shadow: inset 2px 0 0 var(--ybm-color-stroke-neutral-weak); color: var(--ybm-color-fg-neutral-muted); }
+.ds-markdown hr { margin: var(--ybm-space-x6) 0; border: 0; border-top: 1px solid var(--ybm-color-stroke-neutral-weak); }
+.ds-markdown a:not([class]) { color: var(--ybm-color-fg-brand); text-decoration: underline; }
+.ds-markdown img { max-width: 100%; border-radius: var(--ybm-shape-sm); }
+.ds-markdown :not(pre) > code { padding: 0 var(--ybm-space-x1); border-radius: var(--ybm-shape-2xs); background: var(--ybm-color-bg-neutral); font-family: var(--ds-font-mono); font-size: 0.9em; }
+.ds-markdown table { border-collapse: collapse; }
+.ds-markdown :is(th, td) { padding: var(--ybm-space-x2); border: 1px solid var(--ybm-color-stroke-neutral-weak); text-align: start; }
+.ds-markdown th { font-weight: var(--ybm-font-weight-semibold); }
+
+
+/* --------------------------------------------------------------------------
+   69 Code Block - 코드를 고정 폭 글꼴로 보여 주는 칸 (2026-10-29 추가)
+   header 에는 언어 이름과 복사 버튼. 복사 버튼(data-ds-copy)은 ybm-ds.js 가 코드를 복사하고 잠시 data-copied 를 붙인다.
+     <figure class="ds-codeblock">
+       [<figcaption class="ds-codeblock__header"><span class="ds-codeblock__language">javascript</span>
+         <button type="button" class="ds-codeblock__copy" data-ds-copy aria-label="코드 복사"><i class="ds-icon ds-icon--copy ds-icon--sm" aria-hidden="true"></i></button></figcaption>]
+       <pre class="ds-codeblock__code"><code>…</code></pre>
+     </figure>
+   Figma: shape/sm, 1px stroke/neutral-weak, bg/neutral / header padding x2 x4, 아래 1px 선, 언어 12 Medium fg/neutral-subtle, 복사 24 안에 16
+     코드 padding x3 x4, 13 / 20, fg/neutral, 긴 줄은 가로 스크롤
+   -------------------------------------------------------------------------- */
+.ds-codeblock {
+  --ds-font-mono: ui-monospace, "Roboto Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--ybm-shape-sm);
+  background: var(--ybm-color-bg-neutral);
+  box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak);
+}
+.ds-codeblock__header { display: flex; align-items: center; justify-content: space-between; gap: var(--ybm-space-x2); padding: var(--ybm-space-x2) var(--ybm-space-x4); box-shadow: inset 0 -1px 0 var(--ybm-color-stroke-neutral-weak); }
+.ds-codeblock__language { color: var(--ybm-color-fg-neutral-subtle); font-family: var(--ds-font-mono); font-size: var(--ybm-font-size-t02); line-height: var(--ybm-line-height-t02); font-weight: var(--ybm-font-weight-medium); }
+.ds-codeblock__copy { display: grid; place-items: center; flex: none; width: var(--ybm-space-x6); height: var(--ybm-space-x6); border-radius: var(--ybm-shape-sm); color: var(--ybm-color-fg-neutral-subtle); }
+.ds-codeblock__copy:active { background: var(--ybm-color-bg-transparent-pressed); }
+.ds-codeblock__copy[data-copied] > .ds-icon { --ds-icon: var(--ds-icon-check); }
+.ds-codeblock__code {
+  margin: 0;
+  padding: var(--ybm-space-x3) var(--ybm-space-x4);
+  overflow-x: auto;
+  color: var(--ybm-color-fg-neutral);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ybm-font-size-t03);
+  line-height: 20px;
+  white-space: pre;
+  tab-size: 2;
+}
+.ds-codeblock__code > code { font: inherit; }
+
+
+/* --------------------------------------------------------------------------
+   70 Citation - 본문 안에서 근거가 된 출처를 가리키는 표시 (2026-10-29 추가)
+   type: 기본 label(출처 이름 칩) / data-type="number"(글 뒤 위첨자 번호)
+     <a class="ds-citation" data-type="number" href="#ref-1" aria-label="출처 1">1</a>
+     <a class="ds-citation" href="https://…">[<span class="ds-citation__icon"><i class="ds-icon ds-icon--globe" aria-hidden="true"></i></span>]<span class="ds-citation__label">출처 이름</span></a>
+   Figma: 높이 x5, t02, fg/neutral-muted / number 최소 폭 x5, 좌우 x1, pill, bg/brand-weak, SemiBold
+     label 좌우 x2(아이콘이 있으면 왼쪽 x0_5), gap x1, shape/sm, 1px stroke/neutral-weak, 최대 15em / 아이콘 칸 x4 원, 아이콘 12
+   -------------------------------------------------------------------------- */
+.ds-citation {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ybm-space-x1);
+  max-width: 15em;
+  height: var(--ybm-space-x5);
+  margin-inline-start: var(--ybm-space-x0_5);
+  padding-inline: var(--ybm-space-x2);
+  overflow: hidden;
+  border-radius: var(--ybm-shape-sm);
+  box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak);
+  color: var(--ybm-color-fg-neutral-muted);
+  font-size: var(--ybm-font-size-t02);
+  line-height: var(--ybm-line-height-t02);
+  text-decoration: none;
+  vertical-align: baseline;
+  transition: background-color var(--ybm-duration-fast) var(--ybm-easing-standard);
+}
+.ds-citation:has(.ds-citation__icon) { padding-inline-start: var(--ybm-space-x0_5); }
+a.ds-citation:hover { background: var(--ybm-color-bg-transparent-pressed); }
+.ds-citation__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-citation__icon { display: grid; place-items: center; flex: none; width: var(--ybm-space-x4); height: var(--ybm-space-x4); overflow: hidden; border-radius: var(--ybm-shape-pill); background: var(--ybm-color-bg-layer-default); box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak); }
+.ds-citation__icon > :is(.ds-icon, img) { --ds-icon-size: 12px; width: 12px; height: 12px; }
+.ds-citation[data-type="number"] {
+  justify-content: center;
+  min-width: var(--ybm-space-x5);
+  padding-inline: var(--ybm-space-x1);
+  border-radius: var(--ybm-shape-pill);
+  background: var(--ybm-color-bg-brand-weak);
+  box-shadow: none;
+  font-weight: var(--ybm-font-weight-semibold);
+  vertical-align: super;
+}
+a.ds-citation[data-type="number"]:hover { background: var(--ybm-color-bg-brand-weak-pressed); }
+
+
+/* --------------------------------------------------------------------------
+   71 Multi Select - 목록에서 여러 값을 골라 칸에 모아 보여 주는 부품 (2026-10-29 추가)
+   Popover 와 같이 data-ds-popover="id" 로 열고, 바깥 누르기와 Esc 로 닫는다.
+   ybm-ds.js 가 고른 값을 Badge 로 칸에 채우고, data-max(기본 2) 를 넘으면 +N 으로 줄인다.
+     <div class="ds-multiselect">
+       <button type="button" class="ds-multiselect__trigger" data-ds-popover="ms" aria-haspopup="listbox" aria-expanded="false">
+         <span class="ds-multiselect__values" data-placeholder="선택하세요" [data-max="2"]></span>
+         <i class="ds-icon ds-icon--chevron-down ds-icon--sm" aria-hidden="true"></i>
+       </button>
+       <div class="ds-multiselect__panel" id="ms" role="listbox" aria-multiselectable="true" hidden>
+         [<div class="ds-multiselect__heading">관심 분야</div>]
+         <label class="ds-multiselect__option"><span class="ds-checkbox" data-tone="neutral"><input type="checkbox" class="ds-checkbox__control"></span><span class="ds-multiselect__label">디자인</span></label>
+       </div>
+     </div>
+   Figma: Trigger 높이 40, padding x2 x3_5, gap x2, shape/sm, 1px stroke/neutral-weak (열림 stroke/neutral-contrast), 값 사이 x1, +N t04 Medium fg/neutral-muted
+     Panel padding x1, shape/lg, bg/layer-floating, elevation overlay, 최대 높이 300 / heading padding x1 x2, t02 fg/neutral-muted
+     Option padding x1_5 x2, gap x2, shape/sm, t04 Medium / highlighted bg/transparent-pressed / disabled fg/disabled
+   -------------------------------------------------------------------------- */
+.ds-multiselect { position: relative; }
+.ds-multiselect__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--ybm-space-x2);
+  width: 100%;
+  min-height: var(--ybm-space-x10);
+  padding: var(--ybm-space-x2) var(--ybm-space-x3_5);
+  border-radius: var(--ybm-shape-sm);
+  box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak);
+  color: var(--ybm-color-fg-neutral);
+  font-size: var(--ybm-font-size-t04);
+  line-height: var(--ybm-line-height-t04);
+  text-align: start;
+}
+.ds-multiselect__trigger[aria-expanded="true"] { box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-contrast); }
+.ds-multiselect__trigger > .ds-icon { color: var(--ybm-color-fg-neutral-subtle); transition: rotate var(--ybm-duration-fast) var(--ybm-easing-standard); }
+.ds-multiselect__trigger[aria-expanded="true"] > .ds-icon { rotate: 180deg; }
+.ds-multiselect__trigger:disabled { background: var(--ybm-color-bg-disabled); color: var(--ybm-color-fg-disabled); }
+.ds-multiselect__trigger:disabled > .ds-icon { color: inherit; }
+.ds-multiselect__values { display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: center; gap: var(--ybm-space-x1); min-width: 0; }
+.ds-multiselect__values:empty::before { content: attr(data-placeholder); color: var(--ybm-color-fg-placeholder); }
+.ds-multiselect__overflow { color: var(--ybm-color-fg-neutral-muted); font-weight: var(--ybm-font-weight-medium); }
+.ds-multiselect__panel {
+  position: absolute;
+  z-index: var(--ybm-z-overlay);
+  top: calc(100% + var(--ybm-space-x1));
+  inset-inline: 0;
+  max-height: 300px;
+  padding: var(--ybm-space-x1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--ybm-shape-lg);
+  background: var(--ybm-color-bg-layer-floating);
+  box-shadow: var(--ybm-elevation-overlay);
+}
+.ds-multiselect__panel[hidden] { display: none; }
+.ds-multiselect__heading { padding: var(--ybm-space-x1) var(--ybm-space-x2); color: var(--ybm-color-fg-neutral-muted); font-size: var(--ybm-font-size-t02); line-height: var(--ybm-line-height-t02); user-select: none; }
+.ds-multiselect__option {
+  display: flex;
+  align-items: center;
+  gap: var(--ybm-space-x2);
+  padding: var(--ybm-space-x1_5) var(--ybm-space-x2);
+  border-radius: var(--ybm-shape-sm);
+  color: var(--ybm-color-fg-neutral);
+  font-size: var(--ybm-font-size-t04);
+  line-height: var(--ybm-line-height-t04);
+  font-weight: var(--ybm-font-weight-medium);
+  cursor: pointer;
+}
+.ds-multiselect__option:is(:hover, :focus-within, [data-highlighted]) { background: var(--ybm-color-bg-transparent-pressed); }
+.ds-multiselect__option:has(:disabled) { color: var(--ybm-color-fg-disabled); cursor: default; }
+.ds-multiselect__option .ds-checkbox { min-height: 0; }
+.ds-multiselect__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
