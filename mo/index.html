@@ -130,6 +130,7 @@
 <script src="icons.js"></script>
 <script src="taxonomy.js"></script>
 <script src="../assets/sidebar.js"></script>
+<script src="../assets/synonyms.js"></script>
 <script src="../assets/search.js"></script>
 <script src="../assets/cols.js"></script>
 <script>
@@ -312,6 +313,7 @@ function loadCrossSearchIndex() {
 function onSearchInput(v) {
   const q = v.trim();
   const drop = document.getElementById('searchDrop');
+  if (!q) { drop.innerHTML = buildSearchHome(); drop.classList.toggle('open', AC.rows.length > 0); return; }  // 빈 검색창: 최근 검색어, 추천 조합
   if (q.length < 2) { drop.classList.remove('open'); return; }
 
   // 상대 사이트 인덱스가 아직 없으면 백그라운드로 불러온 뒤, 입력값이 그대로면 다시 그린다
@@ -323,7 +325,7 @@ function onSearchInput(v) {
     });
   }
 
-  // 시안 A: 카테고리 → 서비스 → 이어지는 검색어, 최대 6줄 (../assets/search.js)
+  // 자동완성: 전체보기 + UX 패턴, 여러 단어면 조합 보기 + 단어 하나씩 (../assets/search.js)
   drop.innerHTML = buildAutocomplete(q);
   drop.classList.add('open');
 }
