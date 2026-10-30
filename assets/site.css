@@ -116,8 +116,9 @@ body { background: var(--ybm-color-bg-canvas); }
 
 /* 서비스 카드 (필터 없을 때 서비스당 1장) */
 .svc-item { min-width: 0; cursor: pointer; }
-/* 인덱스 카드도 동일 처리 (523장 레이아웃 102ms → 20ms). 썸네일 + 하단 정보바(62px) */
-.svc-item { content-visibility: auto; contain-intrinsic-size: auto calc(var(--cih, var(--shot-h)) + 62px); }
+/* 인덱스 카드도 동일 처리 (523장 레이아웃 102ms → 20ms). 썸네일에만 건다 -
+   .svc-item 에 걸면 호버로 떠오른 썸네일 위쪽과 그림자가 카드 칸 밖이라 잘려 둥근 모서리가 깎여 보인다 */
+.svc-thumb { content-visibility: auto; contain-intrinsic-size: auto var(--cih, var(--shot-h)); }
 .svc-thumb { position: relative; aspect-ratio: var(--shot-ratio); overflow: hidden; border-radius: var(--ybm-shape-2xl); background: var(--ybm-color-bg-layer-default); transition: transform .18s, box-shadow .18s; }
 @media (hover: hover) { .svc-item:hover .svc-thumb { transform: translateY(-3px); box-shadow: var(--ybm-elevation-floating); } }
 .svc-info { display: flex; align-items: center; gap: var(--ybm-space-x2_5); padding: var(--ybm-space-x3_5) var(--ybm-space-x1) 0; }
