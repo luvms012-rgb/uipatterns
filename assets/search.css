@@ -4,8 +4,11 @@
 .sr-sec-hdr { display: flex; align-items: baseline; gap: var(--ybm-space-x2_5); margin-bottom: var(--ybm-space-x6); }
 .sr-sec-title { font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); font-weight: var(--ybm-font-weight-bold); }
 .sr-sec-cnt { color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
-/* 비슷한 말 안내 줄, 결과 없을 때 "단어만 보기" 버튼의 장수 */
-.sr-note { margin-bottom: var(--ybm-space-x6); color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); }
+/* "함께 찾은 말" 칩 줄 (칩은 ybm-ds Chip small), 결과 없을 때 "단어만 보기" 버튼의 장수 */
+.sr-syn { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ybm-space-x2); margin-bottom: var(--ybm-space-x6); }
+/* 뺀 말: 흐린 글자 + 취소선 (아이콘은 + 로 바뀜) */
+.sr-syn-chip[data-off] { color: var(--ybm-color-fg-neutral-subtle); text-decoration: line-through; }
+.sr-syn-label { color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); }
 .sr-btn-cnt { color: var(--ybm-color-fg-neutral-subtle); }
 /* 자동완성 묶음 제목 줄 (최근 검색어 + 지우기) */
 .ac-label { display: flex; align-items: center; justify-content: space-between; gap: var(--ybm-space-x2); }

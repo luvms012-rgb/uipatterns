@@ -18,6 +18,7 @@ function runSearch(q, opts) {
   if (!q) { S.q = ''; if (S.view === 'search') backToIndex(); return; }
   if (q.length >= 2) aTrack('search', { q });
   srRemember(q);
+  if (q !== S.q) SR_OFF.clear();
   S.q = q; S.view = 'search'; S.svc = null;
   S.checked.clear(); S.checkedComps.clear(); S.checkedColors.clear(); S.checkedTypes.clear();
   document.getElementById('hdrSearchInput').value = q;
@@ -70,16 +71,22 @@ function srSvcItems() {
 }
 
 // 검색어 한 단어 → 비슷한 말까지 (words: 서비스 말고 전부에서 찾을 말, svcs: 서비스 이름에서 찾을 말). 첫 번째가 입력한 말
+// 사용자가 "함께 찾은 말" 칩에서 뺀 비슷한 말 (normCat 값). 검색어가 바뀌면 비운다. 주소 #x=
+const SR_OFF = new Set();
+
 function srTerm(t) {
   const n = normCat(t);
   const grp = list => list.find(g => g.some(w => normCat(w) === n)) || [];
+  const on = w => normCat(w) === n || !SR_OFF.has(normCat(w));  // 입력한 말 자체는 뺄 수 없다
   const syn = grp(typeof SEARCH_SYNONYMS !== 'undefined' ? SEARCH_SYNONYMS : []);  // synonyms.js 를 못 불러와도 검색은 되게
   const ali = grp(typeof SERVICE_ALIASES !== 'undefined' ? SERVICE_ALIASES : []);
+  const others = [...new Set([...syn, ...ali].filter(w => normCat(w) !== n))];
   return {
     t, n,
-    words: [...new Set([n, ...syn.map(normCat)])],
-    svcs: [...new Set([n, ...ali.map(normCat)])],
-    alts: [...new Set([...syn, ...ali].filter(w => normCat(w) !== n))],
+    words: [...new Set([n, ...syn.filter(on).map(normCat)])],
+    svcs: [...new Set([n, ...ali.filter(on).map(normCat)])],
+    alts: others.filter(on),
+    off: others.filter(w => !on(w)),
   };
 }
 
@@ -163,10 +170,17 @@ function searchResults(q) {
   return r;
 }
 
-// "비슷한 말도 함께 찾았어요" 한 줄 (없으면 빈 글자)
+// "함께 찾은 말" 칩 줄 (시안 A, 10/30 사용자 결정) — × 로 그 말을 빼고, 뺀 말은 흐린 칩 + 로 다시 넣는다. 없으면 빈 글자
 function srSynNote(terms, esc) {
-  const parts = terms.filter(v => v.alts.length).map(v => `${esc(v.t)} → ${v.alts.map(esc).join(', ')}`);
-  return parts.length ? `<p class="sr-note">비슷한 말도 함께 찾았어요: ${parts.join(' / ')}</p>` : '';
+  const chip = (w, off) => `<button type="button" class="ds-chip sr-syn-chip" data-size="small"${off ? ' data-variant="outlineWeak" data-off' : ''}
+    onclick="srToggleSyn('${encodeURIComponent(w)}')" title="${off ? '다시 넣기' : '이 말 빼고 찾기'}">${esc(w)}<i class="ds-icon ds-icon--${off ? 'plus' : 'x'}" aria-hidden="true"></i></button>`;
+  const chips = terms.flatMap(v => [...v.alts.map(w => chip(w, false)), ...v.off.map(w => chip(w, true))]);
+  return chips.length ? `<div class="sr-syn"><span class="sr-syn-label">함께 찾은 말</span><div class="ds-chip-group">${chips.join('')}</div></div>` : '';
+}
+function srToggleSyn(enc) {
+  const n = normCat(decodeURIComponent(enc));
+  SR_OFF.has(n) ? SR_OFF.delete(n) : SR_OFF.add(n);
+  render(); syncUrl();
 }
 
 function searchSvcCard(svc, svcItems) {

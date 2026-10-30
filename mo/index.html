@@ -920,6 +920,7 @@ function syncUrl() {
   if (S.checkedTypes.size) params.set('type', [...S.checkedTypes].join(','));
   if (S.view === 'detail' && S.svc) params.set('svc', S.svc);
   if (S.view === 'search' && S.q)   params.set('q', S.q);
+  if (S.view === 'search' && S.q && SR_OFF.size) params.set('x', [...SR_OFF].join(','));  // 뺀 비슷한 말
   const qs = params.toString();
   history.replaceState(null, '', qs ? '#' + qs : location.pathname + location.search);
 }
@@ -941,6 +942,7 @@ function readUrl() {
     if (type) type.split(',').forEach(t => { if (t) S.checkedTypes.add(t); });
     if (svc)  { S.view = 'detail'; S.svc = svc.trim().normalize('NFC'); }
     if (q && q.trim()) { S.view = 'search'; S.q = q.trim(); document.getElementById('hdrSearchInput').value = S.q; }
+    SR_OFF.clear(); (params.get('x') || '').split(',').filter(Boolean).forEach(w => SR_OFF.add(normCat(w)));
   } catch(e) {}
 }
 
