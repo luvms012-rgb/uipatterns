@@ -284,10 +284,11 @@ function srForget() {
 }
 
 // 빈 검색창 추천 조합 — 이 사이트에서 결과가 있는 것만 4개
-const SR_EXAMPLES = ['지도, 리스트', '쿠팡 장바구니', '금융 온보딩', '블랙 메인', '바텀시트 결제', '토스 로그인', '배달 리뷰', '카트'];
+const SR_EXAMPLES = ['여행 예약', '금융 계좌', '모빌리티 길찾기', '커머스 장바구니', '금융 온보딩', '블랙 메인', '쿠팡 장바구니', '토스 송금'];
 let _srExamples = null;
 function srExamples() {
-  if (!_srExamples) _srExamples = SR_EXAMPLES.map(q => [q, searchResults(q).all.size]).filter(e => e[1]).slice(0, 4);
+  // 이 사이트에서 20장 이상 나오는 것만 (2장뿐인 조합은 예시로 약하다)
+  if (!_srExamples) _srExamples = SR_EXAMPLES.map(q => [q, searchResults(q).all.size]).filter(e => e[1] >= 20).slice(0, 4);
   return _srExamples;
 }
 
