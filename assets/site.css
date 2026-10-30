@@ -58,11 +58,21 @@ body { background: var(--ybm-color-bg-canvas); }
 @media (hover: hover) { .cat-row:hover:not(:has(:disabled)) { background: var(--ybm-color-bg-neutral-weak-alpha); } }
 .cat-row .ds-checkbox__label { flex: 1; min-width: 0; }
 .cat-cnt { color: var(--ybm-color-fg-neutral-subtle); }
+/* 컬러 필터의 색 점 (사이드바 줄, 고른 필터 칩) */
+.color-dot { display: inline-block; flex: none; width: 12px; height: 12px; margin-right: var(--ybm-space-x2); border-radius: 50%; background: var(--dot); box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak); vertical-align: -1px; }
+.ds-chip .color-dot { margin-right: 0; }
+.ds-checkbox__label:has(> .color-dot) { white-space: nowrap; }
 
 /* 본문 */
 #main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 0 var(--ybm-space-x6) var(--ybm-space-x6); }
 #toolbar { display: flex; align-items: center; justify-content: space-between; padding-top: var(--ybm-space-x5); margin-bottom: var(--ybm-space-x6); }
 .tb-title { font-size: var(--ybm-font-size-t08); line-height: var(--ybm-line-height-t08); font-weight: var(--ybm-font-weight-bold); }
+/* 열 필터 (assets/cols.js) - 고른 열 수가 사이트 기본 열 수보다 우선 */
+.cols-filter { position: relative; flex: none; }
+.cols-filter .ds-select { width: auto; }
+.cols-menu { display: none; position: absolute; top: calc(100% + var(--ybm-space-x2)); right: 0; z-index: var(--ybm-z-overlay); min-width: 128px; }
+.cols-menu.open { display: flex; }
+:root[data-cols] { --grid-cols: var(--grid-cols-user); }
 #chips-row { margin-bottom: var(--ybm-space-x6); }
 #chips-row:empty { margin-bottom: 0; }
 
@@ -115,7 +125,20 @@ body { background: var(--ybm-color-bg-canvas); }
 .svc-info-icon[data-missing] { display: none; }
 .svc-info-text { flex: 1; min-width: 0; }
 .svc-info-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); font-weight: var(--ybm-font-weight-bold); }
-.svc-info-cat  { margin-top: var(--ybm-space-x1); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); color: var(--ybm-color-fg-neutral-subtle); }
+.svc-info-cat  { margin-top: var(--ybm-space-x1); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); color: var(--ybm-color-fg-neutral-subtle); }
+/* 열 필터로 카드가 좁아지면 정보 줄도 작게 (카드 폭 기준) */
+.svc-item { container-type: inline-size; }
+@container (max-width: 200px) {
+  .svc-info { gap: var(--ybm-space-x2); padding: var(--ybm-space-x2_5) var(--ybm-space-x0_5) 0; }
+  .svc-info-icon { width: 32px; height: 32px; border-radius: var(--ybm-shape-md); }
+  .svc-info-name { font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
+  .svc-info-cat  { margin-top: 0; font-size: var(--ybm-font-size-t02); line-height: var(--ybm-line-height-t02); }
+}
+@container (max-width: 130px) {
+  .svc-info-icon { width: 24px; height: 24px; border-radius: var(--ybm-shape-sm); }
+  .svc-info-name { font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); }
+  .svc-info-cat  { font-size: var(--ybm-font-size-t01); line-height: var(--ybm-line-height-t01); }
+}
 
 /* 서비스 상세 머리 */
 #detail-header { display: none; }

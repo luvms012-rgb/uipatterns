@@ -2,7 +2,7 @@
  * update.js — 원클릭 업데이트 (업데이트.bat / 업데이트.command 가 실행)
  *
  *   1) GitHub에서 최신 코드 받기 (git pull)
- *   2) 이 PC에 이미지 폴더가 설정돼 있으면 스캔 → mo/·web/ 데이터 갱신
+ *   2) 이 PC에 이미지 폴더가 설정돼 있으면 새 화면 대표 색 뽑기(Windows) → 스캔 → mo/·web/ 데이터 갱신
  *   3) 이번에 새로 추가된 이미지 목록 출력 (회사 서버에 수동 업로드할 것)
  *   4) 변경사항 커밋 → GitHub 반영 (push) → 1~2분 뒤 사이트 자동 배포
  *
@@ -68,6 +68,17 @@ function updateSearch(results) {
   }
 }
 
+// 컬러 필터용 화면 대표 색 — 새 화면만 뽑아 <site>/colors.json 에 더한다 (데이터 갱신 전에 해야 data.js 에 들어감).
+// Windows 내장 그리기 기능이라 Windows 에서만. 실패해도 업데이트 자체는 계속한다.
+function updateColors(sites) {
+  if (process.platform !== 'win32') { console.log('  화면 색: Windows에서만 뽑음 — 건너뜀'); return; }
+  try {
+    execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${path.join(REPO, 'scripts', 'colors.ps1')}" -Sites ${sites.join(',')}`, { cwd: REPO, stdio: 'inherit' });
+  } catch (e) {
+    console.log(`  ⚠ 화면 색 뽑기 실패 (업데이트는 계속): ${e.message.split('\n')[0]}`);
+  }
+}
+
 async function main() {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -92,6 +103,7 @@ async function main() {
     } else {
       console.log('\n[2/4] 이미지 폴더 스캔 중…');
       if (!acquireLock()) { process.exitCode = 1; return; }
+      updateColors(Object.keys(dirs));
       try {
         for (const [p, dir] of Object.entries(dirs)) {
           // 안전장치: 폴더를 잘못 지정했거나 드라이브가 안 붙어서 이미지가 갑자기 반 이상 사라지면 확인받는다

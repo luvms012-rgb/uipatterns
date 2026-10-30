@@ -13,7 +13,7 @@ function runSearch(q, opts) {
   if (!q) { S.q = ''; if (S.view === 'search') backToIndex(); return; }
   if (q.length >= 2) aTrack('search', { q });
   S.q = q; S.view = 'search'; S.svc = null;
-  S.checked.clear(); S.checkedComps.clear(); S.checkedTypes.clear();
+  S.checked.clear(); S.checkedComps.clear(); S.checkedColors.clear(); S.checkedTypes.clear();
   document.getElementById('hdrSearchInput').value = q;
   document.getElementById('hdrSearchInput').blur();
   window.scrollTo({ top: 0, behavior: 'auto' });

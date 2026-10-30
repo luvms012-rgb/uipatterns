@@ -78,6 +78,10 @@
   <main id="main">
     <div id="toolbar">
       <span class="tb-title">모바일</span>
+      <div class="cols-filter">
+        <button type="button" class="ds-select" data-size="medium" id="colsTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="열 수" onclick="colsToggle()"><span class="ds-select__value" id="colsValue">기본</span></button>
+        <div class="ds-select-content cols-menu" data-size="medium" id="colsMenu" role="listbox" aria-label="열 수"></div>
+      </div>
     </div>
     <div id="chips-row" class="ds-chip-group"></div>
     <div id="detail-header"></div>
@@ -127,6 +131,7 @@
 <script src="taxonomy.js"></script>
 <script src="../assets/sidebar.js"></script>
 <script src="../assets/search.js"></script>
+<script src="../assets/cols.js"></script>
 <script>
 window.DATA = DATA;
 
@@ -143,7 +148,7 @@ const ALL_CATS = [...new Set(DISPLAY_DATA.map(i => i.category))].sort(sortMixed)
 const CAT_COUNTS = {};
 DISPLAY_DATA.forEach(i => { CAT_COUNTS[i.category] = (CAT_COUNTS[i.category]||0)+1; });
 
-const S = { checked: new Set(), checkedComps: new Set(), checkedTypes: new Set(), selected: new Set(), view: 'index', svc: null, q: '' };
+const S = { checked: new Set(), checkedComps: new Set(), checkedColors: new Set(), checkedTypes: new Set(), selected: new Set(), view: 'index', svc: null, q: '' };
 
 // SVC_TYPES에 없는 새 서비스는 '미분류'로 자동 분류 (수동 매핑 전까지 사이드바에 자동 노출)
 const UNCLASSIFIED = '미분류';
@@ -252,6 +257,7 @@ function getItems() {
   return DISPLAY_DATA.filter(item => {
     if (S.checked.size && !S.checked.has(item.category)) return false;
     if (S.checkedComps.size && !(item.comps || []).some(c => S.checkedComps.has(c))) return false;
+    if (S.checkedColors.size && !S.checkedColors.has(item.color)) return false;
     if (S.checkedTypes.size) {
       const t = getSvcType(extractService(item.name));
       if (!t || !S.checkedTypes.has(t)) return false;
@@ -406,14 +412,17 @@ function buildChips() {
   const compChips = [...S.checkedComps].map(c =>
     `<button type="button" class="ds-chip" aria-pressed="true" onclick="toggleComp('${encodeURIComponent(c)}')" title="필터 해제">${c}<i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>`
   ).join('');
-  const hasAny = S.checkedTypes.size + S.checked.size + S.checkedComps.size > 0;
+  const colorChips = [...S.checkedColors].map(c =>
+    `<button type="button" class="ds-chip" aria-pressed="true" onclick="toggleColor('${encodeURIComponent(c)}')" title="필터 해제">${colorDot(c)}${c}<i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>`
+  ).join('');
+  const hasAny = S.checkedTypes.size + S.checked.size + S.checkedComps.size + S.checkedColors.size > 0;
   const resetChip = hasAny ? `<button type="button" class="ds-chip" data-variant="outlineWeak" onclick="clearFilters()" title="전체 해제"><i class="ds-icon ds-icon--rotate-ccw" aria-hidden="true"></i>초기화</button>` : '';
-  el.innerHTML = catChips + compChips + typeChips + resetChip;
+  el.innerHTML = catChips + compChips + colorChips + typeChips + resetChip;
 }
 
 function clearFilters() {
   S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
-  S.checked.clear(); S.checkedComps.clear(); S.checkedTypes.clear();
+  S.checked.clear(); S.checkedComps.clear(); S.checkedColors.clear(); S.checkedTypes.clear();
   S.view = 'index'; S.svc = null;
   buildSidebar(); render(); syncUrl();
   window.scrollTo({ top: 0, behavior: 'auto' });
@@ -623,7 +632,7 @@ function render() {
     return;
   }
 
-  const hasFilter = S.checked.size > 0 || S.checkedComps.size > 0 || S.checkedTypes.size > 0;
+  const hasFilter = S.checked.size > 0 || S.checkedComps.size > 0 || S.checkedColors.size > 0 || S.checkedTypes.size > 0;
   const units = [];
 
   if (hasFilter) {
@@ -746,13 +755,13 @@ function initLazyLoad() {
 // 메인 스레드가 1초 이상 멈춘다(실측). 첫 청크는 즉시 그려 화면을 바로 채우고,
 // 나머지는 requestAnimationFrame으로 프레임을 나눠 삽입해 끊김 없이 채운다.
 // content-visibility로 건너뛴 카드의 자리 높이(--cih)를 현재 그리드 폭 기준으로 계산한다.
-// 값이 실제와 어긋나면 스크롤바 길이가 튀므로, CSS의 컬럼 수·간격 브레이크포인트와 반드시 일치시킬 것.
+// 열 수와 간격을 CSS 에서 읽으므로 브레이크포인트나 열 필터가 바뀌어도 따로 맞출 필요 없다.
 function updateCardIntrinsic() {
   const g = document.getElementById('grid');
   if (!g) return;
-  const w = window.innerWidth;
-  const cols = w <= 480 ? 2 : w <= 768 ? 3 : 5;              // #grid / .mini-grid grid-template-columns
-  const gap  = w <= 480 ? 12 : w <= 768 ? 16 : w <= 1100 ? 20 : 32;  // column-gap
+  // 열 수와 간격은 CSS 가 정한 값을 그대로 읽는다 (열 필터, 브레이크포인트 모두 반영)
+  const cols = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-cols')) || 1;
+  const gap  = parseFloat(getComputedStyle(g).columnGap) || 0;
   const cw = (g.clientWidth - gap * (cols - 1)) / cols;
   if (cw > 0) document.documentElement.style.setProperty('--cih', Math.round(cw * 812 / 375) + 'px');
 }
@@ -905,6 +914,7 @@ function syncUrl() {
   const params = new URLSearchParams();
   if (S.checked.size)      params.set('cat',  [...S.checked].join(','));
   if (S.checkedComps.size) params.set('comp', [...S.checkedComps].join(','));
+  if (S.checkedColors.size) params.set('color', [...S.checkedColors].join(','));
   if (S.checkedTypes.size) params.set('type', [...S.checkedTypes].join(','));
   if (S.view === 'detail' && S.svc) params.set('svc', S.svc);
   if (S.view === 'search' && S.q)   params.set('q', S.q);
@@ -919,11 +929,13 @@ function readUrl() {
     const params = new URLSearchParams(hash);
     const cat  = params.get('cat');
     const comp = params.get('comp');
+    const color = params.get('color');
     const type = params.get('type');
     const svc  = params.get('svc');
     const q    = params.get('q');
     if (cat)  cat.split(',').forEach(c => { if (c && ALL_CATS.includes(c)) S.checked.add(c); });
     if (comp) comp.split(',').forEach(c => { if (c && COMPONENTS.includes(c)) S.checkedComps.add(c); });
+    if (color) color.split(',').forEach(c => { if (COLOR_LIST.some(x => x.name === c)) S.checkedColors.add(c); });
     if (type) type.split(',').forEach(t => { if (t) S.checkedTypes.add(t); });
     if (svc)  { S.view = 'detail'; S.svc = svc.trim().normalize('NFC'); }
     if (q && q.trim()) { S.view = 'search'; S.q = q.trim(); document.getElementById('hdrSearchInput').value = S.q; }

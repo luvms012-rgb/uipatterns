@@ -288,6 +288,18 @@ function updatePlatform(platform, imageDir, opts = {}) {
     }
   }
 
+  // 화면 대표 색 — <platform>/colors.json { "카테고리/파일.png": "블루" } (scripts/colors.ps1, Windows 에서만 뽑는다)
+  // 사이드바 컬러 필터에 쓰인다. 아직 안 뽑은 화면은 color 가 없다
+  const COLOR_FILE = path.join(BASE, 'colors.json');
+  if (fs.existsSync(COLOR_FILE)) {
+    const colors = JSON.parse(fs.readFileSync(COLOR_FILE, 'utf-8'));
+    const byPath = new Map(Object.entries(colors).map(([k, v]) => [k.normalize('NFC'), v]));
+    for (const item of items) {
+      const c = byPath.get(item.path);
+      if (c) item.color = c;
+    }
+  }
+
   const prev = readData(DATA_FILE);
   const prevPaths = new Set(prev.map(i => i.path));
   const curPaths  = new Set(items.map(i => i.path));

@@ -1,6 +1,6 @@
-// 사이드바 (mo/web 공용) — uibowl 구성: UI 패턴(그룹별) → 컴포넌트 → 카테고리 유형
+// 사이드바 (mo/web 공용) — uibowl 구성: UI 패턴(그룹별) → 컴포넌트 → 컬러 → 카테고리 유형
 // 분류 기준은 각 플랫폼의 taxonomy.js (PATTERN_GROUPS · CAT_ALIAS · COMPONENTS).
-// 필터 상태는 index.html의 S(checked · checkedComps · checkedTypes)를 그대로 쓴다.
+// 필터 상태는 index.html의 S(checked · checkedComps · checkedColors · checkedTypes)를 그대로 쓴다.
 
 const SB_COLLAPSE_KEY = 'uip_sb_collapsed_v2';  // v2: 컴포넌트·카테고리 유형 기본 닫힘 (예전 저장값 무시)
 const SB = { collapsed: null };
@@ -34,6 +34,24 @@ function compCounts() {
   return _compCounts;
 }
 
+// 화면 대표 색 (data.js 의 color, scripts/colors.ps1 이 뽑는다). 점 색은 고르기 쉽게 보여주는 견본
+const COLOR_LIST = [
+  { name: '그레이', hex: '#b0b3ba' }, { name: '블랙', hex: '#1a1c20' }, { name: '레드', hex: '#ef4444' },
+  { name: '오렌지', hex: '#f97316' }, { name: '옐로', hex: '#facc15' }, { name: '그린', hex: '#22c55e' },
+  { name: '블루', hex: '#3b82f6' }, { name: '퍼플', hex: '#8b5cf6' }, { name: '핑크', hex: '#ec4899' },
+];
+function colorDot(name) {
+  const c = COLOR_LIST.find(x => x.name === name);
+  return c ? `<span class="color-dot" style="--dot:${c.hex}" aria-hidden="true"></span>` : '';
+}
+let _colorCounts = null;
+function colorCounts() {
+  if (_colorCounts) return _colorCounts;
+  _colorCounts = {};
+  for (const item of DISPLAY_DATA) if (item.color) _colorCounts[item.color] = (_colorCounts[item.color] || 0) + 1;
+  return _colorCounts;
+}
+
 function sbCollapsed() {
   if (!SB.collapsed) {
     let saved = null;
@@ -53,10 +71,10 @@ function toggleSbGroup(id) {
 
 const CHEVRON_SVG = `<i class="ds-icon ds-icon--sm ds-icon--chevron-up sb-chev" aria-hidden="true"></i>`;
 
-function makeCatRow(label, count, isOn, action, disabled) {
+function makeCatRow(label, count, isOn, action, disabled, lead = '') {
   return `<label class="ds-checkbox cat-row" data-label="${label.replace(/"/g, '&quot;')}">
     <input type="checkbox" class="ds-checkbox__control"${isOn ? ' checked' : ''}${disabled ? ' disabled' : ''} onchange="${action}">
-    <span class="ds-checkbox__label">${label}</span>
+    <span class="ds-checkbox__label">${lead}${label}</span>
     <span class="cat-cnt">(${count})</span>
   </label>`;
 }
@@ -91,7 +109,12 @@ function buildSidebar() {
     `toggleComp('${encodeURIComponent(c)}')`, !cc[c])).join('');
   const compNote = hasComps ? '' : `<p class="sb-note">컴포넌트 정보는 새로 캡처하는 이미지부터 모입니다.</p>`;
 
-  // 3) 카테고리 유형 — 맨 아래. 미분류(SVC_TYPES 미등록) 항목이 있으면 목록 끝에 자동 추가
+  // 3) 컬러 — 색을 뽑은 화면이 없는 색은 고르지 못하게
+  const kc = colorCounts();
+  const colorRows = COLOR_LIST.map(c => makeCatRow(c.name, kc[c.name] || 0, S.checkedColors.has(c.name),
+    `toggleColor('${encodeURIComponent(c.name)}')`, !kc[c.name], colorDot(c.name))).join('');
+
+  // 4) 카테고리 유형 — 맨 아래. 미분류(SVC_TYPES 미등록) 항목이 있으면 목록 끝에 자동 추가
   const typeList = TYPE_COUNTS[UNCLASSIFIED] ? [...ALL_INDUSTRY_TYPES, UNCLASSIFIED] : ALL_INDUSTRY_TYPES;
   const typeRows = typeList.map(t =>
     makeCatRow(t, TYPE_COUNTS[t] || 0, S.checkedTypes.has(t), `toggleType('${encodeURIComponent(t)}')`)
@@ -101,6 +124,7 @@ function buildSidebar() {
   el.innerHTML =
     `<section class="sb-sec" data-sec="pat"><div class="sb-sec-hdr">UI 패턴</div>${patGroups}</section>` +
     `<section class="sb-sec" data-sec="comp">${sbGroup('comp', '컴포넌트', compRows, { note: compNote })}</section>` +
+    `<section class="sb-sec" data-sec="color">${sbGroup('color', '컬러', colorRows)}</section>` +
     `<section class="sb-sec" data-sec="type">${sbGroup('type', '카테고리 유형', typeRows)}</section>`;
 }
 
@@ -108,6 +132,16 @@ function toggleComp(enc) {
   S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
   const c = decodeURIComponent(enc);
   S.checkedComps.has(c) ? S.checkedComps.delete(c) : S.checkedComps.add(c);
+  S.view = 'index'; S.svc = null;
+  buildSidebar(); render(); syncUrl();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+  closeSidebarOnMobile();
+}
+
+function toggleColor(enc) {
+  S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
+  const c = decodeURIComponent(enc);
+  S.checkedColors.has(c) ? S.checkedColors.delete(c) : S.checkedColors.add(c);
   S.view = 'index'; S.svc = null;
   buildSidebar(); render(); syncUrl();
   window.scrollTo({ top: 0, behavior: 'auto' });
