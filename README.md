@@ -43,6 +43,7 @@ uipatterns/
 │  ├─ taxonomy.js        사이드바 분류 — uibowl 패턴 그룹 · 폴더명 별칭 · 컴포넌트 목록
 │  ├─ components.json    (선택) 이미지별 컴포넌트 { "카테고리/파일.png": ["버튼", …] } → data.js의 comps
 │  ├─ icons.js · search-index.js · stats.js · version.js · upload-list.txt
+│  ├─ words.js          화면 속 글자 색인 (search/build-words.js 가 회사 PC OCR 로 만듦, 사이트 검색이 첫 검색 때 불러옴)
 │  ├─ update-index.js    예전 명령 호환용 (→ scripts/update-index.js)
 │  └─ 카테고리 폴더/ · icons/ · (업데이트)/ · (업로드)/   ← 이미지, git 제외 (.gitignore)
 └─ worker/               다운로드용 이미지 중계 (Cloudflare Worker, worker/README.md)

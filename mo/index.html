@@ -121,7 +121,10 @@
     <span class="lb-name" id="lb-name"></span>
     <span id="lb-cat"></span>
   </div>
-  <button type="button" id="lb-dl" class="ds-btn" onclick="dlFromLb()"><i class="ds-icon ic-download" aria-hidden="true"></i>다운로드</button>
+  <div class="lb-actions">
+    <button type="button" id="lb-link" class="ds-btn" data-variant="neutralWeak" onclick="copyLbLink()"><i class="ds-icon ds-icon--link" aria-hidden="true"></i>링크 복사</button>
+    <button type="button" id="lb-dl" class="ds-btn" onclick="dlFromLb()"><i class="ds-icon ic-download" aria-hidden="true"></i>다운로드</button>
+  </div>
 </div>
 
 <script src="../config.js"></script>
@@ -801,12 +804,18 @@ function openLb(encPath, encName, encCat) {
   const cat = decodeURIComponent(encCat);
   _lbList = [...document.querySelectorAll('#grid [data-path]')].map(el => el.dataset.path);
   _lbIndex = _lbList.indexOf(_lbPath);
+  if (_lbIndex < 0) {  // 화면 링크로 바로 들어온 경우 등: 같은 서비스 화면을 이전/다음으로
+    const svc = extractService(_lbName);
+    _lbList = DISPLAY_DATA.filter(i => extractService(i.name) === svc).map(i => i.path);
+    _lbIndex = _lbList.indexOf(_lbPath);
+  }
   document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
   document.getElementById('lb-name').textContent = extractService(_lbName);
   document.getElementById('lb-cat').textContent  = cat;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
   updateLbNav();
+  syncUrl();
 }
 // 통합검색에서 상대 사이트 패턴을 클릭했을 때: 페이지 이동 없이 상대 폴더 이미지를 바로 미리보기
 function openLbCross(platform, encPath, encName, encCat) {
@@ -847,11 +856,34 @@ function lbNav(dir) {
   document.getElementById('lb-name').textContent = extractService(_lbName);
   document.getElementById('lb-cat').textContent  = item.category;
   updateLbNav();
+  syncUrl();
 }
 function closeLb(e) {
   if (e && e.target !== document.getElementById('lightbox') && !e.target.closest('.lb-close')) return;
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
+  syncUrl();
+}
+// 화면 1장 링크: 사이트/#img=카테고리/파일.png — 열면 바로 크게 보기 (Claude 검색 답변, 팀원 공유용)
+function lbLink() {
+  return new URL('../' + _lbPlatform + '/', location.href).href + '#img=' + encodeURIComponent(_lbPath);
+}
+async function copyLbLink() {
+  if (!_lbPath) return;
+  const url = lbLink();
+  try { await navigator.clipboard.writeText(url); }
+  catch {  // 클립보드 권한이 없을 때
+    const t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select();
+    try { document.execCommand('copy'); } catch {} t.remove();
+  }
+  showToast('화면 링크를 복사했어요');
+}
+// 주소의 #img= 로 들어왔을 때 (readUrl 이 넣어 둠) 목록을 그린 뒤 그 화면을 연다
+let _pendingImg = null;
+function openPendingImg() {
+  const p = _pendingImg; _pendingImg = null;
+  const item = p && DATA_BY_PATH.get(p);
+  if (item) openLb(encodeURIComponent(item.path), encodeURIComponent(item.name), encodeURIComponent(item.category));
 }
 async function dlFromLb() {
   if (!_lbPath) return;
@@ -921,6 +953,7 @@ function syncUrl() {
   if (S.view === 'detail' && S.svc) params.set('svc', S.svc);
   if (S.view === 'search' && S.q)   params.set('q', S.q);
   if (S.view === 'search' && S.q && SR_OFF.size) params.set('x', [...SR_OFF].join(','));  // 뺀 비슷한 말
+  if (_lbPath && _lbPlatform === PLATFORM && document.getElementById('lightbox').classList.contains('open')) params.set('img', _lbPath);  // 크게 보기 중인 화면
   const qs = params.toString();
   history.replaceState(null, '', qs ? '#' + qs : location.pathname + location.search);
 }
@@ -943,13 +976,14 @@ function readUrl() {
     if (svc)  { S.view = 'detail'; S.svc = svc.trim().normalize('NFC'); }
     if (q && q.trim()) { S.view = 'search'; S.q = q.trim(); document.getElementById('hdrSearchInput').value = S.q; }
     SR_OFF.clear(); (params.get('x') || '').split(',').filter(Boolean).forEach(w => SR_OFF.add(normCat(w)));
+    const img = params.get('img'); if (img) _pendingImg = img.normalize('NFC');
   } catch(e) {}
 }
 
-window.addEventListener('popstate', () => { readUrl(); buildSidebar(); render(); });
+window.addEventListener('popstate', () => { readUrl(); buildSidebar(); render(); openPendingImg(); });
 
 document.addEventListener('DOMContentLoaded', () => {
-  readUrl(); buildSidebar(); render();
+  readUrl(); buildSidebar(); render(); openPendingImg();
 });
 
 // ════════════════════════════════════════════

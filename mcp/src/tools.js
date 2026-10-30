@@ -14,7 +14,8 @@ const POOL = 1000;   // 결과를 섞고 넘겨 보는 범위 (이보다 많으�
 
 const encodePath = p => p.split('/').map(encodeURIComponent).join('/');
 const imageUrl = r => IMG_BASE + r.site + '/' + encodePath(r.path);
-const pageUrl = r => SITE_BASE + r.site + '/#svc=' + encodeURIComponent(r.svc);
+// 화면 1장으로 바로 가는 링크 (사이트가 #img= 로 열면 그 화면을 크게 보기로 연다, 10/30)
+const pageUrl = r => SITE_BASE + r.site + '/#img=' + encodeURIComponent(r.path);
 const parseLines = s => (s ? s.split('\n').map(l => { const i = l.indexOf('\t'); return { y: +l.slice(0, i), t: l.slice(i + 1) }; }) : []);
 const asList = v => (v == null ? [] : Array.isArray(v) ? v : [v]).map(x => String(x).trim()).filter(Boolean);
 const sites = p => (p === 'mo' || p === 'web' ? [p] : ['mo', 'web']);

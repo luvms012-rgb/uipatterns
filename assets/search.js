@@ -114,7 +114,7 @@ function srTerms(q) {
   for (const part of String(q || '').split(/[,，+]/).map(s => s.trim()).filter(Boolean)) {
     if (/\s/.test(part)) {
       const v = srTerm(part);
-      if (!srIndex().some(x => srScore(x, v) >= 3.5)) { out.push(...part.split(/\s+/)); continue; }
+      if (!srIndex().some(x => srScore(x, v) >= 3.5) && !srWordHits(ocrNorm(part)).size) { out.push(...part.split(/\s+/)); continue; }
     }
     out.push(part);
   }
@@ -122,19 +122,71 @@ function srTerms(q) {
   return out.filter(t => { const n = normCat(t); return n && !seen.has(n) && seen.add(n); }).map(srTerm);
 }
 
+// ── 화면 속 글자 (words.js — search/build-words.js 가 회사 PC 의 OCR 로 만듦) ──────────
+// 첫 검색 때 불러온다. data.js 와 짝(n, first, last)이 안 맞으면 글자 검색만 쉰다.
+const SRW = { state: 'none', w: null, p: null, pos: null, hits: new Map() };
+// 검색 서버와 같은 글자 규칙 (mcp/src/text.js 의 norm): 띄어쓰기·기호·대소문자 무시, OCR 이 헷갈리는 i/l 을 같게
+const ocrNorm = s => String(s == null ? '' : s).normalize('NFC').toLowerCase().replace(/i/g, 'l').replace(/[^\p{L}\p{N}]/gu, '');
+function srWordsLoad() {
+  if (SRW.state !== 'none') return;
+  SRW.state = 'loading';
+  const s = document.createElement('script');
+  s.src = 'words.js?n=' + DATA.length;   // 데이터가 바뀌면 새로 받도록
+  s.onload = () => {
+    const W = window.__WORDS__; window.__WORDS__ = null; s.remove();
+    const last = DATA[DATA.length - 1];
+    if (!W || W.n !== DATA.length || W.first !== (DATA[0] && DATA[0].path) || W.last !== (last && last.path)) { SRW.state = 'off'; }
+    else {
+      SRW.w = W.w ? W.w.split('|') : []; SRW.p = W.p ? W.p.split('|') : [];
+      SRW.pos = new Map(DATA.map((it, i) => [it.path, i]));
+      SRW.state = 'ready';
+    }
+    if (S.view === 'search') render();
+  };
+  s.onerror = () => { s.remove(); SRW.state = 'off'; if (S.view === 'search') render(); };  // 이 사이트엔 아직 없음
+  document.head.appendChild(s);
+}
+// 낱말에 이 글자가 들어 있는 화면 번호 (2자 이상). 같은 글자는 한 번만 계산
+function srWordHits(n) {
+  if (SRW.state !== 'ready' || !n || n.length < 2) return new Set();
+  let set = SRW.hits.get(n);
+  if (set) return set;
+  set = new Set();
+  SRW.w.forEach((w, k) => {
+    if (!w.includes(n)) return;
+    let i = 0;
+    for (const d of SRW.p[k].split(',')) { i += parseInt(d, 36); set.add(i); }
+  });
+  SRW.hits.set(n, set);
+  return set;
+}
+// 검색어(비슷한 말 포함)가 화면 글자에 있는 화면 번호. 글자 색인이 없으면 null
+function srOcrSet(v) {
+  if (SRW.state !== 'ready') return null;
+  const out = new Set();
+  for (const w of new Set([v.t, ...v.alts].map(ocrNorm))) for (const i of srWordHits(w)) out.add(i);
+  return out;
+}
+
 // 점수 높은 것 먼저 (같으면 원래 순서)
 const srByScore = arr => arr.map((e, i) => [e, i]).sort((a, b) => b[0][1] - a[0][1] || a[1] - b[1]).map(([e]) => e[0]);
 
 function searchResults(q) {
   const terms = srTerms(q);
-  const r = { terms, multi: terms.length > 1, cats: [], svcs: [], types: [], comps: { names: [], items: [] }, pats: [], colors: { names: [], items: [] }, combo: [], all: new Set() };
+  const r = { terms, multi: terms.length > 1, cats: [], svcs: [], types: [], comps: { names: [], items: [] }, pats: [], colors: { names: [], items: [] }, text: [], combo: [], all: new Set() };
   if (!terms.length) return r;
 
   if (r.multi) {
+    const ocr = terms.map(srOcrSet);  // 단어마다 화면 글자에 그 말이 있는 화면 번호 (글자 색인이 없으면 null)
     const hit = [];
     for (const x of srIndex()) {
       let sum = 0;
-      for (const v of terms) { const s = srScore(x, v); if (!s) { sum = 0; break; } sum += s; }
+      for (let k = 0; k < terms.length; k++) {
+        let s = srScore(x, terms[k]);
+        if (!s && ocr[k] && ocr[k].has(SRW.pos.get(x.item.path))) s = 1;  // 이름엔 없지만 화면 글자에 있음
+        if (!s) { sum = 0; break; }
+        sum += s;
+      }
       if (sum) hit.push([x.item, sum]);
     }
     r.combo = srByScore(hit);
@@ -167,6 +219,9 @@ function searchResults(q) {
   for (const [, items] of r.svcs) items.forEach(i => r.all.add(i.path));
   for (const [, svcs] of r.types) for (const [, items] of svcs) items.forEach(i => r.all.add(i.path));
   for (const list of [r.comps.items, r.pats, r.colors.items]) list.forEach(i => r.all.add(i.path));
+  const ocr = srOcrSet(v);
+  if (ocr) r.text = [...ocr].sort((a, b) => a - b).map(i => DATA[i]).filter(it => it && it.category !== 'icons' && !r.all.has(it.path));
+  r.text.forEach(i => r.all.add(i.path));
   return r;
 }
 
@@ -208,6 +263,7 @@ function renderSearch() {
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const num = n => n.toLocaleString('ko-KR');
   const q = S.q;
+  srWordsLoad();  // 첫 검색 때 화면 속 글자 색인을 불러온다 (도착하면 다시 그림)
   const r = searchResults(q);
   const qt = r.terms.length ? r.terms.map(v => `'${esc(v.t)}'`).join(' + ') : `'${esc(q)}'`;
   document.getElementById('detail-header').style.display = 'none';
@@ -228,10 +284,13 @@ function renderSearch() {
     if (r.comps.items.length) sections.push([`${r.comps.names.map(c => `'${esc(c)}'`).join(', ')} 컴포넌트`, `${num(r.comps.items.length)}장`, r.comps.items.map(i => cardTpl(i, ec)), 'comp']);
     if (r.pats.length) sections.push([`'${esc(q)}' 화면 이름`, `${num(r.pats.length)}장`, r.pats.map(i => cardTpl(i, ec)), 'pat']);
     if (r.colors.items.length) sections.push([`${r.colors.names.map(c => `'${esc(c)}'`).join(', ')} 컬러`, `${num(r.colors.items.length)}장`, r.colors.items.map(i => cardTpl(i, ec)), 'color']);
+    if (r.text.length) sections.push([`'${esc(q)}' 화면 속 글자`, `${num(r.text.length)}장`, r.text.map(i => cardTpl(i, ec)), 'text']);
   }
 
   const token = ++_renderToken;
   resetLazyObservers();
+  const textNote = SRW.state === 'loading' ? `<p class="sr-loading">화면 속 글자에서도 찾는 중…</p>` : '';
+  if (!sections.length && SRW.state === 'loading') { g.innerHTML = srSynNote(r.terms, esc) + textNote; return; }
   if (!sections.length) {
     // 여러 단어인데 모두 맞는 화면이 없으면 단어 하나씩 보기를 안내
     const each = r.multi ? r.terms.map(v => [v.t, searchResults(v.t).all.size]).filter(e => e[1]) : [];
@@ -246,7 +305,7 @@ function renderSearch() {
   }
 
   // 섹션 틀을 먼저 그리고, 카드는 섹션 순서대로 조금씩 채운다 (한 카테고리가 수천 장일 수 있음)
-  g.innerHTML = srSynNote(r.terms, esc) + sections.map(([title, cnt, , kind], k) => `<section class="sr-sec${k ? '' : ' first'}" data-kind="${kind}">
+  g.innerHTML = srSynNote(r.terms, esc) + textNote + sections.map(([title, cnt, , kind], k) => `<section class="sr-sec${k ? '' : ' first'}" data-kind="${kind}">
     <div class="sr-sec-hdr"><span class="sr-sec-title">${title}</span><span class="sr-sec-cnt">${cnt}</span></div>
     <div class="mini-grid" data-sr="${k}"></div>
   </section>`).join('');

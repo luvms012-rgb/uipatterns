@@ -68,6 +68,18 @@ function updateSearch(results) {
   }
 }
 
+// 사이트 검색의 "화면 속 글자" 색인 <site>/words.js — data.js 순서를 쓰므로 데이터가 바뀌면 늘 다시 만든다.
+// 재료(search/ocr/)가 회사 PC 에만 있어서, 없으면 건너뛴다 (search/build-words.js)
+function updateWords() {
+  if (!fs.existsSync(path.join(REPO, 'search', 'ocr'))) return;
+  try {
+    console.log('  화면 속 글자 색인(words.js) 만드는 중…');
+    execSync(`node --no-warnings "${path.join(REPO, 'search', 'build-words.js')}"`, { cwd: REPO, stdio: 'inherit' });
+  } catch (e) {
+    console.log(`  ⚠ words.js 만들기 실패 (업데이트는 계속): ${e.message.split('\n')[0]}`);
+  }
+}
+
 // 컬러 필터용 화면 대표 색 — 새 화면만 뽑아 <site>/colors.json 에 더한다 (데이터 갱신 전에 해야 data.js 에 들어감).
 // Windows 내장 그리기 기능이라 Windows 에서만. 실패해도 업데이트 자체는 계속한다.
 function updateColors(sites) {
@@ -128,7 +140,7 @@ async function main() {
       }
     }
 
-    if (results.length) updateSearch(results);
+    if (results.length) { updateSearch(results); updateWords(); }
 
     // 3) 회사 서버에 올릴 이미지 목록
     const newOnes = results.flatMap(r => r.newItems.map(i => `${r.platform}/${i.path}`));

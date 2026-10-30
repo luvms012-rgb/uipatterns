@@ -165,6 +165,7 @@ body { background: var(--ybm-color-bg-canvas); }
 .lb-next { right: -56px; }
 #lb-img { display: block; width: auto; height: auto; max-height: var(--lb-max-h); max-width: var(--lb-max-w); border-radius: var(--ybm-shape-lg); }
 .lb-info { display: flex; align-items: center; gap: var(--ybm-space-x3); font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
+.lb-actions { display: flex; gap: var(--ybm-space-x2); }  /* 링크 복사 + 다운로드 */
 .lb-name { font-weight: var(--ybm-font-weight-semibold); }
 #lb-cat  { color: var(--ybm-color-fg-neutral-subtle); }
 
