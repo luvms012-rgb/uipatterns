@@ -2,7 +2,7 @@
 // 분류 기준은 각 플랫폼의 taxonomy.js (PATTERN_GROUPS · CAT_ALIAS · COMPONENTS).
 // 필터 상태는 index.html의 S(checked · checkedComps · checkedColors · checkedTypes)를 그대로 쓴다.
 
-const SB_COLLAPSE_KEY = 'uip_sb_collapsed_v3';  // v3: UI 패턴 그룹까지 전부 기본 닫힘 (예전 저장값 무시)
+const SB_COLLAPSE_KEY = 'uip_sb_collapsed_v4';  // v4: UI 패턴도 접기 묶음, 처음엔 네 묶음 모두 닫힘 (예전 저장값 무시)
 const SB = { collapsed: null };
 
 // ㆍ(U+318D)·・·(U+00B7) 같은 가운뎃점과 띄어쓰기 차이를 무시하고 비교
@@ -56,18 +56,22 @@ function sbCollapsed() {
   if (!SB.collapsed) {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(SB_COLLAPSE_KEY)); } catch (_) {}
-    // 처음 방문: UI 패턴 그룹까지 전부 닫아 둔다. 열고 닫은 상태는 저장된다
-    SB.collapsed = new Set(Array.isArray(saved) ? saved
-      : [...PATTERN_GROUPS.map(g => 'pat:' + g.name), 'pat:기타 패턴', 'comp', 'color', 'type']);
+    // 처음 방문: 네 묶음 모두 닫아 둔다 (UI 패턴 안 그룹은 펼친 채). 열고 닫은 상태는 저장된다
+    SB.collapsed = new Set(Array.isArray(saved) ? saved : ['pat', 'comp', 'color', 'type']);
   }
   return SB.collapsed;
 }
 function toggleSbGroup(id) {
   const c = sbCollapsed();
   c.has(id) ? c.delete(id) : c.add(id);
+  // UI 패턴을 열면 안의 그룹도 모두 펼친다
+  if (id === 'pat' && !c.has(id)) [...c].filter(x => x.startsWith('pat:')).forEach(x => c.delete(x));
   try { localStorage.setItem(SB_COLLAPSE_KEY, JSON.stringify([...c])); } catch (_) {}
-  const el = document.querySelector(`.sb-grp[data-id="${CSS.escape(id)}"]`);
-  if (el) el.classList.toggle('collapsed', c.has(id));
+  document.querySelectorAll('.sb-grp[data-id]').forEach(el => {
+    const on = c.has(el.dataset.id);
+    el.classList.toggle('collapsed', on);
+    el.querySelector(':scope > .sb-grp-hdr').setAttribute('aria-expanded', !on);
+  });
 }
 
 const CHEVRON_SVG = `<i class="ds-icon ds-icon--sm ds-icon--chevron-up sb-chev" aria-hidden="true"></i>`;
@@ -123,7 +127,7 @@ function buildSidebar() {
 
   // 검색은 사이드바에 두지 않는다 — 헤더 통합 검색으로 일원화 예정
   el.innerHTML =
-    `<section class="sb-sec" data-sec="pat"><div class="sb-sec-hdr">UI 패턴</div>${patGroups}</section>` +
+    `<section class="sb-sec" data-sec="pat">${sbGroup('pat', 'UI 패턴', patGroups)}</section>` +
     `<section class="sb-sec" data-sec="comp">${sbGroup('comp', '컴포넌트', compRows, { note: compNote })}</section>` +
     `<section class="sb-sec" data-sec="color">${sbGroup('color', '컬러', colorRows)}</section>` +
     `<section class="sb-sec" data-sec="type">${sbGroup('type', '카테고리 유형', typeRows)}</section>`;
