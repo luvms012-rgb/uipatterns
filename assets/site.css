@@ -99,6 +99,15 @@ body { background: var(--ybm-color-bg-canvas); }
 .card-img-wrap { position: relative; aspect-ratio: var(--shot-ratio); overflow: hidden; background: var(--ybm-color-bg-layer-floating); }
 .card-img, .svc-thumb-img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--shot-pos); opacity: 0; transition: transform .25s, opacity .2s; }
 .card-img.loaded, .svc-thumb-img.loaded { opacity: 1; }
+/* 불러오는 동안 옅은 반짝임, 실패하면 깨진 그림 대신 흐린 그림 아이콘 (lz-done 은 지연 로딩이 붙임) */
+.card-img-wrap:not(.lz-done), .svc-thumb:not(.lz-done) {
+  background-image: linear-gradient(105deg, transparent 40%, color-mix(in srgb, var(--ybm-color-fg-neutral) 6%, transparent) 50%, transparent 60%);
+  background-size: 300% 100%; animation: lz-shimmer 1.6s linear infinite;
+}
+@keyframes lz-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .card-img-wrap, .svc-thumb { animation: none !important; } }
+.card-img.failed, .svc-thumb-img.failed { visibility: hidden; }
+.lz-fail-icon { position: absolute; inset: 0; margin: auto; --ds-icon-size: 28px; color: var(--ybm-color-fg-neutral-subtle); opacity: .5; pointer-events: none; }
 .card:hover .card-img, .svc-item:hover .svc-thumb-img { transform: scale(1.02); }
 /* 푸시알림: 가로 배너를 세로 카드 위쪽에 */
 .push-notif { background: var(--ybm-color-bg-layer-default); }

@@ -246,7 +246,7 @@ function searchSvcCard(svc, svcItems) {
       <img class="svc-thumb-img" data-src="${imgUrl(rep.path)}" alt="${svc}" decoding="async" />
     </div>
     <div class="svc-info">
-      <img class="svc-info-icon" src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+      <img class="svc-info-icon" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
         data-svc="${svc.replace(/"/g, '&quot;')}" onerror="tryNextIconExt(this)" />
       <div class="svc-info-text">
         <div class="svc-info-name">${svc}</div>
@@ -325,7 +325,7 @@ function renderSearch() {
       const frag = document.createDocumentFragment();
       while (tmp.firstChild) frag.appendChild(tmp.firstChild);
       grids[s].appendChild(frag);
-      imgs.forEach(img => { _lazyObserver.observe(img); _unloadObserver.observe(img); });
+      imgs.forEach(lazyWatch);
       budget -= end - i; i = end;
       if (i >= cards.length) { s++; i = 0; }
     }

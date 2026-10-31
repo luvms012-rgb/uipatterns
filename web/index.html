@@ -651,7 +651,7 @@ function render() {
       const safeSvc = svc.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       units.push(`<div class="svc-group${isFirst?' first':''}">
         <div class="svc-header" onclick="showService('${safeSvc}')" style="cursor:pointer" title="${svc} 전체 화면 보기">
-          <img class="svc-h-icon" src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+          <img class="svc-h-icon" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
             data-svc="${svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)">
           <div class="svc-h-info">
             <span class="svc-h-name">${svc}</span>
@@ -682,7 +682,7 @@ function render() {
             <img class="svc-thumb-img" data-src="${imgUrl(repItem.path)}" alt="${svc}" decoding="async" />
           </div>
           <div class="svc-info">
-            <img class="svc-info-icon" src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+            <img class="svc-info-icon" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
               data-svc="${svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)" />
             <div class="svc-info-text">
               <div class="svc-info-name">${svc}</div>
@@ -710,51 +710,131 @@ function backToIndex() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── 지연 로딩 (IntersectionObserver) ────────────────────────────────────
-let _lazyObserver = null;
-let _unloadObserver = null;
+// ── 이미지 불러오기 (지연 로딩) ──────────────────────────────────────────
+// 늦게 뜨는 느낌 없이, 회사 서버 웹방화벽(짧은 시간에 수십 장이면 IP 차단)도 덜 건드리게 (2026-10-31)
+//  · 화면에 보이는 것은 바로 부른다. 빠르게 훑고 지나가는 중이면(LZ_FAST) 속도가 줄 때까지 기다린다
+//  · 화면 위아래 한 화면씩은 미리 부르되, 한 번에 LZ_PREFETCH 장씩 화면에 가까운 것부터
+//  · 서비스 아이콘도 같은 줄에 선다 (예전엔 첫 화면에서 542개를 한꺼번에 요청 - 보이는 카드가 다 뜨는 데 15초, 테스트 서버 실측)
+//  · 받은 이미지는 LZ_MAX 장이 넘을 때만, 멀리(세 화면 밖) 있는 것부터 내려놓는다 (되돌아올 때 다시 받지 않게)
+//  · 실패가 이어지면 오래된 화면 1장으로 서버를 확인해, 차단이면 알림 + 잠시 멈춘 뒤 다시 부른다
+// 카드를 그리는 곳은 resetLazyObservers() 뒤 lazyWatch(img) 만 부른다 (renderChunked, search.js)
+// content-visibility 로 건너뛴 카드 안의 img 는 위치가 없어서, 카드(.card / .svc-thumb)를 지켜본다
+const LZ_FAST = 2.5, LZ_PREFETCH = 3, LZ_MAX = 240, LZ_PAUSE = 60000;
+let _lzNear = null, _lzSee = null, _lzFar = null, _lzGen = 0, _lzPre = 0, _lzTimer = 0;
+let _lzWait = new Set(), _lzVis = new Set(), _lzAway = new Set(), _lzOk = new Set(), _lzImg = new WeakMap();
+let _lzFails = [], _lzPausedUntil = 0, _lzRetry = false, _lzNoticed = false;
+let _lzY = 0, _lzScrollT = 0, _lzSpeed = 0, _lzStopTimer = 0;
+const lzMain = img => img.classList.contains('card-img') || img.classList.contains('svc-thumb-img');
 
-// observer만 (재)생성 — 전체 DOM 재스캔은 하지 않음. 청크 렌더링에서 신규 삽입분만 개별 observe.
 function resetLazyObservers() {
-  if (_lazyObserver)  _lazyObserver.disconnect();
-  if (_unloadObserver) _unloadObserver.disconnect();
-
-  // 로드 observer: 뷰포트 800px 앞에서 미리 로드
-  _lazyObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const img = entry.target;
-      const src = img.dataset.src;
-      if (!src || (img.getAttribute('src') || '').endsWith(src.split('/').pop())) return;
-      img.src = src;
-      img.onload = () => img.classList.add('loaded');
-      img.onerror = () => img.classList.add('loaded'); // 실패해도 레이아웃 유지
-      _lazyObserver.unobserve(img);
-    });
-  }, { rootMargin: '800px 0px', threshold: 0 });
-
-  // 언로드 observer: 뷰포트 2000px 밖으로 나가면 src 해제
-  _unloadObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) return;
-      const img = entry.target;
-      if (!img.getAttribute('src') || !img.dataset.src) return;
-      // src=''로 비우면 img.src가 문서 URL(수 MB index.html)을 가리키게 되므로 속성 자체를 제거한다.
-      img.removeAttribute('src');
-      img.classList.remove('loaded');
-      // 다시 lazy observer에 등록
-      _lazyObserver.observe(img);
-    });
-  }, { rootMargin: '2000px 0px', threshold: 0 });
+  [_lzNear, _lzSee, _lzFar].forEach(o => o && o.disconnect());
+  _lzGen++; _lzPre = 0;
+  _lzWait = new Set(); _lzVis = new Set(); _lzAway = new Set(); _lzOk = new Set();
+  const track = set => entries => { entries.forEach(e => e.isIntersecting ? set.add(e.target) : set.delete(e.target)); lzKick(); };
+  _lzNear = new IntersectionObserver(track(_lzWait), { rootMargin: '100% 0px' });   // 위아래 한 화면
+  _lzSee  = new IntersectionObserver(track(_lzVis), { rootMargin: '0px' });
+  _lzFar  = new IntersectionObserver(entries => entries.forEach(e => e.isIntersecting ? _lzAway.delete(e.target) : _lzAway.add(e.target)), { rootMargin: '300% 0px' });
 }
+function lazyWatch(img) {
+  const t = (lzMain(img) && img.closest('.card, .svc-thumb')) || img;
+  _lzImg.set(t, img);
+  _lzNear.observe(t); _lzSee.observe(t);
+  if (lzMain(img)) _lzFar.observe(t);
+}
+function lzKick(ms) { if (!_lzTimer) _lzTimer = setTimeout(lzPump, ms || 0); }
+addEventListener('scroll', () => {
+  const now = performance.now(), y = scrollY, dt = now - _lzScrollT;
+  const v = Math.abs(y - _lzY) / Math.max(8, dt);
+  _lzSpeed = dt > 150 ? v : _lzSpeed * 0.6 + v * 0.4;
+  _lzY = y; _lzScrollT = now;
+  clearTimeout(_lzStopTimer); _lzStopTimer = setTimeout(() => lzKick(), 120);   // 멈추면 그때 부른다
+}, { passive: true });
 
-function initLazyLoad() {
-  resetLazyObservers();
-  // 모든 lazy 이미지에 등록 (한 번에 전체를 그린 경우용 — 청크 렌더링 경로에서는 미사용)
-  document.querySelectorAll('img[data-src]').forEach(img => {
-    _lazyObserver.observe(img);
-    _unloadObserver.observe(img);
-  });
+function lzPump() {
+  _lzTimer = 0;
+  const now = performance.now();
+  if (now < _lzPausedUntil) { lzKick(_lzPausedUntil - now + 50); return; }
+  if (_lzRetry) {   // 차단 뒤 쉬었다가: 실패한 화면을 다시 부를 수 있게
+    _lzRetry = false;
+    document.querySelectorAll('#grid img.failed').forEach(img => {
+      img.classList.remove('failed'); delete img.dataset.lz;
+      img.parentElement.classList.remove('lz-done');
+      const ic = img.parentElement.querySelector('.lz-fail-icon'); if (ic) ic.remove();
+    });
+  }
+  if (now - _lzScrollT < 100 && _lzSpeed > LZ_FAST) { lzKick(110); return; }   // 훑고 지나가는 중
+  for (const t of _lzVis) { const img = _lzImg.get(t); if (img && !img.dataset.lz && img.dataset.src) lzLoad(img, true); }
+  if (_lzPre >= LZ_PREFETCH) return;
+  const vh = innerHeight, cand = [];
+  for (const t of _lzWait) {
+    const img = _lzImg.get(t);
+    if (!img || img.dataset.lz || !img.dataset.src) continue;
+    const r = t.getBoundingClientRect();
+    cand.push([r.top > vh ? r.top - vh : r.bottom < 0 ? -r.bottom : 0, img]);
+  }
+  cand.sort((a, b) => a[0] - b[0]);
+  for (const [, img] of cand) { if (_lzPre >= LZ_PREFETCH) break; lzLoad(img, false); }
+}
+function lzLoad(img, vis) {
+  const gen = _lzGen;
+  img.dataset.lz = 'loading';
+  if (!vis) _lzPre++;
+  img.fetchPriority = vis ? 'high' : 'low';
+  const done = e => {
+    img.removeEventListener('load', done); img.removeEventListener('error', done);
+    if (gen !== _lzGen) return;   // 그 사이 화면이 바뀜
+    if (!vis) _lzPre--;
+    lzDone(img, e.type === 'load');
+  };
+  img.addEventListener('load', done); img.addEventListener('error', done);   // 아이콘의 onerror(다른 확장자 시도)는 그대로 둔다
+  img.src = img.dataset.src;
+}
+function lzDone(img, ok) {
+  const main = lzMain(img);
+  if (ok) {
+    img.dataset.lz = 'ok'; img.classList.add('loaded');
+    if (main) { img.parentElement.classList.add('lz-done'); _lzOk.add(img); _lzFails.length = 0; lzTrim(); }
+  } else {
+    img.dataset.lz = 'fail';
+    if (main) {   // 깨진 그림과 이름 글자 대신 흐린 그림 아이콘
+      img.classList.add('failed'); img.parentElement.classList.add('lz-done');
+      if (!img.parentElement.querySelector('.lz-fail-icon')) img.insertAdjacentHTML('afterend', '<i class="ds-icon ds-icon--image lz-fail-icon" aria-hidden="true"></i>');
+      lzNoteFail(img);
+    }
+  }
+  lzKick();
+}
+// 실패가 15초 안에 8장 이상이고 그 사이 성공이 없으면, 가장 오래전에 캡처한 다른 서비스 화면 1장(서버에 있을 게 확실)으로 확인한다
+//  그것도 실패 → 차단(웹방화벽)으로 보고 알림 + 잠시 멈춤 / 성공 → 아직 서버에 안 올린 화면일 뿐 (확인은 30초에 한 번까지)
+let _lzProbing = false, _lzProbeT = -1e9;
+function lzNoteFail(img) {
+  const now = performance.now();
+  _lzFails = _lzFails.filter(t => now - t < 15000);
+  _lzFails.push(now);
+  if (_lzFails.length < 8 || _lzProbing || now - _lzProbeT < 30000) return;
+  const svc = extractService(img.alt || '');
+  let pick = null;
+  for (const i of DISPLAY_DATA) { const d = i.name.slice(-8); if ((!pick || d < pick.d) && extractService(i.name) !== svc) pick = { d, path: i.path }; }
+  if (!pick) return;
+  _lzProbing = true; _lzProbeT = now;
+  const probe = new Image();
+  probe.onload = () => { _lzProbing = false; _lzFails = []; };
+  probe.onerror = () => {
+    _lzProbing = false; _lzFails = []; _lzPausedUntil = performance.now() + LZ_PAUSE; _lzRetry = true;
+    if (!_lzNoticed) { _lzNoticed = true; showToast('회사 서버가 이미지 요청을 잠시 막았어요. 1분 뒤 다시 불러올게요', 10000); }
+  };
+  probe.src = imgUrl(pick.path) + '?probe=' + Date.now();   // 받아 둔 것(캐시)이 아니라 지금 서버 응답으로
+}
+function lzTrim() {
+  if (_lzOk.size <= LZ_MAX) return;
+  for (const t of _lzAway) {
+    if (_lzOk.size <= LZ_MAX - 20) break;
+    const img = _lzImg.get(t);
+    if (!img || img.dataset.lz !== 'ok') continue;
+    // src='' 로 비우면 img.src 가 문서 주소(수 MB index.html)를 가리키게 되므로 속성 자체를 지운다
+    img.removeAttribute('src'); img.classList.remove('loaded'); img.parentElement.classList.remove('lz-done');
+    delete img.dataset.lz; _lzOk.delete(img);
+  }
 }
 
 // ── 대량 카드 청크 렌더링 (메인 스레드 블로킹 방지) ──────────────────────
@@ -790,7 +870,7 @@ function renderChunked(container, htmlUnits, chunkSize) {
     const frag = document.createDocumentFragment();
     while (tmp.firstChild) frag.appendChild(tmp.firstChild);
     container.appendChild(frag);
-    imgs.forEach(img => { _lazyObserver.observe(img); _unloadObserver.observe(img); });
+    imgs.forEach(lazyWatch);
     i = end;
     if (i < htmlUnits.length) requestAnimationFrame(step);
   }
@@ -966,12 +1046,12 @@ document.addEventListener('keydown', e => {
 // ── 탭 전환 ─────────────────────────────────────────────────────────────
 
 let toastTimer = null;
-function showToast(msg) {
+function showToast(msg, ms) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.dataset.state = 'open';
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.dataset.state = 'closed'; }, 3000);
+  toastTimer = setTimeout(() => { t.dataset.state = 'closed'; }, ms || 3000);
 }
 
 function switchTab(tab, el) {
