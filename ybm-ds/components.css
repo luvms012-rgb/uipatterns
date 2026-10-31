@@ -87,6 +87,7 @@
      69 Code Block           .ds-codeblock
      70 Citation             .ds-citation
      71 Multi Select         .ds-multiselect
+     72 Rating               .ds-rating
    ========================================================================== */
 
 
@@ -1136,6 +1137,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
      <div class="ds-segmented" role="group" aria-label="보기 방식" [data-size="medium"] [data-layout="fill"]>
        <button type="button" class="ds-segmented__item" aria-pressed="true">목록</button>
      </div>
+   모션: 선택 배경이 고른 항목으로 미끄러져 이동한다(필수, ybm-ds.js). 누르면 aria-pressed 가 바뀌고 change 이벤트가 난다.
    Figma small : 트랙 bg/neutral · padding 2 · shape/sm / item py6 px12 · shape/xs · t03 Bold fg/neutral-subtle
          medium: 트랙 shape/lg / item py8 px16 · shape/sm · t04 Bold
          selected bg/layer-default + elevation raised + fg/neutral · disabled fg/disabled
@@ -1175,28 +1177,28 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
 }
 .ds-segmented__item[aria-pressed="true"] { background: var(--ybm-color-bg-layer-default); color: var(--ybm-color-fg-neutral); box-shadow: var(--ybm-elevation-raised); }
 .ds-segmented__item:disabled { color: var(--ybm-color-fg-disabled); cursor: not-allowed; }
-/* 모션 — fill 에서는 선택 배경이 선택한 항목으로 미끄러져 이동한다(항목 2~4개). aria-pressed 만 바꾸면 된다. */
-.ds-segmented[data-layout="fill"] { --ds-seg-count: 2; --ds-seg-index: 0; position: relative; isolation: isolate; }
-.ds-segmented[data-layout="fill"]:has(> .ds-segmented__item:nth-child(3):last-child) { --ds-seg-count: 3; }
-.ds-segmented[data-layout="fill"]:has(> .ds-segmented__item:nth-child(4):last-child) { --ds-seg-count: 4; }
-.ds-segmented[data-layout="fill"]:has(> .ds-segmented__item:nth-child(2)[aria-pressed="true"]) { --ds-seg-index: 1; }
-.ds-segmented[data-layout="fill"]:has(> .ds-segmented__item:nth-child(3)[aria-pressed="true"]) { --ds-seg-index: 2; }
-.ds-segmented[data-layout="fill"]:has(> .ds-segmented__item:nth-child(4)[aria-pressed="true"]) { --ds-seg-index: 3; }
-.ds-segmented[data-layout="fill"]::before {
+/* 모션 (필수) — 선택 배경(indicator)이 고른 항목으로 미끄러져 이동한다. hug, fill 모두.
+   ybm-ds.js 가 고른 항목 위치를 --ds-seg-x / --ds-seg-w 에 넣고 data-ds-ready 를 붙인다. 항목을 누르면 aria-pressed 도 바꾼다.
+   스크립트가 없으면 고른 항목 자체에 배경이 그려진다(움직임 없음).
+   레퍼런스 값: 200ms, standard easing / 동작 줄이기 설정이면 움직이지 않는다 */
+.ds-segmented { position: relative; isolation: isolate; }
+.ds-segmented::before {
   content: "";
   position: absolute;
   z-index: -1;
   inset-block: var(--ybm-space-x0_5);
-  inset-inline-start: var(--ybm-space-x0_5);
-  width: calc((100% - var(--ybm-space-x0_5) * 2) / var(--ds-seg-count));
+  left: 0;
+  width: var(--ds-seg-w, 0px);
   border-radius: var(--ds-seg-item-radius);
   background: var(--ybm-color-bg-layer-default);
   box-shadow: var(--ybm-elevation-raised);
-  translate: calc(var(--ds-seg-index) * 100%) 0;
-  transition: translate var(--ybm-duration-normal) var(--ybm-easing-emphasized);
+  translate: var(--ds-seg-x, 0px) 0;
+  opacity: 0;
+  pointer-events: none;
 }
-.ds-segmented[data-layout="fill"]:not(:has(> [aria-pressed="true"]))::before { opacity: 0; }
-.ds-segmented[data-layout="fill"] > .ds-segmented__item[aria-pressed="true"] { background: transparent; box-shadow: none; }
+.ds-segmented[data-ds-ready]::before { opacity: 1; transition: translate var(--ybm-duration-normal) var(--ybm-easing-standard), width var(--ybm-duration-normal) var(--ybm-easing-standard); }
+.ds-segmented[data-ds-ready] > .ds-segmented__item[aria-pressed="true"] { background: transparent; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .ds-segmented[data-ds-ready]::before { transition: none; } }
 
 
 /* --------------------------------------------------------------------------
@@ -3904,6 +3906,7 @@ a.ds-card:active, button.ds-card:active { background: linear-gradient(var(--ybm-
 /* --------------------------------------------------------------------------
    69 Code Block - 코드를 고정 폭 글꼴로 보여 주는 칸 (2026-10-29 추가)
    header 에는 언어 이름과 복사 버튼. 복사 버튼(data-ds-copy)은 ybm-ds.js 가 코드를 복사하고 잠시 data-copied 를 붙인다.
+   data-wrap: 긴 줄을 가로로 넘기지 않고 줄바꿈한다(2026-10-30 추가).
      <figure class="ds-codeblock">
        [<figcaption class="ds-codeblock__header"><span class="ds-codeblock__language">javascript</span>
          <button type="button" class="ds-codeblock__copy" data-ds-copy aria-label="코드 복사"><i class="ds-icon ds-icon--copy ds-icon--sm" aria-hidden="true"></i></button></figcaption>]
@@ -3937,6 +3940,8 @@ a.ds-card:active, button.ds-card:active { background: linear-gradient(var(--ybm-
   tab-size: 2;
 }
 .ds-codeblock__code > code { font: inherit; }
+/* 긴 줄 줄바꿈 (AI 안내문처럼 글이 긴 코드) - <figure class="ds-codeblock" data-wrap> */
+.ds-codeblock[data-wrap] .ds-codeblock__code { white-space: pre-wrap; word-break: break-all; }
 
 
 /* --------------------------------------------------------------------------
@@ -4055,3 +4060,52 @@ a.ds-citation[data-type="number"]:hover { background: var(--ybm-color-bg-brand-w
 .ds-multiselect__option:has(:disabled) { color: var(--ybm-color-fg-disabled); cursor: default; }
 .ds-multiselect__option .ds-checkbox { min-height: 0; }
 .ds-multiselect__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* --------------------------------------------------------------------------
+   72 Rating - 별 다섯 개로 평점을 보여 주거나 고르는 부품 (2026-10-30 추가)
+   보기:  <span class="ds-rating" style="--ds-rating-value: 4.5" role="img" aria-label="5점 만점에 4.5점"><span class="ds-rating__stars"></span><span class="ds-rating__value">4.5</span><span class="ds-rating__count">(312)</span></span>
+   입력:  <fieldset class="ds-rating" data-input aria-label="별점"> 안에 <label class="ds-rating__option"><input type="radio" class="ds-rating__control" name="r" value="1"><span class="ds-rating__star"></span></label> 5개
+   size: small 12 / medium 16 (기본) / large 20  ·  값: --ds-rating-value 0~5 (소수 가능)  ·  색: --ds-rating-fill, --ds-rating-empty
+   -------------------------------------------------------------------------- */
+.ds-rating {
+  --ds-rating-size: 16px;
+  --ds-rating-gap: 2px;
+  --ds-rating-value: 0;
+  --ds-rating-fill: var(--ybm-color-fg-warning);
+  --ds-rating-empty: var(--ybm-color-stroke-neutral-muted);
+  display: inline-flex; align-items: center; gap: var(--ybm-space-x1);
+  margin: 0; padding: 0; border: 0; min-width: 0;
+  color: var(--ybm-color-fg-neutral); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03);
+}
+.ds-rating[data-size="small"] { --ds-rating-size: 12px; --ds-rating-gap: 1px; font-size: var(--ybm-font-size-t02); line-height: var(--ybm-line-height-t02); }
+.ds-rating[data-size="large"] { --ds-rating-size: 20px; --ds-rating-gap: 3px; font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
+.ds-rating__stars {
+  position: relative; display: block; flex: none;
+  width: calc(var(--ds-rating-size) * 5 + var(--ds-rating-gap) * 4); height: var(--ds-rating-size);
+  background: var(--ds-rating-empty);
+  -webkit-mask: var(--ds-icon-star-solid) 0 0 / var(--ds-rating-size) var(--ds-rating-size) space;
+          mask: var(--ds-icon-star-solid) 0 0 / var(--ds-rating-size) var(--ds-rating-size) space;
+}
+.ds-rating__stars::before {
+  content: ""; position: absolute; inset: 0; background: var(--ds-rating-fill);
+  clip-path: inset(0 calc(100% - var(--ds-rating-value) / 5 * 100%) 0 0);
+}
+.ds-rating__value { font-weight: var(--ybm-font-weight-semibold); font-variant-numeric: tabular-nums; }
+.ds-rating__count { color: var(--ybm-color-fg-neutral-muted); font-variant-numeric: tabular-nums; }
+/* 입력형: 라디오 5개. 고른 별까지 채우고, 올리면 그 별까지 미리 채운다 */
+.ds-rating[data-input] { gap: var(--ds-rating-gap); }
+.ds-rating__option { position: relative; display: block; width: var(--ds-rating-size); height: var(--ds-rating-size); cursor: pointer; }
+.ds-rating__control { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.ds-rating__star {
+  display: block; width: 100%; height: 100%; background: var(--ds-rating-empty);
+  -webkit-mask: var(--ds-icon-star-solid) center / contain no-repeat; mask: var(--ds-icon-star-solid) center / contain no-repeat;
+  transition: background-color var(--ybm-duration-fast) var(--ybm-easing-standard), scale var(--ybm-duration-fast) var(--ybm-easing-standard);
+}
+.ds-rating__option:has(:checked) .ds-rating__star,
+.ds-rating__option:has(~ .ds-rating__option :checked) .ds-rating__star { background: var(--ds-rating-fill); }
+.ds-rating[data-input]:hover .ds-rating__option .ds-rating__star { background: var(--ds-rating-empty); }
+.ds-rating[data-input] .ds-rating__option:hover .ds-rating__star,
+.ds-rating[data-input] .ds-rating__option:has(~ .ds-rating__option:hover) .ds-rating__star { background: var(--ds-rating-fill); }
+.ds-rating__option:hover .ds-rating__star { scale: 1.1; }
+.ds-rating__option:has(:focus-visible) .ds-rating__star { outline: 2px solid var(--ybm-color-stroke-focus-ring); outline-offset: 2px; border-radius: var(--ybm-shape-2xs); }
+.ds-rating[data-input]:is(:disabled, [aria-disabled="true"]) { opacity: .4; pointer-events: none; }

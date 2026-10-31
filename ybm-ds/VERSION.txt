@@ -1,1 +1,1 @@
-ybm-ds origin/main 6cde41f (2026-10-29 복사) - scripts/sync-ybm-ds.js 가 만든 사본, 직접 고치지 말 것
+ybm-ds origin/main 1aae948 (2026-10-31 복사) - scripts/sync-ybm-ds.js 가 만든 사본, 직접 고치지 말 것
