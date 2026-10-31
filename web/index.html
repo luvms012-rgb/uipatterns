@@ -121,6 +121,7 @@
     <span class="lb-name" id="lb-name"></span>
     <span id="lb-cat"></span>
   </div>
+  <div class="lb-more ds-chip-group" id="lb-more"></div>
   <div class="lb-actions">
     <button type="button" id="lb-link" class="ds-btn" data-variant="neutralWeak" onclick="copyLbLink()"><i class="ds-icon ds-icon--link" aria-hidden="true"></i>링크 복사</button>
     <button type="button" id="lb-dl" class="ds-btn" onclick="dlFromLb()"><i class="ds-icon ic-download" aria-hidden="true"></i>다운로드</button>
@@ -815,7 +816,7 @@ function openLb(encPath, encName, encCat) {
   document.getElementById('lb-cat').textContent  = cat;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
-  updateLbNav();
+  updateLbNav(); renderLbMore();
   syncUrl();
 }
 // 통합검색에서 상대 사이트 패턴을 클릭했을 때: 페이지 이동 없이 상대 폴더 이미지를 바로 미리보기
@@ -831,7 +832,7 @@ function openLbCross(platform, encPath, encName, encCat) {
   document.getElementById('lb-cat').textContent  = cat;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
-  updateLbNav();
+  updateLbNav(); renderLbMore();
 }
 function updateLbNav() {
   const hasList = _lbIndex > -1 && _lbList.length > 1;
@@ -856,8 +857,58 @@ function lbNav(dir) {
   document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
   document.getElementById('lb-name').textContent = extractService(_lbName);
   document.getElementById('lb-cat').textContent  = item.category;
-  updateLbNav();
+  updateLbNav(); renderLbMore();
   syncUrl();
+}
+// 이어 보기: 보고 있는 화면에서 같은 서비스 · 같은 카테고리 · 같은 컴포넌트 · 웹/모바일 짝으로 바로 가기 (10/31)
+const _lbSvcKey = s => String(s || '').normalize('NFC').toLowerCase().replace(/\s+/g, '');
+function renderLbMore() {
+  const box = document.getElementById('lb-more');
+  const ec = encodeURIComponent, esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const chip = (label, onclick, icon) => `<button type="button" class="ds-chip lb-more-chip" data-size="small" data-variant="outlineWeak" onclick="event.stopPropagation();${onclick}">` +
+    (icon ? `<i class="ds-icon ds-icon--${icon}" aria-hidden="true"></i>` : '') + esc(label) + '</button>';
+  const svc = extractService(_lbName);
+  const cross = _lbPlatform !== PLATFORM;          // 통합검색에서 상대 사이트 화면을 미리보기 중
+  const item = cross ? null : DATA_BY_PATH.get(_lbPath);
+  const chips = [];
+  if (!cross) {
+    const n = DISPLAY_DATA.filter(i => extractService(i.name) === svc).length;
+    if (n > 1 && !(S.view === 'detail' && S.svc === svc)) chips.push(chip(`${svc} 화면 ${n}장`, `lbGo('svc','${ec(svc)}')`));
+    if (item && item.category) chips.push(chip(`${item.category} 다른 서비스`, `lbGo('cat','${ec(item.category)}')`));
+    for (const c of (item && item.comps || []).slice(0, 8)) chips.push(chip(`${c} 쓰인 화면`, `lbGo('comp','${ec(c)}')`));
+  }
+  box.innerHTML = chips.join('');
+  box.style.display = chips.length ? '' : 'none';
+
+  // 상대 사이트(웹 ↔ 모바일)에 같은 서비스가 있으면 그쪽 서비스 페이지로 (search-index.js 는 처음 한 번만 불러옴)
+  const path = _lbPath, other = PLATFORM === 'mo' ? 'web' : 'mo';
+  loadCrossSearchIndex().then(idx => {
+    if (_lbPath !== path) return;   // 그 사이 다른 화면으로 넘어감
+    const hit = idx && (idx.svcs || []).find(x => _lbSvcKey(x.svc) === _lbSvcKey(svc));
+    if (cross) {   // 상대 사이트 화면을 보는 중: 그 서비스의 화면 전체는 상대 사이트에서, 이쪽에도 있으면 이쪽 서비스로
+      if (hit) box.insertAdjacentHTML('beforeend', chip(`${svc} ${other === 'web' ? '웹' : '모바일'} 화면 ${hit.count}장`, `lbGoOther('${ec(hit.svc)}')`, 'external-link'));
+      const n = DISPLAY_DATA.filter(i => extractService(i.name) === svc).length;
+      if (n && !(S.view === 'detail' && S.svc === svc)) box.insertAdjacentHTML('beforeend', chip(`${PLATFORM === 'mo' ? '모바일' : '웹'} 버전 ${n}장`, `lbGo('svc','${ec(svc)}')`, PLATFORM === 'mo' ? 'smartphone' : 'monitor'));
+    } else if (hit) {
+      box.insertAdjacentHTML('beforeend', chip(`${other === 'web' ? '웹' : '모바일'} 버전 ${hit.count}장`, `lbGoOther('${ec(hit.svc)}')`, other === 'web' ? 'monitor' : 'smartphone'));
+    }
+    box.style.display = box.children.length ? '' : 'none';
+  });
+}
+function lbGo(kind, enc) {   // kind: svc(서비스 페이지) | cat(카테고리 필터) | comp(컴포넌트 필터). 다른 필터는 모두 풀어서 결과가 예측되게
+  const v = decodeURIComponent(enc);
+  closeLb();
+  S.selected.clear(); document.getElementById('select-bar').classList.remove('open');
+  S.checked.clear(); S.checkedComps.clear(); S.checkedColors.clear(); S.checkedTypes.clear();
+  if (kind === 'cat') S.checked.add(v);
+  if (kind === 'comp') S.checkedComps.add(v);
+  S.view = kind === 'svc' ? 'detail' : 'index'; S.svc = kind === 'svc' ? v : null;
+  buildSidebar(); render(); syncUrl();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+function lbGoOther(encSvc) {   // 상대 사이트의 서비스 페이지로 (같은 탭)
+  const other = PLATFORM === 'mo' ? 'web' : 'mo';
+  location.href = new URL('../' + other + '/', location.href).href + '#svc=' + encSvc;
 }
 function closeLb(e) {
   if (e && e.target !== document.getElementById('lightbox') && !e.target.closest('.lb-close')) return;
