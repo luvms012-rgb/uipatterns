@@ -83,6 +83,8 @@ body { background: var(--ybm-color-bg-canvas); }
 .svc-header { display: flex; align-items: center; gap: var(--ybm-space-x3); padding-bottom: var(--ybm-space-x3); border-bottom: 1px solid var(--ybm-color-stroke-neutral-muted); }
 .svc-h-icon { width: 40px; height: 40px; border-radius: var(--ybm-shape-md); object-fit: cover; flex-shrink: 0; background: var(--ybm-color-bg-layer-floating); }
 .svc-h-icon[data-missing] { display: none; }
+/* 아이콘이 오기 전(data-src 만 있을 때) 대체 글자(서비스 이름)가 칸 안에 비치지 않게 */
+.svc-h-icon, .svc-info-icon { color: transparent; }
 .svc-h-info { display: flex; flex-direction: column; gap: var(--ybm-space-x0_5); }
 .svc-h-name { font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); font-weight: var(--ybm-font-weight-bold); }
 .svc-h-cat  { font-size: var(--ybm-font-size-t02); line-height: var(--ybm-line-height-t02); color: var(--ybm-color-fg-neutral-subtle); }
