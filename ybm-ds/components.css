@@ -778,8 +778,8 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
        <label class="ds-radio"><input type="radio" class="ds-radio__control" name="g"><span>라벨</span></label>
      </div>
    Figma: 행 min-h 36/32 · 위 6 · gap x2 · 원 bg/layer-default + 1px stroke/neutral-weak · label t05/t04
-     checked neutral bg/neutral-solid + 점(10/8) fg/on-neutral-solid · brand bg/brand-solid + 점 fg/on-brand-solid
-     disabled bg/disabled + stroke/neutral-muted · disabledChecked bg/disabled + 점 fg/disabled
+     checked 고리(두께 7/6, 가운데 10/8 은 투명) brand bg/brand-solid · neutral bg/neutral-solid (2026-10-31 흰 점 → 투명)
+     disabled bg/disabled + stroke/neutral-muted · disabledChecked 고리 bg/disabled, 가운데 투명
    -------------------------------------------------------------------------- */
 .ds-radio-group { display: flex; flex-direction: column; }
 .ds-radio {
@@ -811,7 +811,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
   background: var(--ybm-color-bg-layer-default);
   box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak);
   cursor: inherit;
-  transition: background-color var(--ybm-duration-fast) var(--ybm-easing-standard);
+  transition: background-color var(--ybm-duration-fast) var(--ybm-easing-standard), box-shadow var(--ybm-duration-fast) var(--ybm-easing-emphasized);
 }
 .ds-radio__control::after {
   content: "";
@@ -822,10 +822,10 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
   transform: scale(0);
   transition: transform var(--ybm-duration-fast) var(--ybm-easing-emphasized);
 }
-.ds-radio__control:checked { background: var(--ds-radio-checked-bg); box-shadow: none; }
-.ds-radio__control:checked::after { transform: scale(1); }
+.ds-radio__control:checked { background: transparent; box-shadow: inset 0 0 0 calc((var(--ds-radio-size) - var(--ds-radio-dot)) / 2) var(--ds-radio-checked-bg); }
+.ds-radio__control:checked::after { transform: scale(0); } /* 가운데는 비워 둔다(투명 고리) */
 .ds-radio__control:disabled { background: var(--ybm-color-bg-disabled); box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-muted); }
-.ds-radio__control:disabled:checked { box-shadow: none; }
+.ds-radio__control:disabled:checked { background: transparent; box-shadow: inset 0 0 0 calc((var(--ds-radio-size) - var(--ds-radio-dot)) / 2) var(--ybm-color-bg-disabled); }
 .ds-radio__control:disabled::after { background: var(--ybm-color-fg-disabled); }
 .ds-radio:has(:disabled) { color: var(--ybm-color-fg-disabled); cursor: not-allowed; }
 
@@ -1005,7 +1005,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
 .ds-chip[data-layout="iconOnly"] { width: var(--ds-chip-height); min-width: var(--ds-chip-height); padding: 0; }
 .ds-chip[data-variant="outlineStrong"] { --ds-chip-bg: var(--ybm-color-bg-layer-default); --ds-chip-line: var(--ybm-color-stroke-neutral-weak); }
 .ds-chip[data-variant="outlineWeak"]   { --ds-chip-bg: var(--ybm-color-bg-layer-default); --ds-chip-line: var(--ybm-color-stroke-neutral-muted); }
-.ds-chip[aria-pressed="true"] { --ds-chip-bg: var(--ybm-color-bg-neutral-solid); --ds-chip-fg: var(--ybm-color-fg-on-neutral-solid); font-weight: var(--ybm-font-weight-semibold); }
+.ds-chip[aria-pressed="true"] { --ds-chip-bg: var(--ybm-color-bg-neutral-solid); --ds-chip-fg: var(--ybm-color-fg-on-neutral-solid); --ds-chip-line: var(--ybm-color-bg-neutral-solid); font-weight: var(--ybm-font-weight-semibold); } /* 선택되면 선도 같은 색: 고리처럼 안 보이게 */
 .ds-chip[data-variant="outlineWeak"][aria-pressed="true"] { --ds-chip-bg: var(--ybm-color-bg-neutral); --ds-chip-fg: var(--ybm-color-fg-neutral); --ds-chip-line: var(--ybm-color-stroke-neutral-contrast); font-weight: var(--ybm-font-weight-medium); }
 .ds-chip:disabled { opacity: 0.5; cursor: not-allowed; }
 /* 호버 — 마우스 환경에서만, Figma 의 pressed 색을 쓴다 (DS 공통 규칙) */
@@ -1678,7 +1678,7 @@ a.ds-callout:active, button.ds-callout:active { filter: brightness(0.97); }
   gap: var(--ybm-space-x2);
   width: 100%;
   padding: var(--ybm-space-x2_5) var(--ybm-space-x3);
-  border-radius: var(--ybm-shape-sm);
+  border-radius: calc(var(--ybm-shape-2xl) - var(--ybm-space-x1)); /* 바깥 곡률(2xl) - 안쪽 여백(x1) = 16, 곡선이 나란하게 */
   color: var(--ds-menu-item-fg);
   font-size: var(--ybm-font-size-t04);
   line-height: var(--ybm-line-height-t04);

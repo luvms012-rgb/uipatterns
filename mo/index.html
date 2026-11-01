@@ -586,7 +586,7 @@ function render() {
   if (S.view === 'detail' && S.svc) {
     const svcItems = DISPLAY_DATA.filter(i => extractService(i.name) === S.svc);
     if (!svcItems.length) { backToIndex(); return; }
-    const cat = svcItems[0].category;
+    const cat = getSvcType(S.svc);   // 서비스 이름 아래 = 업종 (예전엔 첫 화면의 카테고리가 나와 네이버페이가 'AI' 로 보였음)
     const dh = document.getElementById('detail-header');
     dh.style.display = 'block';
     dh.innerHTML = `<div class="detail-bar">
@@ -646,7 +646,7 @@ function render() {
     g.classList.add('filter-mode');
     let isFirst = true;
     for (const [svc, svcItems] of groups) {
-      const cat = svcItems[0].category;
+      const cat = getSvcType(svc);   // 업종 (목록 카드와 같게)
       const safeSvc = svc.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       units.push(`<div class="svc-group${isFirst?' first':''}">
         <div class="svc-header" onclick="showService('${safeSvc}')" style="cursor:pointer" title="${svc} 전체 화면 보기">
