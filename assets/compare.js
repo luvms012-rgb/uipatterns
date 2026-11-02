@@ -25,9 +25,40 @@ function cmpEnsure() {
         <button type="button" class="ds-btn" data-variant="neutralWeak" data-size="small" data-layout="iconOnly" onclick="cmpClose()" aria-label="닫기"><i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>
       </div>
     </div>
-    <div class="cmp-row" id="cmp-row"></div>`;
+    <div class="cmp-body">
+      <div class="cmp-row" id="cmp-row"></div>
+      <button type="button" class="ds-btn cmp-nav cmp-prev" id="cmp-prev" data-variant="neutralWeak" data-layout="iconOnly" onclick="cmpPage(-1)" aria-label="이전 화면들"><i class="ds-icon ds-icon--chevron-left" aria-hidden="true"></i></button>
+      <button type="button" class="ds-btn cmp-nav cmp-next" id="cmp-next" data-variant="neutralWeak" data-layout="iconOnly" onclick="cmpPage(1)" aria-label="다음 화면들"><i class="ds-icon ds-icon--chevron-right" aria-hidden="true"></i></button>
+    </div>`;
   document.body.appendChild(el);
+  const row = el.querySelector('#cmp-row');
+  row.addEventListener('scroll', cmpSyncNav, { passive: true });
+  // 마우스 휠(세로)로 가로 넘기기. 긴 웹 화면 칸 안에서 세로로 더 내릴 수 있으면 그 칸을 먼저 내린다
+  row.addEventListener('wheel', e => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;   // 터치패드 가로 밀기는 그대로
+    const shot = e.target.closest('.cmp-shot');
+    if (shot && shot.scrollHeight > shot.clientHeight + 2) {
+      const atTop = shot.scrollTop <= 0, atEnd = shot.scrollTop + shot.clientHeight >= shot.scrollHeight - 2;
+      if ((e.deltaY < 0 && !atTop) || (e.deltaY > 0 && !atEnd)) return;
+    }
+    e.preventDefault();
+    row.scrollLeft += e.deltaY;
+  }, { passive: false });
+  window.addEventListener('resize', () => { if (cmpIsOpen()) cmpSyncNav(); });
   return el;
+}
+
+// 양옆 화살표: 보이는 폭만큼 넘긴다. 처음/끝이면 그쪽 화살표는 숨김
+function cmpPage(dir) {
+  const row = document.getElementById('cmp-row');
+  row.scrollBy({ left: dir * row.clientWidth * 0.9, behavior: 'smooth' });
+}
+function cmpSyncNav() {
+  const row = document.getElementById('cmp-row');
+  if (!row) return;
+  const more = row.scrollWidth - row.clientWidth > 2;
+  document.getElementById('cmp-prev').hidden = !more || row.scrollLeft <= 2;
+  document.getElementById('cmp-next').hidden = !more || row.scrollLeft + row.clientWidth >= row.scrollWidth - 2;
 }
 
 // paths: 화면 경로 목록, title: 머리 글자
@@ -40,6 +71,7 @@ function cmpOpen(paths, title) {
   el.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.getElementById('cmp-row').scrollLeft = 0;
+  requestAnimationFrame(cmpSyncNav);
   syncUrl();
 }
 
@@ -69,7 +101,7 @@ function cmpRender() {
 function cmpRemove(i) {
   CMP.paths.splice(i, 1);
   if (!CMP.paths.length) { cmpClose(); return; }
-  cmpRender(); syncUrl();
+  cmpRender(); cmpSyncNav(); syncUrl();
 }
 
 function cmpClose() {
@@ -130,7 +162,7 @@ function openPendingPick() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape' || !cmpIsOpen()) return;
-  if (document.getElementById('lightbox').classList.contains('open')) return;
-  cmpClose();
+  if (!cmpIsOpen() || document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape') cmpClose();
+  else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); cmpPage(e.key === 'ArrowRight' ? 1 : -1); }   // ← → 로 넘기기
 });
