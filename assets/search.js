@@ -43,17 +43,26 @@ function srNameScore(n, w) {
   return 1;
 }
 
+// 찾는 곳(사이트) 하나 = 데이터 + 그 사이트의 분류표. 이 사이트(srHome)와 통합 검색용 상대 사이트(SR_OTHER.ctx)가 같은 모양
+let _srHome = null;
+function srHome() {
+  return _srHome || (_srHome = {
+    platform: PLATFORM, data: DISPLAY_DATA, raw: DATA, cats: ALL_CATS, catLabel, type: getSvcType,
+    types: typeof ALL_INDUSTRY_TYPES !== 'undefined' ? ALL_INDUSTRY_TYPES : [], comps: typeof COMPONENTS !== 'undefined' ? COMPONENTS : [],
+    W: SRW, idx: null, svcItems: null,
+  });
+}
+
 // 화면마다 찾을 이름을 한 번만 만들어 둔다
-let _srIdx = null;
-function srIndex() {
-  if (_srIdx) return _srIdx;
-  return (_srIdx = DISPLAY_DATA.map(item => {
+function srIndex(ctx = srHome()) {
+  if (ctx.idx) return ctx.idx;
+  return (ctx.idx = ctx.data.map(item => {
     const svc = extractService(item.name);
     const x = {
       item, svc,
-      cat: [srName(item.category), srName(catLabel(item.category))],
+      cat: [srName(item.category), srName(ctx.catLabel(item.category))],
       sv: srName(svc), pat: srName(extractPattern(item.name)),
-      comp: (item.comps || []).map(srName), type: srName(getSvcType(svc)), color: normCat(item.color || ''),
+      comp: (item.comps || []).map(srName), type: srName(ctx.type(svc)), color: normCat(item.color || ''),
     };
     x.all = [x.sv.w, x.pat.w, x.type.w, x.color, ...x.cat.map(n => n.w), ...x.comp.map(n => n.w)].join('|');  // 빨리 거르기용
     return x;
@@ -62,13 +71,61 @@ function srIndex() {
 // 첫 검색이 느리지 않게 페이지가 한가할 때 미리 만든다 (모바일 5.7만 장 약 0.3초)
 (window.requestIdleCallback || (f => setTimeout(f, 1500)))(() => { if (typeof DISPLAY_DATA !== 'undefined') srIndex(); });
 
-let _srSvcItems = null;
-function srSvcItems() {
-  if (_srSvcItems) return _srSvcItems;
-  _srSvcItems = new Map();
-  for (const x of srIndex()) { if (!_srSvcItems.has(x.svc)) _srSvcItems.set(x.svc, []); _srSvcItems.get(x.svc).push(x.item); }
-  return _srSvcItems;
+function srSvcItems(ctx = srHome()) {
+  if (ctx.svcItems) return ctx.svcItems;
+  ctx.svcItems = new Map();
+  for (const x of srIndex(ctx)) { if (!ctx.svcItems.has(x.svc)) ctx.svcItems.set(x.svc, []); ctx.svcItems.get(x.svc).push(x.item); }
+  return ctx.svcItems;
 }
+
+// ── 통합 검색: 상대 사이트(모바일 ↔ 웹사이트) 데이터를 첫 검색 때 불러온다 (11/02) ──────────
+// data.js, svc-types.js, taxonomy.js 를 글자로 받아 따로 실행해 이 페이지의 DATA 와 섞이지 않게 한다. 화면 속 글자(words.js)는 그다음에
+const SR_OTHER = { platform: '', state: 'none', ctx: null };   // platform 은 첫 검색 때 (PLATFORM 은 index.html 이 이 파일 뒤에 정한다)
+const srOtherName = () => SR_OTHER.platform === 'web' ? '웹사이트' : '모바일';
+function srOtherLoad() {
+  SR_OTHER.platform = PLATFORM === 'mo' ? 'web' : 'mo';
+  if (SR_OTHER.state !== 'none' || location.protocol === 'file:') return;
+  SR_OTHER.state = 'loading';
+  const base = '../' + SR_OTHER.platform + '/', ver = '?v=' + (window.__UIP_VER || '');
+  const get = f => fetch(base + f + ver).then(r => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.text(); });
+  Promise.all(['data.js', 'svc-types.js', 'taxonomy.js'].map(get)).then(([d, t, x]) => {
+    const raw = new Function(d + '\n;return DATA;')();
+    const T = new Function(t + '\n;return { SVC_TYPES, types: typeof ALL_INDUSTRY_TYPES !== "undefined" ? ALL_INDUSTRY_TYPES : [] };')();
+    const X = new Function(x + '\n;return { alias: typeof CAT_ALIAS !== "undefined" ? CAT_ALIAS : {}, groups: typeof PATTERN_GROUPS !== "undefined" ? PATTERN_GROUPS : [], comps: typeof COMPONENTS !== "undefined" ? COMPONENTS : [] };')();
+    const byNorm = new Map(); X.groups.forEach(g => g.cats.forEach(c => byNorm.set(normCat(c), c)));
+    const data = raw.filter(i => i.category !== 'icons');
+    SR_OTHER.ctx = {
+      platform: SR_OTHER.platform, data, raw, cats: [...new Set(data.map(i => i.category))].sort(sortMixed),
+      catLabel: c => { const a = X.alias[c]; return byNorm.get(normCat(a || c)) || a || c; },
+      type: s => T.SVC_TYPES[s] || UNCLASSIFIED, types: T.types, comps: X.comps,
+      W: { state: 'loading', w: null, p: null, pos: null, hits: new Map() }, idx: null, svcItems: null,
+      byPath: new Map(data.map(i => [i.path, i])),
+    };
+    SR_OTHER.state = 'ready';
+    srOtherRefresh();
+    // 상대 사이트 화면 속 글자 — 없거나 짝이 안 맞으면 글자 검색만 쉰다
+    get('words.js').then(w => {
+      const box = {}; new Function('window', w)(box);
+      const W = box.__WORDS__, C = SR_OTHER.ctx, last = raw[raw.length - 1];
+      if (!W || W.n !== raw.length || W.first !== (raw[0] && raw[0].path) || W.last !== (last && last.path)) { C.W.state = 'off'; return; }
+      Object.assign(C.W, { w: W.w ? W.w.split('|') : [], p: W.p ? W.p.split('|') : [], pos: new Map(raw.map((it, i) => [it.path, i])), state: 'ready' });
+      srOtherRefresh();
+    }).catch(() => { SR_OTHER.ctx.W.state = 'off'; });
+  }).catch(() => { SR_OTHER.state = 'off'; });
+}
+// 상대 사이트 데이터가 도착하면 보고 있던 검색 결과와 드롭다운을 다시 그린다
+function srOtherRefresh() {
+  if (S.view === 'search') render();
+  const inp = document.getElementById('hdrSearchInput');
+  if (inp && document.activeElement === inp && inp.value.trim().length >= 2) onSearchInput(inp.value);
+}
+// 상대 사이트에서 이 검색어로 찾은 화면 (없으면 null). 순서: 카테고리, 서비스, 업종, 컴포넌트, 화면 이름, 컬러, 화면 속 글자
+function srOtherHits(q) {
+  if (SR_OTHER.state !== 'ready') return null;
+  const C = SR_OTHER.ctx, r = searchResults(q, C);
+  return r.multi ? r.combo : [...r.all].map(p => C.byPath.get(p)).filter(Boolean);
+}
+function srOtherUrl(q) { return new URL('../' + SR_OTHER.platform + '/', location.href).href + '#' + new URLSearchParams({ q }).toString(); }
 
 // 검색어 한 단어 → 비슷한 말까지 (words: 서비스 말고 전부에서 찾을 말, svcs: 서비스 이름에서 찾을 말). 첫 번째가 입력한 말
 // 사용자가 "함께 찾은 말" 칩에서 뺀 비슷한 말 (normCat 값). 검색어가 바뀌면 비운다. 주소 #x=
@@ -147,43 +204,43 @@ function srWordsLoad() {
   document.head.appendChild(s);
 }
 // 낱말에 이 글자가 들어 있는 화면 번호 (2자 이상). 같은 글자는 한 번만 계산
-function srWordHits(n) {
-  if (SRW.state !== 'ready' || !n || n.length < 2) return new Set();
-  let set = SRW.hits.get(n);
+function srWordHits(n, W = SRW) {
+  if (W.state !== 'ready' || !n || n.length < 2) return new Set();
+  let set = W.hits.get(n);
   if (set) return set;
   set = new Set();
-  SRW.w.forEach((w, k) => {
+  W.w.forEach((w, k) => {
     if (!w.includes(n)) return;
     let i = 0;
-    for (const d of SRW.p[k].split(',')) { i += parseInt(d, 36); set.add(i); }
+    for (const d of W.p[k].split(',')) { i += parseInt(d, 36); set.add(i); }
   });
-  SRW.hits.set(n, set);
+  W.hits.set(n, set);
   return set;
 }
 // 검색어(비슷한 말 포함)가 화면 글자에 있는 화면 번호. 글자 색인이 없으면 null
-function srOcrSet(v) {
-  if (SRW.state !== 'ready') return null;
+function srOcrSet(v, W = SRW) {
+  if (W.state !== 'ready') return null;
   const out = new Set();
-  for (const w of new Set([v.t, ...v.alts].map(ocrNorm))) for (const i of srWordHits(w)) out.add(i);
+  for (const w of new Set([v.t, ...v.alts].map(ocrNorm))) for (const i of srWordHits(w, W)) out.add(i);
   return out;
 }
 
 // 점수 높은 것 먼저 (같으면 원래 순서)
 const srByScore = arr => arr.map((e, i) => [e, i]).sort((a, b) => b[0][1] - a[0][1] || a[1] - b[1]).map(([e]) => e[0]);
 
-function searchResults(q) {
+function searchResults(q, ctx = srHome()) {
   const terms = srTerms(q);
   const r = { terms, multi: terms.length > 1, cats: [], svcs: [], types: [], comps: { names: [], items: [] }, pats: [], colors: { names: [], items: [] }, text: [], combo: [], all: new Set() };
   if (!terms.length) return r;
 
   if (r.multi) {
-    const ocr = terms.map(srOcrSet);  // 단어마다 화면 글자에 그 말이 있는 화면 번호 (글자 색인이 없으면 null)
+    const ocr = terms.map(v => srOcrSet(v, ctx.W));  // 단어마다 화면 글자에 그 말이 있는 화면 번호 (글자 색인이 없으면 null)
     const hit = [];
-    for (const x of srIndex()) {
+    for (const x of srIndex(ctx)) {
       let sum = 0;
       for (let k = 0; k < terms.length; k++) {
         let s = srScore(x, terms[k]);
-        if (!s && ocr[k] && ocr[k].has(SRW.pos.get(x.item.path))) s = 1;  // 이름엔 없지만 화면 글자에 있음
+        if (!s && ocr[k] && ocr[k].has(ctx.W.pos.get(x.item.path))) s = 1;  // 이름엔 없지만 화면 글자에 있음
         if (!s) { sum = 0; break; }
         sum += s;
       }
@@ -197,30 +254,30 @@ function searchResults(q) {
   const v = terms[0];
   const best = (n, list, min = 1) => Math.max(0, ...list.map((w, k) => { const s = srNameScore(n, w); return s >= min ? s - (k ? 0.5 : 0) : 0; }));
 
-  r.cats = srByScore(ALL_CATS.map(c => [c, Math.max(best(srName(c), v.words), best(srName(catLabel(c)), v.words))]).filter(e => e[1]));
+  r.cats = srByScore(ctx.cats.map(c => [c, Math.max(best(srName(c), v.words), best(srName(ctx.catLabel(c)), v.words))]).filter(e => e[1]));
   const catSet = new Set(r.cats);
 
   const svcScore = new Map();
-  for (const [svc] of srSvcItems()) { const s = best(srName(svc), v.svcs); if (s) svcScore.set(svc, s); }
-  r.svcs = [...svcScore].sort((a, b) => b[1] - a[1] || sortMixed(a[0], b[0])).map(([svc]) => [svc, srSvcItems().get(svc)]);
+  for (const [svc] of srSvcItems(ctx)) { const s = best(srName(svc), v.svcs); if (s) svcScore.set(svc, s); }
+  r.svcs = [...svcScore].sort((a, b) => b[1] - a[1] || sortMixed(a[0], b[0])).map(([svc]) => [svc, srSvcItems(ctx).get(svc)]);
 
-  const typeNames = (typeof ALL_INDUSTRY_TYPES !== 'undefined' ? ALL_INDUSTRY_TYPES : []).filter(t => best(srName(t), v.words, 3));
-  r.types = typeNames.map(t => [t, [...srSvcItems()].filter(([svc]) => getSvcType(svc) === t).sort((a, b) => sortMixed(a[0], b[0]))]).filter(e => e[1].length);
+  const typeNames = ctx.types.filter(t => best(srName(t), v.words, 3));
+  r.types = typeNames.map(t => [t, [...srSvcItems(ctx)].filter(([svc]) => ctx.type(svc) === t).sort((a, b) => sortMixed(a[0], b[0]))]).filter(e => e[1].length);
 
-  r.comps.names = (typeof COMPONENTS !== 'undefined' ? COMPONENTS : []).filter(c => best(srName(c), v.words, 3));
-  if (r.comps.names.length) r.comps.items = DISPLAY_DATA.filter(i => (i.comps || []).some(c => r.comps.names.includes(c)));
+  r.comps.names = ctx.comps.filter(c => best(srName(c), v.words, 3));
+  if (r.comps.names.length) r.comps.items = ctx.data.filter(i => (i.comps || []).some(c => r.comps.names.includes(c)));
 
   r.colors.names = COLOR_LIST.map(c => c.name).filter(c => v.words.includes(normCat(c)));
-  if (r.colors.names.length) r.colors.items = DISPLAY_DATA.filter(i => r.colors.names.includes(i.color));
+  if (r.colors.names.length) r.colors.items = ctx.data.filter(i => r.colors.names.includes(i.color));
 
-  r.pats = srByScore(srIndex().filter(x => !catSet.has(x.item.category)).map(x => [x.item, best(x.pat, v.words)]).filter(e => e[1]));
+  r.pats = srByScore(srIndex(ctx).filter(x => !catSet.has(x.item.category)).map(x => [x.item, best(x.pat, v.words)]).filter(e => e[1]));
 
-  for (const c of r.cats) for (const i of DISPLAY_DATA) if (i.category === c) r.all.add(i.path);
+  for (const c of r.cats) for (const i of ctx.data) if (i.category === c) r.all.add(i.path);
   for (const [, items] of r.svcs) items.forEach(i => r.all.add(i.path));
   for (const [, svcs] of r.types) for (const [, items] of svcs) items.forEach(i => r.all.add(i.path));
   for (const list of [r.comps.items, r.pats, r.colors.items]) list.forEach(i => r.all.add(i.path));
-  const ocr = srOcrSet(v);
-  if (ocr) r.text = [...ocr].sort((a, b) => a - b).map(i => DATA[i]).filter(it => it && it.category !== 'icons' && !r.all.has(it.path));
+  const ocr = srOcrSet(v, ctx.W);
+  if (ocr) r.text = [...ocr].sort((a, b) => a - b).map(i => ctx.raw[i]).filter(it => it && it.category !== 'icons' && !r.all.has(it.path));
   r.text.forEach(i => r.all.add(i.path));
   return r;
 }
@@ -256,6 +313,15 @@ function searchSvcCard(svc, svcItems) {
   </div>`;
 }
 
+// 상대 사이트 화면 카드 — 고르기는 안 되고, 누르면 그 사이트 이미지로 크게 보기 (openLbCross, index.html)
+const SR_OTHER_PREVIEW = 20;
+function srCrossCard(item, platform) {
+  const ec = encodeURIComponent, esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  return `<div class="card" data-cross="${platform}" onclick="openLbCross('${platform}','${ec(item.path)}','${ec(item.name)}','${ec(item.category)}')">
+    <div class="card-img-wrap"><img class="card-img" data-src="${imgUrl(item.path, platform)}" alt="${esc(item.name)}" decoding="async" /></div>
+  </div>`;
+}
+
 // render() 가 S.view === 'search' 일 때 부른다
 function renderSearch() {
   const g = document.getElementById('grid');
@@ -264,13 +330,14 @@ function renderSearch() {
   const num = n => n.toLocaleString('ko-KR');
   const q = S.q;
   srWordsLoad();  // 첫 검색 때 화면 속 글자 색인을 불러온다 (도착하면 다시 그림)
+  srOtherLoad();  // 통합 검색: 상대 사이트 데이터도 (도착하면 다시 그림)
   const r = searchResults(q);
   const qt = r.terms.length ? r.terms.map(v => `'${esc(v.t)}'`).join(' + ') : `'${esc(q)}'`;
   document.getElementById('detail-header').style.display = 'none';
   setToolbarTitle(`${qt} 검색 결과`);
   g.classList.add('filter-mode');
 
-  // 섹션: [제목, 개수 글자, 카드 HTML 배열, 종류]
+  // 섹션: [제목, 개수 글자, 카드 HTML 배열, 종류, 제목 줄 오른쪽(선택)]
   const sections = [];
   if (r.multi) {
     if (r.combo.length) sections.push([`${qt} 모두 맞는 화면`, `${num(r.combo.length)}장`, r.combo.map(i => cardTpl(i, ec)), 'combo']);
@@ -286,11 +353,17 @@ function renderSearch() {
     if (r.colors.items.length) sections.push([`${r.colors.names.map(c => `'${esc(c)}'`).join(', ')} 컬러`, `${num(r.colors.items.length)}장`, r.colors.items.map(i => cardTpl(i, ec)), 'color']);
     if (r.text.length) sections.push([`'${esc(q)}' 화면 속 글자`, `${num(r.text.length)}장`, r.text.map(i => cardTpl(i, ec)), 'text']);
   }
+  // 통합 검색: 상대 사이트에서 찾은 화면은 맨 위 안내 + 맨 아래 미리보기 (누르면 그 사이트 이미지로 크게 보기, 전체는 그 사이트 결과로)
+  const homeHas = sections.length > 0, oh = srOtherHits(q), oName = srOtherName(), hName = PLATFORM === 'mo' ? '모바일' : '웹사이트';
+  const oBtn = `<button type="button" class="ds-btn sr-other-btn" data-variant="neutralOutline" data-size="small" onclick="location.href=srOtherUrl(S.q)">${oName} 결과 보기<i class="ds-icon ds-icon--chevron-right" aria-hidden="true"></i></button>`;
+  const otherNote = SR_OTHER.state === 'loading' ? `<p class="sr-loading">${oName}에서도 찾는 중…</p>`
+    : oh && oh.length ? `<div class="sr-other"><span class="sr-other-text">${homeHas ? `${oName}에서도 <b>${num(oh.length)}장</b> 찾았어요` : `${hName}에는 없고 ${oName}에서 <b>${num(oh.length)}장</b> 찾았어요`}</span>${oBtn}</div>` : '';
+  if (oh && oh.length) sections.push([`${oName}에서 찾은 화면`, `${num(oh.length)}장`, oh.slice(0, SR_OTHER_PREVIEW).map(i => srCrossCard(i, SR_OTHER.platform)), 'other', oBtn]);
 
   const token = ++_renderToken;
   resetLazyObservers();
   const textNote = SRW.state === 'loading' ? `<p class="sr-loading">화면 속 글자에서도 찾는 중…</p>` : '';
-  if (!sections.length && SRW.state === 'loading') { g.innerHTML = srSynNote(r.terms, esc) + textNote; return; }
+  if (!sections.length && (SRW.state === 'loading' || SR_OTHER.state === 'loading')) { g.innerHTML = srSynNote(r.terms, esc) + textNote + otherNote; return; }
   if (!sections.length) {
     // 여러 단어인데 모두 맞는 화면이 없으면 단어 하나씩 보기를 안내
     const each = r.multi ? r.terms.map(v => [v.t, searchResults(v.t).all.size]).filter(e => e[1]) : [];
@@ -305,8 +378,8 @@ function renderSearch() {
   }
 
   // 섹션 틀을 먼저 그리고, 카드는 섹션 순서대로 조금씩 채운다 (한 카테고리가 수천 장일 수 있음)
-  g.innerHTML = srSynNote(r.terms, esc) + textNote + sections.map(([title, cnt, , kind], k) => `<section class="sr-sec${k ? '' : ' first'}" data-kind="${kind}">
-    <div class="sr-sec-hdr"><span class="sr-sec-title">${title}</span><span class="sr-sec-cnt">${cnt}</span></div>
+  g.innerHTML = srSynNote(r.terms, esc) + otherNote + textNote + sections.map(([title, cnt, , kind, extra], k) => `<section class="sr-sec${k ? '' : ' first'}" data-kind="${kind}">
+    <div class="sr-sec-hdr"><span class="sr-sec-title">${title}</span><span class="sr-sec-cnt">${cnt}</span>${extra || ''}</div>
     <div class="mini-grid" data-sr="${k}"></div>
   </section>`).join('');
   const grids = [...g.querySelectorAll('.mini-grid[data-sr]')];
@@ -408,20 +481,30 @@ function acRender(groups) {
   }).join('');
 }
 
+// 통합 검색: 상대 사이트에도 있으면 "'검색어' 웹사이트에서 보기 N개" 줄 (데이터가 아직이면 불러오고, 오면 드롭다운을 다시 그림)
+function acOtherRows(q) {
+  srOtherLoad();
+  const oh = srOtherHits(q);
+  if (!oh || !oh.length) return [];
+  const icon = SR_OTHER.platform === 'web' ? 'ds-icon--monitor' : 'ds-icon--smartphone';
+  return [{ tile: `<i class="ds-icon ${icon}"></i>`, title: `${acHi(q, q)} ${srOtherName()}에서 보기`, desc: acNum(oh.length), pick: () => { location.href = srOtherUrl(q); } }];
+}
+
 function buildAutocomplete(q) {
   const r = searchResults(q);
   const hiWords = v => [v.t, ...v.alts];
+  const other = acOtherRows(q);
 
   if (r.multi) {
     const qt = r.terms.map(v => `<em class="ac-hit">${acEsc(v.t)}</em>`).join(' + ');
     return acRender([
-      { rows: [{ tile: 'ALL', title: `${qt} 조합 보기`, desc: acNum(r.all.size), pick: () => runSearch(q) }] },
+      { rows: [{ tile: 'ALL', title: `${qt} 조합 보기`, desc: acNum(r.all.size), pick: () => runSearch(q) }, ...other] },
       { label: '단어 하나씩 보기', rows: r.terms.map(v => ({ title: `${acHi(v.t, v.t)} 전체보기`, desc: acNum(searchResults(v.t).all.size), pick: () => runSearch(v.t) })) },
     ]);
   }
 
   const v = r.terms[0];
-  if (!v || !r.all.size) return `<p class="ds-select-content__label">'${acEsc(q)}'와 이름이 맞는 항목이 없어요</p>`;
+  if (!v || !r.all.size) return other.length ? acRender([{ rows: other }]) : `<p class="ds-select-content__label">'${acEsc(q)}'와 이름이 맞는 항목이 없어요</p>`;
 
   // "카테고리 - 화면 이름" 묶음: 정확히 맞는 이름 먼저, 같으면 화면 수 많은 순
   const grp = new Map();
@@ -439,7 +522,7 @@ function buildAutocomplete(q) {
   if (r.pats.length) UX.push({ title: `${acHi(q, q)} 패턴 전체보기`, desc: acNum(r.pats.length), pick: () => runSearch(q, { focus: 'pat' }) });
   for (const e of rows) UX.push({ title: `${acEsc(e.cat)} - ${acHi(e.pat, hiWords(v))}`, desc: acNum(e.n), pick: () => runSearch(e.pat) });
   return acRender([
-    { rows: [{ tile: 'ALL', title: `${acHi(q, q)} 전체보기`, desc: acNum(r.all.size), pick: () => runSearch(q) }] },
+    { rows: [{ tile: 'ALL', title: `${acHi(q, q)} 전체보기`, desc: acNum(r.all.size), pick: () => runSearch(q) }, ...other] },
     { label: 'UX 패턴', rows: UX },
   ]);
 }
