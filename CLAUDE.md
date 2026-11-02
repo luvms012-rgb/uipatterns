@@ -2,7 +2,7 @@
 
 이 파일은 집 PC·회사 PC 어느 쪽 Claude 든 이 폴더에서 일할 때 자동으로 읽는다. 여기 적힌 결정은 사용자가 정한 것이니 바꾸지 말 것.
 - **지금 상태·다음 할 일: [HANDOFF.md](HANDOFF.md)** — 작업 시작 때 먼저 읽고, 작업을 마칠 때 갱신한다
-- 구조·사용법: [README.md](README.md) · 자연어 검색: [mcp/README.md](mcp/README.md) · 예전 캡처 파이프라인 상세: GUIDE.md (옛 구조 문서)
+- 구조·사용법: [README.md](README.md) · 자연어 검색: [mcp/README.md](mcp/README.md) · 캡처, 분류 파이프라인: [GUIDE.md](GUIDE.md) (보관 문서, 지금은 캡처 안 함)
 
 ## 일하는 방식
 - 사용자는 UI 디자이너. 한국어로, 쉬운 말로 답한다
@@ -17,7 +17,7 @@
 
 ## 결정사항 (바꾸지 말 것)
 - **최종 운영은 회사 서버** `https://imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/` (사이트·이미지 같은 서버). GitHub Pages(`luvms012-rgb.github.io/uipatterns`)는 **개발 기간용**
-- 개발 기간에는 회사 서버에 **이미지만**. 업로드는 사용자가 보안망으로 직접 수동 — 업로드·FTP·동기화 자동화 금지, 서버 설정(CORS 등) 변경 요청 금지
+- 회사 서버에는 이미지와 사이트 파일 둘 다 올린다 (10/29 사용자 결정, 그 전엔 이미지만). 이미지 zip = `zip-upload.js`, 사이트 zip = `scripts/pack-site.js`. 업로드는 사용자가 보안망으로 직접 수동 - 업로드, FTP, 동기화 자동화 금지, 서버 설정(CORS 등) 변경 요청 금지
 - 핵심은 쉬운 업데이트: 이미지 넣고 → `업데이트.bat` 더블클릭 → 반영
 - **검색이 가장 중요.** 자연어 검색은 Claude + MCP(`mcp/`). 사이트 검색바는 단순 키워드, 사이드바 검색창 없음
 - **Cloudflare 가입 불가** → 원격 MCP·다운로드 중계(`worker/`) 보류. 다시 제안하지 말 것. 검색은 회사 PC 로컬 서버(`mcp/local.mjs`)
@@ -38,7 +38,7 @@
 - 업데이트(동기화): `업데이트.bat` / `업데이트.command` → `scripts/update.js` (pull → 이미지 스캔·OCR·검색 데이터 → 커밋 → push)
 - 미리보기: `미리보기.bat` / `미리보기.command` → `scripts/preview.js` (localhost:5180, 이미지 위치 자동)
 - 검색 데이터: `search/run-ocr.bat` → `node search/build-index.js` · 로컬 MCP 등록: `claude mcp add --scope user uipatterns node <폴더>/mcp/local.mjs`
-- 캡처: claude.ai 스킬 uipatterns-capture (Chrome 확장 필요, 회사 PC)
+- 캡처: **지금은 안 함** (uibowl 구독 없음, 11/02). 예전 방식은 claude.ai 스킬 uipatterns-capture 와 [GUIDE.md](GUIDE.md)
 
 ## 주의 (실제로 겪은 것)
 - 회사 서버 웹방화벽: 이미지를 짧은 시간에 수십 장 요청하면 IP 차단(`error_web_fw`). 서버 확인은 몇 장만 천천히. CORS 헤더 없음

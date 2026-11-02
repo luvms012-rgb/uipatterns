@@ -5,7 +5,7 @@
 - **최종 운영: 회사 서버** <https://imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/> — 사이트와 이미지를 같은 서버에 둔다 (2026-10-26 결정)
 - 개발 기간 사이트: <https://luvms012-rgb.github.io/uipatterns/> (GitHub Pages — 이미지는 회사 서버에서 불러옴)
 - 저장소: <https://github.com/luvms012-rgb/uipatterns>
-- 이미지: 회사 서버 `.../uipatterns/{mo,web}/`. 개발 기간에는 **이미지만** 회사 서버, 나머지는 전부 여기
+- 이미지: 회사 서버 `.../uipatterns/{mo,web}/`. 10/29 부터 사이트 파일도 회사 서버에 올린다 (사용자가 올린다고 할 때 `scripts/pack-site.js` 로 묶음)
 - 작업 이어가기: [HANDOFF.md](HANDOFF.md) — 지금 상태 · 남은 작업 · **집·회사 오가며 작업하기(동기화)** · Claude 규칙은 [CLAUDE.md](CLAUDE.md)
 - 미리보기: `미리보기.bat` / `미리보기.command` 더블클릭 → <http://localhost:5180/mo/> (이 PC 에 이미지가 없으면 회사 서버 이미지로)
 
@@ -21,32 +21,52 @@
 새 이미지는 **회사 서버에 직접 업로드** (보안망). 올린 뒤 `사이트/mo/?check=20261024`(날짜·서비스명·all)로 엑박 점검.
 
 ### 평소 흐름 (회사)
-1. 캡처: Claude에게 `모바일 캡처 {서비스명}` / `웹 캡처 {서비스명}` 또는 `{uibowl 주소} 캡처` → `(업데이트)`로 가져와 분류 (uipatterns-capture 스킬)
-2. `업데이트.bat` 더블클릭
-3. `(업로드)` 이미지를 회사 서버에 업로드
+1. 코드 수정 → 미리보기로 확인 → `업데이트.bat` 더블클릭 (또는 Claude 에게 커밋, 푸시 요청)
+2. 서버에 올릴 때만: Claude 에게 말하면 이미지 zip(`zip-upload.js`)과 사이트 zip(`scripts/pack-site.js`)을 만들고, 사용자가 회사 서버에 업로드
+- 새 캡처는 지금 하지 않는다 (uibowl 구독 없음, 11/02). 예전 캡처, 분류 방식은 [GUIDE.md](GUIDE.md)
 
 ## 폴더 구조
 
 ```
 uipatterns/
 ├─ index.html            → mo/ 로 이동
-├─ config.js             이미지 주소(imgBase) · 다운로드 중계(imgProxy)
-├─ assets/sidebar.js·css 사이드바 (mo/web 공용): UI 패턴(그룹) → 컴포넌트 → 카테고리 유형
-├─ 업데이트.bat / 업데이트.command
+├─ config.js             이미지 주소(imgBase), 다운로드 중계(imgProxy, 지금은 비어 있음)
+├─ assets/               mo/web 공용
+│  ├─ site.css           화면 배치 (색, 글자, 간격은 ybm-ds 토큰)
+│  ├─ sidebar.js, .css   사이드바: UI 패턴 → 컴포넌트 → 컬러 → 카테고리 유형 (처음엔 모두 접힘)
+│  ├─ search.js, .css    검색 (자동완성, 결과 페이지, 조합 검색, 화면 속 글자, 모바일/웹 통합)
+│  ├─ synonyms.js        비슷한 말, 서비스 별명 사전 (직접 더해도 됨)
+│  ├─ compare.js         나란히 비교, 모음 링크 `#pick=`
+│  ├─ cols.js            열 수 고르기
+│  └─ dashboard.css      숨긴 사용 현황 스타일
+├─ ybm-ds/               ybm-ds 사본 (`node scripts/sync-ybm-ds.js` 로만 갱신, 직접 고치지 않기)
+├─ 업데이트.bat / 업데이트.command, 미리보기.bat / 미리보기.command
 ├─ scripts/
-│  ├─ update.js          원클릭 업데이트 (pull → 스캔 → 커밋 → push)
-│  └─ update-index.js    폴더 스캔 → data.js / svc-types.js / search-index.js / stats.js
+│  ├─ update.js          원클릭 업데이트 (pull → 스캔, 색, 글자 → 커밋 → push)
+│  ├─ update-index.js    폴더 스캔 → data.js / svc-types.js / search-index.js / stats.js / version.js
+│  ├─ preview.js         미리보기 서버 (localhost:5180)
+│  ├─ colors.ps1         화면 대표 색 뽑기 (Windows)
+│  ├─ pack-site.js       서버용 사이트 zip
+│  ├─ sync-ybm-ds.js     ybm-ds 사본 갱신
+│  └─ match-components.js  예전 화면 컴포넌트 채우기 (uibowl 구독이 없어 안 씀)
 ├─ mo/ · web/
-│  ├─ index.html         화면 (CSS·JS)
+│  ├─ index.html         화면 (사이트마다 다른 값과 JS)
 │  ├─ data.js            이미지 목록 — 자동 생성, 한 줄 = 1장
 │  ├─ svc-types.js       서비스 → 업종 매핑 (직접 수정 가능, 새 서비스는 자동 추가)
 │  ├─ taxonomy.js        사이드바 분류 — uibowl 패턴 그룹 · 폴더명 별칭 · 컴포넌트 목록
-│  ├─ components.json    (선택) 이미지별 컴포넌트 { "카테고리/파일.png": ["버튼", …] } → data.js의 comps
-│  ├─ icons.js · search-index.js · stats.js · version.js · upload-list.txt
-│  ├─ words.js          화면 속 글자 색인 (search/build-words.js 가 회사 PC OCR 로 만듦, 사이트 검색이 첫 검색 때 불러옴)
+│  ├─ components.json    이미지별 컴포넌트 { "카테고리/파일.png": ["버튼", …] } → data.js의 comps (10/26 이후 캡처분만)
+│  ├─ colors.json        이미지별 대표 색 → data.js의 color
+│  ├─ words.js           화면 속 글자 색인 (search/build-words.js 가 회사 PC OCR 로 만듦, 사이트 검색이 첫 검색 때 불러옴)
+│  ├─ search-index.js · stats.js · version.js · upload-list.txt
+│  ├─ icons.js           옛 아이콘 목록 (10/24 이후 갱신 안 됨, 화면은 icons/ 폴더를 바로 씀)
+│  ├─ classify-local.js, prepare-upload.js, pattern-classify.js  캡처 분류, 업로드 준비 (GUIDE.md)
 │  ├─ update-index.js    예전 명령 호환용 (→ scripts/update-index.js)
 │  └─ 카테고리 폴더/ · icons/ · (업데이트)/ · (업로드)/   ← 이미지, git 제외 (.gitignore)
-└─ worker/               다운로드용 이미지 중계 (Cloudflare Worker, worker/README.md)
+├─ search/               화면 글자(OCR), 검색 데이터 만들기 (결과는 회사 PC 에만)
+├─ mcp/                  자연어 검색 서버 (지금은 회사 PC 로컬 `mcp/local.mjs`)
+├─ mockups/              검색 시안 (10/28 스타일 사본에 고정)
+├─ uibowl-capture.js, capture-import.js, zip-upload.js, uibowl-category-map.json  캡처, 압축 (GUIDE.md)
+└─ worker/               다운로드용 이미지 중계 (Cloudflare Worker) - Cloudflare 가입 불가로 보류
 ```
 
 - `index.html`을 파일로 직접 열면(file://) 이 PC의 이미지 폴더를 보여줘서 서버 업로드 전에 확인할 수 있습니다.
@@ -60,7 +80,7 @@ Claude에게 **"uipatterns 회사 PC 연결"** 이라고 하면 아래를 대신
 1. 기존 폴더 백업: `mo/index.html`, `web/index.html`, `mo/update-index.js`, `web/update-index.js`
 2. 그 폴더에서 `git init` → `git remote add origin https://github.com/luvms012-rgb/uipatterns.git` → `git fetch` → `git checkout -f -B main origin/main`
 3. 기존 캡처 스크립트(`uibowl-capture.js`, `capture-import.js`, `classify-local.js`, `prepare-upload.js`, `zip-upload.js`, `GUIDE.md` 등)는 그대로 남아 있고, 첫 `업데이트.bat` 때 함께 GitHub에 올라갑니다.
-4. **`prepare-upload.js`가 `index.html`·`version.js`·`stats.js`를 `(업로드)`에 넣지 않도록 수정** — 이제 회사 서버엔 이미지만 올립니다. 새 index.html을 서버에 올리면 서버 쪽 옛 페이지가 깨집니다. (2026-10-26 완료 — `zip-upload.js` 도 사이트 파일은 빼고 압축)
+4. **`prepare-upload.js`가 `index.html`·`version.js`·`stats.js`를 `(업로드)`에 넣지 않도록 수정** — 이미지 묶음엔 이미지만 담습니다. (2026-10-26 완료 — `zip-upload.js` 도 사이트 파일은 빼고 압축. 10/29 부터 사이트 파일은 `scripts/pack-site.js` 로 따로 묶어 올림)
 
 ## 다운로드
 
@@ -75,14 +95,6 @@ Claude에게 **"uipatterns 회사 PC 연결"** 이라고 하면 아래를 대신
 - `업데이트.bat` 이 새 이미지의 글자 추출과 검색 데이터(`search/dist/`, 저장소 제외) 갱신까지 합니다
 - 지금은 **회사 PC의 Claude에서 로컬 서버**(`mcp/local.mjs`)로 씁니다. 팀원 공용 원격 서버는 Cloudflare 계정이 없어 보류 — 코드(`mcp/src/worker.js`)는 준비돼 있음
 
-## 다음 작업 (2026-10-26 기준)
+## 다음 작업
 
-- [x] 회사 PC 연결
-- [x] `prepare-upload.js`·`zip-upload.js`: 이미지만 `(업로드)`에 담기 · 분류 스크립트가 `data.js` 를 읽도록
-- [x] 로컬 미리보기로 새 화면 확인 (mo·web 이미지 표시, 회사 서버 요청 없음)
-- [ ] 배포된 사이트에서 이미지 표시 확인 — 회사 웹방화벽(`error_web_fw`) 주의, 이미지 몇 장으로만 조심스럽게
-- [x] 캡처 시 이미지별 컴포넌트를 `components.json`에 저장 → 사이드바 컴포넌트 필터 + 컴포넌트 검색 (2026-10-26~ 캡처분. `uibowl-capture.js` v5 → `capture-import.js` → `classify-local.js` 가 최종 경로로 기록)
-- [ ] 예전 캡처 화면(약 8.3만 장)의 컴포넌트 — uibowl 이미지 ID 가 없어 자동으로 못 채움. 자주 찾는 몇 개만 글자·이미지로 추정하는 방안 검토
-- [ ] 파일명에 `+`가 든 web 이미지 13장 이름 바꿔 재업로드 (회사 서버가 `+` 주소를 404 처리)
-- [ ] 사이트 딥링크 — 화면 1장으로 바로 가는 주소 (예: `mo/#img=카테고리/파일.png`)
-- [ ] "비슷한 화면" 검색 (이미지 임베딩)
+지금 상태와 남은 일은 [HANDOFF.md](HANDOFF.md) "3. 남은 일" 이 기준입니다. (11/02 기준 큰 줄기: 썸네일 만들지 사용자와 정하기, 새 화면 보기, 흐름 보기, 경량 MCP, 비슷한 화면)
