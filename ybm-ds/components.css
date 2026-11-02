@@ -386,6 +386,8 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
 }
 .ds-input__clear::after { content: ""; position: absolute; inset: calc((var(--ds-input-icon) - 40px) / 2); }
 .ds-input:focus-within:has(.ds-input__control:not(:placeholder-shown)) .ds-input__clear { display: block; }
+/* type="search" 의 브라우저 기본 지우기(X)는 숨기고 위 clear 버튼을 쓴다 */
+.ds-input__control::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
 
 
 /* --------------------------------------------------------------------------
@@ -1457,6 +1459,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
   --ds-avatar-group-size: 36px;
   --ds-avatar-group-radius: var(--ybm-shape-pill);
   --ds-avatar-group-ring: max(1.5px, calc(var(--ds-avatar-group-size) * 0.05));
+  --ds-avatar-group-ring-color: var(--ybm-color-bg-layer-default);  /* 겹친 경계 고리 색 = 놓인 바탕색 (흰 바탕이 아니면 바탕색으로 덮어쓴다) */
   display: inline-flex;
   align-items: center;
   isolation: isolate;
@@ -1465,7 +1468,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
   --ds-avatar-size: var(--ds-avatar-group-size);
   --ds-avatar-badge: calc(var(--ds-avatar-group-size) * 0.36);
   --ds-avatar-radius: var(--ds-avatar-group-radius);
-  box-shadow: 0 0 0 var(--ds-avatar-group-ring) var(--ybm-color-bg-layer-default);
+  box-shadow: 0 0 0 var(--ds-avatar-group-ring) var(--ds-avatar-group-ring-color);
 }
 .ds-avatar-group > * + * { margin-inline-start: calc(var(--ds-avatar-group-size) * -0.25); }
 .ds-avatar-group > :focus-visible { z-index: 1; }
@@ -1703,7 +1706,7 @@ a.ds-callout:active, button.ds-callout:active { filter: brightness(0.97); }
        [<div class="ds-dialog__footer"><button class="ds-btn" data-variant="neutralSolid" data-size="large">확인</button></div>]
      </dialog>
    Figma: 폭 480(large 800) · shape/2xl · bg/layer-floating · 그림자 없음(2026-10-01 결정)
-     header 24/20/16/20 · gap x4 · title t07 SemiBold fg/neutral · desc t05 fg/neutral-muted
+     header 24/20/16/20 · gap x4 · title t07 Bold(Alert Dialog 와 같게, 2026-11-02) fg/neutral · desc t05 fg/neutral-muted
      body 12/20/16/20 · min-h64 · footer 24/20 · Action Button large 폭 채움
      닫기 40×40 · 위 18 · 오른쪽 10 · Lucide/x 24 fg/neutral
    -------------------------------------------------------------------------- */
@@ -1738,7 +1741,7 @@ a.ds-callout:active, button.ds-callout:active { filter: brightness(0.97); }
   gap: var(--ybm-space-x4);
   padding: var(--ybm-space-x6) var(--ybm-space-x5) var(--ybm-space-x4);
 }
-.ds-dialog__title { padding-right: 40px; font-size: var(--ybm-font-size-t07); line-height: var(--ybm-line-height-t07); font-weight: var(--ybm-font-weight-semibold); }
+.ds-dialog__title { padding-right: 40px; font-size: var(--ybm-font-size-t07); line-height: var(--ybm-line-height-t07); font-weight: var(--ybm-font-weight-bold); }
 .ds-dialog__header:not(:has(.ds-dialog__close)) .ds-dialog__title { padding-right: 0; }
 .ds-dialog__desc { color: var(--ybm-color-fg-neutral-muted); font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); }
 .ds-dialog__close {
