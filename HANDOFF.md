@@ -177,11 +177,10 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 ## 3. 남은 일
 
 ### 사용자가 직접
-1. **10/30 zip 3개 회사 서버 업로드** (10/28·10/29 zip 은 이 안에 합쳐짐)
-   - `mo/(업로드)/20261030.zip` → 서버 `uipatterns/mo/` 아래에 풀기 (퍼블리 122장 + 아이콘 7개, 15.6MB, 129개)
-   - `web/(업로드)/20261030.zip` → 서버 `uipatterns/web/` 아래에 풀기 (삼성생명다이렉트 231장 + 아이콘 14개, 14.3MB, 245개)
-   - `(사이트업로드)/site_20261030.zip` → 서버 `uipatterns/` 바로 아래에 풀기 (사이트 파일 37개, 17.9MB. 열 필터, 컬러 필터, 사이드바, 호버 수정, 검색 개선 포함)
-   - 올린 뒤 점검: <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261029> · <https://luvms012-rgb.github.io/uipatterns/mo/?check=20261028> · <https://luvms012-rgb.github.io/uipatterns/web/?check=20261028>, 서버 화면 <https://imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/mo/index.html> · `web/index.html` (글꼴·색이 나오는지, 골프존·리블 아이콘이 보이는지)
+1. **11/02 zip 2개 회사 서버 업로드** (10/30 zip 3개는 올라간 것 11/02 확인 - 골프존 아이콘 크기 일치)
+   - `(사이트업로드)/site_20261102.zip` → 서버 `uipatterns/` 바로 아래에 풀기 (사이트 파일 40개, 31.9MB. 10/30 이후 바뀐 것 전부: 함께 찾은 말, 화면 1장 링크, 화면 속 글자 검색 words.js 2개, 이어 보기, 이미지 불러오기 개선, 나란히 비교, 업종 검수, ybm-ds b139c77)
+   - `web/(업로드)/web_20261102.zip` → 서버 `uipatterns/web/` 아래에 풀기 (이름에서 `+` 를 뺀 화면 13장, 14.9MB)
+   - 올린 뒤 점검: 서버 <https://imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/web/index.html#q=항공권과%20숙소> 4장이 뜨는지, mo 에서 "품절" 검색 시 "화면 속 글자" 섹션이 나오는지, 필터 걸고 "서비스별 비교"
 2. **캡처 스킬 문구 반영**: claude.ai 설정 → 스킬 → uipatterns-capture 를 회사 PC `Desktop\works\백업\uipatterns-capture-SKILL.md` 내용으로 (zip 은 이미지만, 마무리에 `업데이트.bat` 안내)
 3. ~~**코웨이 IoCare+ 아이콘**~~: 할 일 없음 (11/02 확인, 아래 "이어서 할 작업" 1번)
 
