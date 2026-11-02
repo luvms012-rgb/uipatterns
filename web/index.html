@@ -78,6 +78,7 @@
   <main id="main">
     <div id="toolbar">
       <span class="tb-title">웹사이트</span>
+      <button type="button" class="ds-btn tb-cmp" id="cmpBySvcBtn" data-variant="neutralWeak" data-size="small" hidden onclick="cmpBySvc()" title="지금 결과에서 서비스마다 1장씩 나란히"><i class="ds-icon ds-icon--columns-3" aria-hidden="true"></i>서비스별 비교</button>
       <div class="cols-filter">
         <button type="button" class="ds-select" data-size="medium" id="colsTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="열 수" onclick="colsToggle()"><span class="ds-select__value" id="colsValue">기본</span></button>
         <div class="ds-select-content cols-menu" data-size="medium" id="colsMenu" role="listbox" aria-label="열 수"></div>
@@ -106,6 +107,7 @@
 <div id="select-bar">
   <span class="sb-count"><span id="sb-count-num" class="sb-count-num">0</span>개 선택됨</span>
   <button type="button" id="sb-sel-all" class="ds-btn" data-variant="ghost" data-size="xsmall" onclick="selectAll()">전체 선택</button>
+  <button type="button" id="sb-cmp-btn" class="ds-btn" data-variant="neutralWeak" data-size="small" disabled onclick="cmpSelected()"><i class="ds-icon ds-icon--columns-3" aria-hidden="true"></i>나란히 비교</button>
   <button type="button" id="sb-dl-btn" class="ds-btn" data-size="small" disabled onclick="dlSelected()"><i class="ds-icon ic-download" aria-hidden="true"></i>다운로드</button>
   <button type="button" class="ds-btn" data-variant="neutralWeak" data-size="xsmall" data-layout="iconOnly" onclick="exitSelectMode()" aria-label="선택 취소" title="선택 취소"><i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>
 </div>
@@ -136,6 +138,7 @@
 <script src="../assets/sidebar.js"></script>
 <script src="../assets/synonyms.js"></script>
 <script src="../assets/search.js"></script>
+<script src="../assets/compare.js"></script>
 <script src="../assets/cols.js"></script>
 <script>
 
@@ -484,6 +487,8 @@ function updateSelectBar() {
   if (numEl) numEl.textContent = cnt;
   const dlBtn = document.getElementById('sb-dl-btn');
   if (dlBtn) dlBtn.disabled = cnt === 0;
+  const cmpBtn = document.getElementById('sb-cmp-btn');
+  if (cmpBtn) cmpBtn.disabled = cnt < 2;   // 나란히 비교는 2장부터 (../assets/compare.js)
   const bar = document.getElementById('select-bar');
   if (cnt > 0) bar.classList.add('open');
   else bar.classList.remove('open');
@@ -565,6 +570,7 @@ function cardTpl(item, ec) {
 
 function render() {
   buildChips();
+  cmpSyncToolbar();
   updateCardIntrinsic();
   const g = document.getElementById('grid');
   const ec = encodeURIComponent;
@@ -1086,6 +1092,7 @@ function syncUrl() {
   if (S.view === 'search' && S.q)   params.set('q', S.q);
   if (S.view === 'search' && S.q && SR_OFF.size) params.set('x', [...SR_OFF].join(','));  // 뺀 비슷한 말
   if (_lbPath && _lbPlatform === PLATFORM && document.getElementById('lightbox').classList.contains('open')) params.set('img', _lbPath);  // 크게 보기 중인 화면
+  if (cmpIsOpen() && CMP.paths.length) params.set('pick', CMP.paths.slice(0, CMP_LINK_MAX).join('|'));  // 나란히 비교 중인 모음
   const qs = params.toString();
   history.replaceState(null, '', qs ? '#' + qs : location.pathname + location.search);
 }
@@ -1109,13 +1116,14 @@ function readUrl() {
     if (q && q.trim()) { S.view = 'search'; S.q = q.trim(); document.getElementById('hdrSearchInput').value = S.q; }
     SR_OFF.clear(); (params.get('x') || '').split(',').filter(Boolean).forEach(w => SR_OFF.add(normCat(w)));
     const img = params.get('img'); if (img) _pendingImg = img.normalize('NFC');
+    const pick = params.get('pick'); _pendingPick = pick ? pick.split('|').map(p => p.normalize('NFC')).filter(Boolean) : null;
   } catch(e) {}
 }
 
-window.addEventListener('popstate', () => { readUrl(); buildSidebar(); render(); openPendingImg(); });
+window.addEventListener('popstate', () => { readUrl(); buildSidebar(); render(); openPendingImg(); openPendingPick(); });
 
 document.addEventListener('DOMContentLoaded', () => {
-  readUrl(); buildSidebar(); render(); openPendingImg();
+  readUrl(); buildSidebar(); render(); openPendingImg(); openPendingPick();
 });
 
 // ════════════════════════════════════════════
