@@ -448,7 +448,7 @@ function buildAutocomplete(q) {
 function buildSearchHome() {
   const clock = '<i class="ds-icon ds-icon--clock"></i>', spark = '<i class="ds-icon ds-icon--sparkles"></i>';
   return acRender([
-    { label: '최근 검색어', extra: `<button type="button" class="ds-link ac-clear" onmousedown="event.preventDefault()" onclick="srForget()">지우기</button>`,
+    { label: '최근 검색어', extra: `<button type="button" class="ds-btn ac-clear" data-variant="ghost" data-size="xsmall" onmousedown="event.preventDefault()" onclick="srForget()">지우기</button>`,
       rows: srRecent().map(q => ({ tile: clock, title: acEsc(q), pick: () => runSearch(q) })) },
     { label: '이렇게 찾아보세요', rows: srExamples().map(([q, n]) => ({ tile: spark, title: acEsc(q), desc: acNum(n), pick: () => runSearch(q) })) },
   ]);

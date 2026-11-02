@@ -59,7 +59,7 @@ function cmpRender() {
         <button type="button" class="ds-btn cmp-remove" data-variant="neutralWeak" data-size="xsmall" data-layout="iconOnly" onclick="cmpRemove(${i})" aria-label="이 화면 빼기" title="빼기"><i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>
       </div>
       <figcaption class="cmp-cap">
-        <button type="button" class="cmp-svc" onclick="cmpGoSvc('${ec(svc)}')" title="${esc(svc)} 전체 화면">${esc(svc)}</button>
+        <button type="button" class="ds-link cmp-svc" onclick="cmpGoSvc('${ec(svc)}')" title="${esc(svc)} 전체 화면">${esc(svc)}</button>
         <span class="cmp-sub">${esc(catLabel(item.category))}${pat ? ' / ' + esc(pat) : ''}</span>
       </figcaption>
     </figure>`;

@@ -197,8 +197,7 @@ body { background: var(--ybm-color-bg-canvas); }
 .cmp-remove { position: absolute; top: var(--ybm-space-x2); right: var(--ybm-space-x2); opacity: 0; transition: opacity var(--ybm-duration-fast); }
 .cmp-col:hover .cmp-remove, .cmp-remove:focus-visible { opacity: 1; }
 .cmp-cap { display: flex; flex-direction: column; gap: var(--ybm-space-x0_5); width: 0; min-width: 100%; }  /* 글자가 길어도 칸 폭은 화면 폭 그대로 */
-.cmp-svc { align-self: flex-start; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); font-weight: var(--ybm-font-weight-semibold); }
-@media (hover: hover) { .cmp-svc:hover { text-decoration: underline; text-underline-offset: 3px; } }
+.cmp-svc { align-self: flex-start; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; --ds-link-color: var(--ybm-color-fg-neutral); font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); font-weight: var(--ybm-font-weight-semibold); }  /* 서비스로 이동 = Text Link */
 .cmp-sub { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); }
 .tb-cmp { margin-left: auto; margin-right: var(--ybm-space-x2); }  /* 툴바: 제목 … [서비스별 비교][열 수] */
 .tb-cmp[hidden] { display: none; }

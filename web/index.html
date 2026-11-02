@@ -426,7 +426,7 @@ function buildChips() {
     `<button type="button" class="ds-chip" aria-pressed="true" onclick="toggleColor('${encodeURIComponent(c)}')" title="필터 해제">${colorDot(c)}${c}<i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>`
   ).join('');
   const hasAny = S.checkedTypes.size + S.checked.size + S.checkedComps.size + S.checkedColors.size > 0;
-  const resetChip = hasAny ? `<button type="button" class="ds-chip" data-variant="outlineWeak" onclick="clearFilters()" title="전체 해제"><i class="ds-icon ds-icon--rotate-ccw" aria-hidden="true"></i>초기화</button>` : '';
+  const resetChip = hasAny ? `<button type="button" class="ds-btn" data-variant="ghost" data-size="small" onclick="clearFilters()" title="전체 해제"><i class="ds-icon ds-icon--rotate-ccw" aria-hidden="true"></i>초기화</button>` : '';
   el.innerHTML = catChips + compChips + colorChips + typeChips + resetChip;
 }
 
