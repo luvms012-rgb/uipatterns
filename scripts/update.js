@@ -58,15 +58,21 @@ function ensureGitIdentity() {
 function updateSearch(results) {
   const added = results.reduce((n, r) => n + r.newItems.length, 0);
   // 분류(classify-local.js)가 data.js 를 먼저 갱신하면 여기선 새 화면이 0장으로 보인다 (11/03 잼페이스 39장이 검색에서 빠짐)
-  // → 새 화면이 없어도 검색 데이터가 data.js 보다 오래됐으면 다시 만든다. 글자 추출은 이미 한 화면을 건너뛴다
+  // → 새 화면이 없어도 검색 데이터를 만든 뒤 data.js 내용이 바뀌었으면 다시 만든다. 글자 추출은 이미 한 화면을 건너뛴다
+  //   (data.js 는 업데이트 때마다 새로 써서 날짜로는 못 견준다 → 마지막으로 만들 때의 data.js 지문을 search/dist/source.txt 에 둔다)
   const db = path.join(REPO, 'search', 'dist', 'uipatterns.db');
-  const stale = !fs.existsSync(db) || results.some(r => fs.statSync(path.join(REPO, r.platform, 'data.js')).mtimeMs > fs.statSync(db).mtimeMs);
+  const stamp = path.join(REPO, 'search', 'dist', 'source.txt');
+  const hash = require('crypto').createHash('sha1');
+  for (const p of Object.keys(PLATFORMS)) { const f = path.join(REPO, p, 'data.js'); if (fs.existsSync(f)) hash.update(fs.readFileSync(f)); }
+  const source = hash.digest('hex');
+  const stale = !fs.existsSync(db) || !fs.existsSync(stamp) || fs.readFileSync(stamp, 'utf-8').trim() !== source;
   if (!added && !stale) return;
   if (process.platform !== 'win32') { console.log('  검색 데이터: 화면 글자 추출은 Windows에서만 — 건너뜀'); return; }
   try {
-    console.log(added ? `  검색 데이터: 새 화면 ${added}장 글자 추출 중…` : '  검색 데이터: 이미지 목록이 더 새로워 글자 추출, 검색 데이터 다시 만드는 중…');
+    console.log(added ? `  검색 데이터: 새 화면 ${added}장 글자 추출 중…` : '  검색 데이터: 이미지 목록이 바뀌어 글자 추출, 검색 데이터 다시 만드는 중…');
     execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${path.join(REPO, 'search', 'run-ocr.ps1')}" -Workers 4`, { cwd: REPO, stdio: 'inherit' });
     execSync(`node --no-warnings "${path.join(REPO, 'search', 'build-index.js')}"`, { cwd: REPO, stdio: 'inherit' });
+    fs.writeFileSync(stamp, source + '\n', 'utf-8');
   } catch (e) {
     console.log(`  ⚠ 검색 데이터 갱신 실패 (업데이트는 계속): ${e.message.split('\n')[0]}`);
   }
