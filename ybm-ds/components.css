@@ -1960,12 +1960,15 @@ html:has(:is(.ds-dialog, .ds-bottomsheet)[open]) { overflow: hidden; }
      <span class="ds-skeleton" data-shape="circle" style="--ds-skeleton-size:48px"></span>
      <span class="ds-skeleton" data-shape="text" data-lines="3"></span>
    Figma: palette/gray-200 · rectangle shape/sm · circle pill · text 줄 높이 14 · 줄 사이 x2 · 마지막 줄 64%
+   모서리(2026-11-03): --ds-skeleton-radius 로 나중에 들어올 콘텐츠와 같게 맞춘다
+   움직임 줄이기(2026-11-03): 설정을 켠 사람에게는 깜빡이지 않는다
    -------------------------------------------------------------------------- */
 .ds-skeleton {
   --ds-skeleton-color: var(--ybm-color-palette-gray-200);
+  --ds-skeleton-radius: var(--ybm-shape-sm);
   display: block;
   height: 16px;
-  border-radius: var(--ybm-shape-sm);
+  border-radius: var(--ds-skeleton-radius);
   background: var(--ds-skeleton-color);
   animation: ds-skeleton-pulse 1.6s var(--ybm-easing-standard) infinite;
 }
@@ -1980,6 +1983,7 @@ html:has(:is(.ds-dialog, .ds-bottomsheet)[open]) { overflow: hidden; }
     linear-gradient(var(--ds-skeleton-color), var(--ds-skeleton-color)) 0 calc((14px + var(--ybm-space-x2)) * 2) / 64% 14px no-repeat;
 }
 @keyframes ds-skeleton-pulse { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .ds-skeleton { animation: none; } }
 
 
 /* --------------------------------------------------------------------------

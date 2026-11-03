@@ -299,11 +299,11 @@ function searchSvcCard(svc, svcItems) {
   const rep = svcItems.find(i => i.category === '메인') || svcItems.find(i => i.category === '랜딩페이지') || svcItems[0];
   const safeSvc = svc.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   return `<div class="svc-item" onclick="showService('${safeSvc}')">
-    <div class="svc-thumb${rep.category === '푸시알림' ? ' push-notif' : ''}">
+    <div class="svc-thumb${rep.category === '푸시알림' ? ' push-notif' : ''}"><span class="ds-skeleton lz-ph" aria-hidden="true"></span>
       <img class="svc-thumb-img" data-src="${imgUrl(rep.path)}" alt="${svc}" decoding="async" />
     </div>
     <div class="svc-info">
-      <img class="svc-info-icon" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+      <img class="svc-info-icon ds-skeleton" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
         data-svc="${svc.replace(/"/g, '&quot;')}" onerror="tryNextIconExt(this)" />
       <div class="svc-info-text">
         <div class="svc-info-name">${svc}</div>
@@ -317,7 +317,7 @@ function searchSvcCard(svc, svcItems) {
 function srCrossCard(item, platform) {
   const ec = encodeURIComponent, esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   return `<div class="card" data-cross="${platform}" onclick="openLbCross('${platform}','${ec(item.path)}','${ec(item.name)}','${ec(item.category)}')">
-    <div class="card-img-wrap"><img class="card-img" data-src="${imgUrl(item.path, platform)}" alt="${esc(item.name)}" decoding="async" /></div>
+    <div class="card-img-wrap"><span class="ds-skeleton lz-ph" aria-hidden="true"></span><img class="card-img" data-src="${imgUrl(item.path, platform)}" alt="${esc(item.name)}" decoding="async" /></div>
   </div>`;
 }
 // 상대 사이트 서비스 카드 — 누르면 그 사이트의 서비스 화면으로
@@ -326,9 +326,9 @@ function srCrossSvcCard(svc, svcItems, ctx) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const url = new URL('../' + P + '/', location.href).href + '#' + new URLSearchParams({ svc }).toString();
   return `<div class="svc-item" data-cross="${P}" onclick="location.href='${url.replace(/'/g, '%27')}'">
-    <div class="svc-thumb"><img class="svc-thumb-img" data-src="${imgUrl(rep.path, P)}" alt="${esc(svc)}" decoding="async" /></div>
+    <div class="svc-thumb"><span class="ds-skeleton lz-ph" aria-hidden="true"></span><img class="svc-thumb-img" data-src="${imgUrl(rep.path, P)}" alt="${esc(svc)}" decoding="async" /></div>
     <div class="svc-info">
-      <img class="svc-info-icon" data-src="${iconBase(P)}${encodeURIComponent(svc)}.png" alt="${esc(svc)}" data-icon-base="${iconBase(P)}"
+      <img class="svc-info-icon ds-skeleton" data-src="${iconBase(P)}${encodeURIComponent(svc)}.png" alt="${esc(svc)}" data-icon-base="${iconBase(P)}"
         data-svc="${esc(svc)}" onerror="tryNextIconExt(this)" />
       <div class="svc-info-text">
         <div class="svc-info-name">${esc(svc)}</div>
@@ -365,6 +365,11 @@ function srSectionsFor(r, ctx, cross, q, qt, esc, num) {
 // 통합 검색 (11/02 사용자: "pc mo 한번에 모두, 디바이스마다 정렬 최적화"): 모바일 묶음과 웹사이트 묶음을 차례로 모두 보여 주고,
 // 묶음마다 그 기기에 맞는 열 수와 화면 비율로 놓는다 (.sr-group[data-plat]). 맨 위 버튼으로 묶음 사이를 오간다
 const SR_PLAT_NAME = { mo: '모바일', web: '웹사이트' }, SR_PLAT_ICON = { mo: 'smartphone', web: 'monitor' };
+// 뒤늦게 오는 결과(상대 사이트, 화면 속 글자) 자리: ybm-ds Skeleton 으로 섹션 제목 + 카드 한 줄
+const srSkel = first => `<section class="sr-sec sr-skel${first ? ' first' : ''}" aria-hidden="true">
+    <div class="sr-sec-hdr"><span class="ds-skeleton sk-sr-title"></span></div>
+    <div class="mini-grid sk-row">${'<div class="card"><div class="card-img-wrap"><span class="ds-skeleton lz-ph"></span></div></div>'.repeat(8)}</div>
+  </section>`;
 function srJump(p) { const el = document.getElementById('sr-g-' + p); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 function renderSearch() {
   const g = document.getElementById('grid');
@@ -391,7 +396,7 @@ function renderSearch() {
   const token = ++_renderToken;
   resetLazyObservers();
   const anyLoading = groups.some(gr => gr.loading);
-  if (!sections.length && anyLoading) { g.innerHTML = srSynNote(r.terms, esc) + `<p class="sr-loading">모바일, 웹사이트에서 찾는 중…</p>`; return; }
+  if (!sections.length && anyLoading) { g.innerHTML = srSynNote(r.terms, esc) + srSkel(true); return; }
   if (!sections.length) {
     // 여러 단어인데 모두 맞는 화면이 없으면 단어 하나씩 보기를 안내
     const each = r.multi ? r.terms.map(v => [v.t, searchResults(v.t).all.size]).filter(e => e[1]) : [];
@@ -415,7 +420,7 @@ function renderSearch() {
     const inner = gr.secs.length ? gr.secs.map(([title, cnt, , kind], j) => `<section class="sr-sec${j ? '' : ' first'}" data-kind="${kind}">
     <div class="sr-sec-hdr"><span class="sr-sec-title">${title}</span><span class="sr-sec-cnt">${cnt}</span></div>
     <div class="mini-grid" data-sr="${k++}"></div>
-  </section>`).join('') : `<p class="sr-group-empty">${gr.loading ? `${SR_PLAT_NAME[gr.p]}에서 찾는 중…` : `${SR_PLAT_NAME[gr.p]}에는 맞는 화면이 없어요`}</p>`;
+  </section>`).join('') + (gr.loading ? srSkel(false) : '') : (gr.loading ? srSkel(true) : `<p class="sr-group-empty">${SR_PLAT_NAME[gr.p]}에는 맞는 화면이 없어요</p>`);
     return `<div class="sr-group" id="sr-g-${gr.p}" data-plat="${gr.p}"${gr.p !== PLATFORM ? ` data-cross="${gr.p}"` : ''}>${head}${inner}</div>`;
   }).join('');
   g.innerHTML = srSynNote(r.terms, esc) + jump + body;

@@ -101,13 +101,18 @@ body { background: var(--ybm-color-bg-canvas); }
 .card-img-wrap { position: relative; aspect-ratio: var(--shot-ratio); overflow: hidden; background: var(--ybm-color-bg-layer-floating); }
 .card-img, .svc-thumb-img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--shot-pos); opacity: 0; transition: transform .25s, opacity .2s; }
 .card-img.loaded, .svc-thumb-img.loaded { opacity: 1; }
-/* 불러오는 동안 옅은 반짝임, 실패하면 깨진 그림 대신 흐린 그림 아이콘 (lz-done 은 지연 로딩이 붙임) */
-.card-img-wrap:not(.lz-done), .svc-thumb:not(.lz-done) {
-  background-image: linear-gradient(105deg, transparent 40%, color-mix(in srgb, var(--ybm-color-fg-neutral) 6%, transparent) 50%, transparent 60%);
-  background-size: 300% 100%; animation: lz-shimmer 1.6s linear infinite;
-}
-@keyframes lz-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
-@media (prefers-reduced-motion: reduce) { .card-img-wrap, .svc-thumb { animation: none !important; } }
+/* 불러오는 동안 ybm-ds Skeleton, 실패하면 깨진 그림 대신 흐린 그림 아이콘 (lz-done 은 지연 로딩이 붙임)
+   카드 모서리는 감싼 상자가 잘라 주므로 Skeleton 은 모서리 없이 꽉 채운다 */
+.lz-ph { position: absolute; inset: 0; height: auto; --ds-skeleton-radius: 0; }
+.lz-done > .lz-ph { display: none; }
+/* 서비스 아이콘: 아이콘 자체가 Skeleton 이고, 다 받으면 깜빡임을 멈춘다 (크기, 모서리는 아래 아이콘 규칙이 이 파일에서 나중에 정해 그대로) */
+.svc-info-icon.loaded, .svc-h-icon.loaded { animation: none; }
+/* 첫 화면 스켈레톤 (index.html 의 data.js 앞 스크립트) - 모서리는 서비스 카드와 같게, 글자 자리는 그 글자의 줄 높이 */
+.sk-item { cursor: default; }
+.sk-thumb { aspect-ratio: var(--shot-ratio); height: auto; --ds-skeleton-radius: var(--ybm-shape-2xl); }
+.sk-name { width: 60%; height: var(--ybm-line-height-t06); }
+.sk-cat  { width: 36%; height: var(--ybm-line-height-t03); margin-top: var(--ybm-space-x1); }
+.sk-sb-title { height: var(--ybm-line-height-t06); }
 .card-img.failed, .svc-thumb-img.failed { visibility: hidden; }
 .lz-fail-icon { position: absolute; inset: 0; margin: auto; --ds-icon-size: 28px; color: var(--ybm-color-fg-neutral-subtle); opacity: .5; pointer-events: none; }
 .card:hover .card-img, .svc-item:hover .svc-thumb-img { transform: scale(1.02); }
@@ -181,6 +186,10 @@ body { background: var(--ybm-color-bg-canvas); }
 .lb-prev { left: -56px; }
 .lb-next { right: -56px; }
 #lb-img { display: block; width: auto; height: auto; max-height: var(--lb-max-h); max-width: var(--lb-max-w); border-radius: var(--ybm-shape-lg); }
+/* 받는 동안 ybm-ds Skeleton (화면 비율, 이미지와 같은 모서리) */
+.lb-ph { display: none; height: var(--lb-max-h); max-width: var(--lb-max-w); aspect-ratio: var(--shot-ratio); --ds-skeleton-radius: var(--ybm-shape-lg); }
+.lb-loading > .lb-ph { display: block; }
+.lb-loading > #lb-img { display: none; }
 .lb-info { display: flex; align-items: center; gap: var(--ybm-space-x3); font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
 .lb-actions { display: flex; gap: var(--ybm-space-x2); }  /* 링크 복사 + 다운로드 */
 .lb-more { display: flex; flex-wrap: wrap; gap: var(--ybm-space-x2); justify-content: center; max-width: min(760px, calc(100vw - var(--ybm-space-x8))); }  /* 이어 보기: 같은 서비스 · 카테고리 · 컴포넌트 · 웹/모바일 짝 */
@@ -299,6 +308,7 @@ body:has(#select-bar.open) #toast { bottom: calc(var(--ybm-space-x6) + 72px); }
   /* 이미지 옆 여백이 부족해 화살표를 숨김 (키보드 ←/→ 로 대체) */
   .lb-nav { display: none !important; }
   #lb-img { max-height: 72vh; max-width: 92vw; }
+  .lb-ph { height: 72vh; max-width: 92vw; }
   #select-bar { width: calc(100vw - var(--ybm-space-x6)); }
 }
 

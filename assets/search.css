@@ -41,4 +41,7 @@
   .sr-group[data-cross="web"] .mini-grid { --grid-cols: 1; }
 }
 /* 화면 속 글자 색인을 불러오는 동안 */
-.sr-loading { margin-bottom: var(--ybm-space-x6); color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); }
+/* 뒤늦게 오는 결과 자리 (search.js srSkel): 제목 줄 + 카드 한 줄만 (넘치는 줄은 높이 0) */
+.sk-sr-title { width: 160px; height: var(--ybm-line-height-t06); }
+.sk-row { grid-template-rows: auto; grid-auto-rows: 0; row-gap: 0; overflow: hidden; }
+.sk-row .card { cursor: default; }

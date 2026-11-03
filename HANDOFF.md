@@ -58,6 +58,7 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 3. **자연어 검색(MCP)에 잼페이스가 빠졌던 것 고침**: 분류(classify-local.js)가 data.js 를 먼저 갱신해서 `업데이트.bat` 이 새 화면 0장으로 보고 글자 추출, 검색 데이터 만들기를 건너뜀 → 글자 추출, `build-index.js`, `build-words.js` 다시 돌림. `scripts/update.js` 는 새 화면이 없어도 검색 데이터(`search/dist/uipatterns.db`)가 data.js 보다 오래됐으면 다시 만들게 고침
 4. **ybm-ds 최신으로** (`node scripts/sync-ybm-ds.js`, 4f794c1): 사이트에서 바뀐 곳은 상단 모바일/웹사이트 전환 높이 36 → 32 (ybm-ds Segmented small 32 로 고정) 하나. 사이트 zip `(사이트업로드)/site_20261103.zip` 다시 만듦
 5. 사용자 질문: 회사 서버는 파일만 올리는 곳이라 유아이볼처럼 주소 하나로 연결하는 MCP 는 안 됨. 팀원이 쓰려면 검색 데이터 파일을 서버에 두고 PC 마다 검색 프로그램을 설치하는 방법이 있음 (필요하면)
+6. **사이트 로딩을 ybm-ds Skeleton 으로** (사용자 "사이트 전체 스켈레톤 적용 검토" → "모두 진행하고 배포"): ① 첫 화면 = data.js 를 받는 동안 사이드바 제목 4줄과 서비스 카드 10장 자리 (mo/web `index.html` 의 data.js 앞 작은 스크립트, render/buildSidebar 가 덮어씀) ② 화면 카드, 서비스 썸네일 = 예전 반짝임(lz-shimmer) 대신 `<span class="ds-skeleton lz-ph">`, lz-done 이면 숨김 ③ 서비스 아이콘 = img 에 ds-skeleton, 다 받으면(loaded) 깜빡임 멈춤, 다른 확장자로 받아도 멈추게 `tryNextIconExt` ④ 크게 보기 = `setLbImg()` 가 받는 동안 화면 비율 Skeleton ⑤ 검색 = 상대 사이트, 화면 속 글자 결과가 오는 동안 "찾는 중" 글자 대신 섹션 제목 + 카드 한 줄 (`srSkel`, search.js). "웹 버전 N장" 버튼은 없는 서비스가 많아 그대로. ybm-ds 에 `--ds-skeleton-radius` 와 움직임 줄이기를 먼저 더함 (ybm-ds 882a70e)
 
 10/26 회사에서 한 일:
 1. 회사 PC 를 저장소에 연결, 안 쓰는 파일·옛 백업 정리

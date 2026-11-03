@@ -116,6 +116,7 @@
   <button type="button" class="ds-btn lb-close" data-variant="neutralWeak" data-layout="iconOnly" onclick="closeLb()" aria-label="닫기"><i class="ds-icon ds-icon--x" aria-hidden="true"></i></button>
   <div class="lb-img-wrap">
     <button type="button" id="lb-prev" class="ds-btn lb-nav lb-prev" data-variant="neutralWeak" data-layout="iconOnly" onclick="event.stopPropagation();lbNav(-1)" aria-label="이전 화면"><i class="ds-icon ds-icon--chevron-left" aria-hidden="true"></i></button>
+    <span class="ds-skeleton lb-ph" aria-hidden="true"></span>
     <img id="lb-img" src="" alt="" />
     <button type="button" id="lb-next" class="ds-btn lb-nav lb-next" data-variant="neutralWeak" data-layout="iconOnly" onclick="event.stopPropagation();lbNav(1)" aria-label="다음 화면"><i class="ds-icon ds-icon--chevron-right" aria-hidden="true"></i></button>
   </div>
@@ -130,6 +131,17 @@
   </div>
 </div>
 
+<script>
+// 첫 화면 스켈레톤: data.js 를 받는 동안 사이드바 제목과 서비스 카드 자리를 미리 보여 준다 (render, buildSidebar 가 덮어씀)
+(function () {
+  const sk = (cls, style) => '<span class="ds-skeleton ' + cls + '"' + (style ? ' style="' + style + '"' : '') + '></span>';
+  document.getElementById('cat-rows').innerHTML = [88, 72, 48, 104].map(w =>
+    '<section class="sb-sec" aria-hidden="true"><div class="sb-grp"><div class="sb-grp-hdr">' + sk('sk-sb-title', 'width:' + w + 'px') + '</div></div></section>').join('');
+  document.getElementById('grid').innerHTML = Array(10).fill(
+    '<div class="svc-item sk-item" aria-hidden="true">' + sk('sk-thumb') +
+    '<div class="svc-info">' + sk('svc-info-icon') + '<div class="svc-info-text">' + sk('sk-name') + sk('sk-cat') + '</div></div></div>').join('');
+})();
+</script>
 <script src="../config.js"></script>
 <script src="data.js"></script>
 <script src="svc-types.js"></script>
@@ -246,6 +258,7 @@ function tryNextIconExt(el) {
   const tried = (el.dataset.iconTry | 0);
   if (tried < ICON_EXTS.length) {
     el.dataset.iconTry = tried + 1;
+    el.onload = () => el.classList.add('loaded');   // 다른 확장자로 받으면 Skeleton 깜빡임을 멈춘다
     el.src = base + encodeURIComponent(svc) + '.' + ICON_EXTS[tried];
   } else {
     el.setAttribute('data-missing', '1');
@@ -561,7 +574,7 @@ function cardTpl(item, ec) {
   const isPush = item.category === '푸시알림';
   return `
   <div class="card${isSel?' selected':''}" data-path="${safePath}" onclick="openLb('${ec(item.path)}','${ec(item.name)}','${ec(item.category)}')">
-    <div class="card-img-wrap${isPush?' push-notif':''}">
+    <div class="card-img-wrap${isPush?' push-notif':''}"><span class="ds-skeleton lz-ph" aria-hidden="true"></span>
       <img class="card-img" data-src="${imgUrl(item.path)}" alt="${item.name}" decoding="async" />
       <span class="ds-checkbox sel-chk" data-size="large" onclick="event.stopPropagation();toggleSelect(this.closest('.card'))"><input type="checkbox" class="ds-checkbox__control" aria-label="선택" tabindex="-1"${isSel ? ' checked' : ''}></span>
     </div>
@@ -604,8 +617,8 @@ function render() {
     </div>
     <div class="svc-hero">
       ${cat ? `<span class="svc-hero-cat">#${cat}</span>` : ''}
-      <img class="svc-h-icon" src="${iconBase()}${encodeURIComponent(S.svc)}.png" alt="${S.svc}"
-        data-svc="${S.svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)">
+      <img class="svc-h-icon ds-skeleton" src="${iconBase()}${encodeURIComponent(S.svc)}.png" alt="${S.svc}"
+        data-svc="${S.svc.replace(/"/g,'&quot;')}" onload="this.classList.add('loaded')" onerror="tryNextIconExt(this)">
       <h2 class="svc-hero-name">${S.svc}</h2>
       <p class="svc-hero-count">화면 ${svcItems.length}장</p>
       <div class="svc-hero-more" id="svc-hero-more"></div>
@@ -669,7 +682,7 @@ function render() {
       const safeSvc = svc.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       units.push(`<div class="svc-group${isFirst?' first':''}">
         <div class="svc-header" onclick="showService('${safeSvc}')" style="cursor:pointer" title="${svc} 전체 화면 보기">
-          <img class="svc-h-icon" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+          <img class="svc-h-icon ds-skeleton" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
             data-svc="${svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)">
           <div class="svc-h-info">
             <span class="svc-h-name">${svc}</span>
@@ -696,11 +709,11 @@ function render() {
       const isPushIdx = repItem.category === '푸시알림';
       units.push(`
         <div class="svc-item" onclick="showService('${safeSvc}')">
-          <div class="svc-thumb${isPushIdx?' push-notif':''}">
+          <div class="svc-thumb${isPushIdx?' push-notif':''}"><span class="ds-skeleton lz-ph" aria-hidden="true"></span>
             <img class="svc-thumb-img" data-src="${imgUrl(repItem.path)}" alt="${svc}" decoding="async" />
           </div>
           <div class="svc-info">
-            <img class="svc-info-icon" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
+            <img class="svc-info-icon ds-skeleton" data-src="${iconBase()}${encodeURIComponent(svc)}.png" alt="${svc}"
               data-svc="${svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)" />
             <div class="svc-info-text">
               <div class="svc-info-name">${svc}</div>
@@ -909,7 +922,7 @@ function openLb(encPath, encName, encCat) {
     _lbList = DISPLAY_DATA.filter(i => extractService(i.name) === svc).map(i => i.path);
     _lbIndex = _lbList.indexOf(_lbPath);
   }
-  document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
+  setLbImg(imgUrl(_lbPath, _lbPlatform));
   document.getElementById('lb-name').textContent = extractService(_lbName);
   document.getElementById('lb-cat').textContent  = cat;
   document.getElementById('lightbox').classList.add('open');
@@ -925,7 +938,7 @@ function openLbCross(platform, encPath, encName, encCat) {
   const cat = decodeURIComponent(encCat);
   _lbList = [];
   _lbIndex = -1;
-  document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
+  setLbImg(imgUrl(_lbPath, _lbPlatform));
   document.getElementById('lb-name').textContent = extractService(_lbName);
   document.getElementById('lb-cat').textContent  = cat;
   document.getElementById('lightbox').classList.add('open');
@@ -952,7 +965,7 @@ function lbNav(dir) {
   _lbPath = item.path;
   _lbPlatform = PLATFORM;
   _lbName = item.name;
-  document.getElementById('lb-img').src = imgUrl(_lbPath, _lbPlatform);
+  setLbImg(imgUrl(_lbPath, _lbPlatform));
   document.getElementById('lb-name').textContent = extractService(_lbName);
   document.getElementById('lb-cat').textContent  = item.category;
   updateLbNav(); renderLbMore();
@@ -1008,6 +1021,13 @@ function lbGo(kind, enc) {   // kind: svc(서비스 페이지) | cat(카테고�
 function lbGoOther(encSvc) {   // 상대 사이트의 서비스 페이지로 (같은 탭)
   const other = PLATFORM === 'mo' ? 'web' : 'mo';
   location.href = new URL('../' + other + '/', location.href).href + '#svc=' + encSvc;
+}
+// 크게 보기 이미지: 받는 동안 ybm-ds Skeleton 을 화면 비율대로 보여 준다
+function setLbImg(url) {
+  const img = document.getElementById('lb-img'), wrap = img.parentElement;
+  wrap.classList.add('lb-loading');
+  img.onload = img.onerror = () => { if (img.src === new URL(url, location.href).href) wrap.classList.remove('lb-loading'); };
+  img.src = url;
 }
 function closeLb(e) {
   if (e && e.target !== document.getElementById('lightbox') && !e.target.closest('.lb-close')) return;
