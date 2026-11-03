@@ -59,7 +59,7 @@ body { background: var(--ybm-color-bg-canvas); }
 .cat-row .ds-checkbox__label { flex: 1; min-width: 0; }
 .cat-cnt { color: var(--ybm-color-fg-neutral-subtle); }
 /* 컬러 필터의 색 점 (사이드바 줄, 고른 필터 칩) */
-.color-dot { display: inline-block; flex: none; width: 12px; height: 12px; margin-right: var(--ybm-space-x2); border-radius: 50%; background: var(--dot); box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak); vertical-align: -1px; }
+.color-dot { display: inline-block; flex: none; width: 12px; height: 12px; margin-right: var(--ybm-space-x2); border-radius: 50%; background: var(--dot); vertical-align: -1px; }
 .ds-chip .color-dot { margin-right: 0; }
 .ds-checkbox__label:has(> .color-dot) { white-space: nowrap; }
 
