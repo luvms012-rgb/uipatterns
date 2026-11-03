@@ -22,7 +22,7 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 - ✅ 코드·문서·`data.js`(이미지 목록)·`components.json`·`CLAUDE.md`·이 문서
 - ❌ 이미지(회사 PC·회사 서버에만), 화면 글자(OCR)·검색 데이터 `search/ocr/`·`search/dist/` (회사 PC 에만, 저장소 제외)
 - ❌ 각 PC 의 Claude 메모리 — 그래서 중요한 건 `CLAUDE.md`·이 문서에 적는다
-- 캡처 스킬(uipatterns-capture)은 claude.ai 계정으로 맞춰짐 (지금은 캡처 안 함, 11/02)
+- 캡처 스킬(uipatterns-capture)은 claude.ai 계정으로 맞춰짐 (11/03 부터 최신 3개 패턴만 캡처)
 
 ### 집 PC(Mac) 처음 한 번
 1. Git, Node.js 22 이상, Claude 데스크톱 앱(Code)
@@ -49,7 +49,7 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 | 컴포넌트 | 10/26 이후 캡처분만 (mo 282장, web 415장) → `{site}/components.json` → `data.js` comps |
 | 컬러 | 전 화면 대표 색 9가지 → `{site}/colors.json` → `data.js` color (회사 PC 에서만 뽑음) |
 | 검색 | 조합 검색, 비슷한 말, 추천 검색어 (10/30), 화면 속 글자 `words.js` (11/02), 모바일/웹 통합 검색 (11/02) |
-| 캡처 | 안 함 - uibowl 구독 없음 (11/02 사용자 결정). 11/03 사용자가 직접 요청한 잼페이스만 무료로 보이는 최신 3개 패턴(39장) 받음 |
+| 캡처 | 무료로 보이는 최신 3개 패턴 기준 (11/03 사용자 결정, 첫 번째 잼페이스 39장). 받는 방법은 아래 11/03 1번 |
 | 자연어 검색 | 회사 PC 로컬 MCP 서버 등록됨 (`claude mcp` 이름 `uipatterns`) — 새 대화에서 "uipatterns 에서 ~ 찾아줘" |
 
 11/03 회사에서 한 일:

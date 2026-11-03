@@ -12,7 +12,7 @@
 - 화면이 바뀌는 작업은 실제 화면 전후 캡처를 이미지로 보여 주고 확인받는다 (숨은 팝업, 드롭다운도 열어서 찍기)
 - 평소엔 GitHub 기준으로만 작업. 서버용 zip(이미지, 사이트)은 사용자가 서버에 올린다고 할 때만 만든다 (회사 PC 에서만)
 - **ybm-ds 부품은 맥락(쓰임)에 맞게** (11/02 사용자): 모양이 아니라 하는 일로 고른다. 이동/실행 = Button, 고르기/거르기 = Chip, Checkbox, 목록에서 고르기 = Select, 문장 속 보조 이동 = Text Link
-- **uibowl 은 구독 회원만 볼 수 있고 사용자는 구독 회원이 아님** (11/02 사용자 결정) - uibowl 페이지를 읽거나 캡처해야 하는 일은 시도도 제안도 하지 않고 건너뛴다. 이미 받아 둔 로컬 데이터로 되는 일만
+- **uibowl 은 무료 계정이라 서비스마다 최신 3개 패턴만 보임** (11/02, 11/03 사용자 결정) - 캡처는 무료로 보이는 최신 3개 패턴 기준으로 한다 (받는 방법은 HANDOFF 11/03). 전체 화면이 있어야 하는 일(예전 화면 컴포넌트 채우기 등)은 시도도 제안도 하지 않고 건너뛴다
 - 이미지를 브라우저로 여러 장 내려받지 않는다 (다운로드 창 폭주로 PC 재부팅한 적 있음) - 주소만 읽고 node, PowerShell 로 받기
 
 ## 결정사항 (바꾸지 말 것)
@@ -38,7 +38,7 @@
 - 업데이트(동기화): `업데이트.bat` / `업데이트.command` → `scripts/update.js` (pull → 이미지 스캔·OCR·검색 데이터 → 커밋 → push)
 - 미리보기: `미리보기.bat` / `미리보기.command` → `scripts/preview.js` (localhost:5180, 이미지 위치 자동)
 - 검색 데이터: `search/run-ocr.bat` → `node search/build-index.js` · 로컬 MCP 등록: `claude mcp add --scope user uipatterns node <폴더>/mcp/local.mjs`
-- 캡처: **지금은 안 함** (uibowl 구독 없음, 11/02). 예전 방식은 claude.ai 스킬 uipatterns-capture 와 [GUIDE.md](GUIDE.md)
+- 캡처: **최신 3개 패턴만** (무료 계정, 11/03). 받는 방법은 HANDOFF 11/03 1번, 예전 방식은 claude.ai 스킬 uipatterns-capture 와 [GUIDE.md](GUIDE.md)
 
 ## 주의 (실제로 겪은 것)
 - 회사 서버 웹방화벽: 이미지를 짧은 시간에 수십 장 요청하면 IP 차단(`error_web_fw`). 서버 확인은 몇 장만 천천히. CORS 헤더 없음
