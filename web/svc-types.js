@@ -407,6 +407,9 @@ const SVC_TYPES = {
 
   // 자동 매핑 (오프라인, update, 2026-11-03)
   '세이브티커':'금융',
+
+  // 자동 매핑 (오프라인, update, 2026-11-03)
+  '클로브 AI':'AI',
 };
 
 const ALL_INDUSTRY_TYPES = [
