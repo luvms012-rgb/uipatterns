@@ -167,6 +167,8 @@
 
 /* --------------------------------------------------------------------------
    02 Text Link — CTA 위/아래 보조 링크 (Figma Text Link 2493:324, state enabled/hover)
+   size: medium(기본, t05) · small(t03, 본문 옆이나 표, 칸 머리처럼 보조 자리) (2026-11-03 추가)
+     <a class="ds-link" href="…" [data-size="small"]>비밀번호를 잊으셨나요?</a>
    -------------------------------------------------------------------------- */
 .ds-link {
   --ds-link-color: var(--ybm-color-fg-neutral-subtle);
@@ -180,6 +182,7 @@
   transition: color var(--ybm-duration-fast) var(--ybm-easing-standard);
 }
 .ds-link:hover { color: var(--ds-link-color-hover); }
+.ds-link[data-size="small"] { font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); text-underline-offset: 2px; }
 
 
 /* --------------------------------------------------------------------------
@@ -1024,7 +1027,8 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
 /* --------------------------------------------------------------------------
    16 Chip Tabs — 콘텐츠 카테고리 전환(가로 스크롤). 주요 내비게이션은 Tabs.
    variant: neutralSolid(기본) · neutralOutline   size: medium(기본 36) · large 40
-     <div class="ds-chiptabs" role="tablist" data-variant="neutralOutline">
+   inset: 기본 좌우 x4(화면 끝까지 넘기는 목록) · data-inset="none" 좌우 여백 없음(제목 아래 콘텐츠 칸 안에 놓을 때, 2026-11-03)
+     <div class="ds-chiptabs" role="tablist" data-variant="neutralOutline" [data-inset="none"]>
        <button class="ds-chiptabs__trigger" role="tab" aria-selected="true">전체</button>
        <button class="ds-chiptabs__trigger" role="tab" aria-selected="false" data-notification>공지</button>
      </div>
@@ -1032,6 +1036,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
      neutralSolid bg/neutral-weak-alpha · neutralOutline 투명 + stroke/neutral-muted
      selected bg/neutral-solid + fg/on-neutral-solid · disabled opacity .5 · notification 점 6 bg/brand-solid
    -------------------------------------------------------------------------- */
+.ds-chiptabs[data-inset="none"] { padding-inline: 0; }
 .ds-chiptabs {
   --ds-ct-height: 36px;
   --ds-ct-padding-x: 14px;
@@ -1086,7 +1091,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
      <div class="ds-tabs" role="tablist" [data-size="medium"] [data-layout="hug"]>
        <button class="ds-tabs__trigger" role="tab" aria-selected="true">탭</button>
      </div>
-   Figma: bg/layer-default · 하단 1px stroke/neutral-muted · trigger padding x2_5 · t04 Medium fg/placeholder
+   Figma: bg/layer-default · 하단 1px stroke/neutral-muted · trigger padding x2_5 · t04 Medium fg/neutral-subtle(2026-11-03, placeholder 에서 진하게)
      selected t04 SemiBold fg/neutral + 하단 2px fg/neutral 인디케이터(트리거 폭) · disabled fg/disabled
      hug: 좌우 x4 · 트리거는 내용 폭
    -------------------------------------------------------------------------- */
@@ -1103,6 +1108,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
 .ds-tabs::-webkit-scrollbar { display: none; }
 .ds-tabs[data-size="medium"] { --ds-tabs-height: 44px; }
 .ds-tabs[data-layout="hug"] { padding-inline: var(--ybm-space-x4); }
+.ds-tabs[data-layout="hug"][data-inset="none"] { padding-inline: 0; }  /* 2026-11-03: 콘텐츠 칸 안에서 제목과 왼쪽 끝을 맞출 때 */
 .ds-tabs__trigger {
   position: relative;
   display: inline-flex;
@@ -1111,7 +1117,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
   flex: 1 1 0;
   min-height: var(--ds-tabs-height);
   padding: var(--ybm-space-x2_5);
-  color: var(--ybm-color-fg-placeholder);
+  color: var(--ybm-color-fg-neutral-subtle);  /* 2026-11-03: placeholder 색은 흰 바탕에서 대비 2.1 이라 한 단계 진하게 */
   font-size: var(--ybm-font-size-t04);
   line-height: var(--ybm-line-height-t04);
   font-weight: var(--ybm-font-weight-medium);
@@ -1143,19 +1149,24 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
    Figma small : 트랙 bg/neutral · padding 2 · shape/sm / item py6 px12 · shape/xs · t03 Bold fg/neutral-subtle
          medium: 트랙 shape/lg / item py8 px16 · shape/sm · t04 Bold
          selected bg/layer-default + elevation raised + fg/neutral · disabled fg/disabled
+   높이(2026-11-03): small 32(Button xsmall 과 같음) · medium 40(Button medium, Select medium 과 같음). 글자와 아이콘 모두 같은 높이
    -------------------------------------------------------------------------- */
 .ds-segmented {
+  --ds-seg-height: 32px;
   --ds-seg-track-radius: var(--ybm-shape-sm);
   --ds-seg-item-radius: var(--ybm-shape-xs);
   --ds-seg-item-padding: var(--ybm-space-x1_5) var(--ybm-space-x3);
   --ds-seg-font-size: var(--ybm-font-size-t03);
   --ds-seg-line-height: var(--ybm-line-height-t03);
   display: inline-flex;
+  box-sizing: border-box;
+  height: var(--ds-seg-height);
   padding: var(--ybm-space-x0_5);
   border-radius: var(--ds-seg-track-radius);
   background: var(--ybm-color-bg-neutral);
 }
 .ds-segmented[data-size="medium"] {
+  --ds-seg-height: 40px;
   --ds-seg-track-radius: var(--ybm-shape-lg);
   --ds-seg-item-radius: var(--ybm-shape-sm);
   --ds-seg-item-padding: var(--ybm-space-x2) var(--ybm-space-x4);
@@ -1341,7 +1352,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
      critical       방해 금지 = 빨강 점 + 흰 가로줄
      지름 = 아바타의 26% (최소 8px) · 배경색 링 · circle 은 4시 방향, rounded/square 는 우하단 모서리
 
-   Figma: 원 · 이미지 없을 때 palette/gray-500 · 1px ring stroke/neutral-subtle(INSIDE)
+   Figma: 원 · 이미지 없을 때 palette/gray-500 · 이니셜 fg/neutral-muted(2026-11-03, 흰 글자에서 바꿈) · 1px ring stroke/neutral-subtle(INSIDE)
           shape rounded·square 는 badgeMask=none 에만 · status 속성(Avatar Status 인스턴스) · Avatar Group·Group Overflow 세트
           badge 지름 = 24→10 · 36→14 · 42→16 · 48→18 · 56→20 · 64→22 · 80→28 · 96→32 · 108→36 (우하단)
    -------------------------------------------------------------------------- */
@@ -1371,7 +1382,7 @@ button.ds-input__prefix:hover { color: var(--ybm-color-fg-neutral); }
 }
 .ds-avatar::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-subtle); pointer-events: none; }
 .ds-avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
-.ds-avatar__initials { white-space: nowrap; }
+.ds-avatar__initials { white-space: nowrap; color: var(--ybm-color-fg-neutral-muted); }  /* 2026-11-03: 흰 글자는 회색 바탕에서 대비 1.4 라 읽기 어려워 진한 회색으로 */
 
 /* 기본 실루엣 — 사진·이니셜이 없을 때 */
 .ds-avatar:not(:has(> img, > .ds-avatar__initials))::before {
@@ -2286,36 +2297,40 @@ html:has(:is(.ds-dialog, .ds-bottomsheet)[open]) { overflow: hidden; }
 
 /* --------------------------------------------------------------------------
    39 Card — 관련 정보를 한 덩어리로 묶는 컨테이너
-   variant: outline(기본) · elevated   size: medium(기본) · small
+   variant: outline(기본) · subtle(옅은 선, 화면 안에 여러 개 늘어놓을 때) · elevated   size: medium(기본) · small(모서리 lg)
      <article class="ds-card" [data-variant="elevated"] [data-size="small"]>
        <header class="ds-card__header"><h3 class="ds-card__title">카드 제목</h3>[<p class="ds-card__desc">설명</p>]</header>
        <div class="ds-card__content">…</div>
        [<footer class="ds-card__footer"><button class="ds-btn" data-variant="neutralWeak" data-width="fill">자세히 보기</button></footer>]
      </article>
    Figma: bg/layer-default · shape/xl · padding medium x5 / small x4 · 영역 gap x4 / x3
-     header gap x1 · title t05 Bold(small t04 Bold) fg/neutral · desc t04(small t03) fg/neutral-subtle
-     outline 1px stroke/neutral-weak · elevated elevation raised · footer 버튼 neutralWeak medium(small) gap x2
+     header gap x1 · title t06 Bold(small t05 Bold, 2026-11-03 한 단계 올림: Empty 제목과 같은 단계) fg/neutral · desc t04(small t03) fg/neutral-subtle
+     outline 1px stroke/neutral-weak · subtle 1px stroke/neutral-muted · elevated elevation raised · footer 버튼 neutralWeak medium(small) gap x2
+     모서리 medium shape/xl · small shape/lg (2026-11-03) · 화면 폭에 따라 안쪽 여백을 바꿀 때는 --ds-card-padding / --ds-card-gap
    전체가 눌리는 카드: <a class="ds-card" href> → pressed 시 bg/transparent-pressed 를 덧씌움
    -------------------------------------------------------------------------- */
 .ds-card {
   --ds-card-padding: var(--ybm-space-x5);
   --ds-card-gap: var(--ybm-space-x4);
+  --ds-card-radius: var(--ybm-shape-xl);
+  --ds-card-line: var(--ybm-color-stroke-neutral-weak);
   display: flex;
   flex-direction: column;
   gap: var(--ds-card-gap);
   padding: var(--ds-card-padding);
-  border-radius: var(--ybm-shape-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ybm-color-bg-layer-default);
-  box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-weak);
+  box-shadow: inset 0 0 0 1px var(--ds-card-line);
   color: var(--ybm-color-fg-neutral);
   text-decoration: none;
 }
+.ds-card[data-variant="subtle"] { --ds-card-line: var(--ybm-color-stroke-neutral-muted); }
 .ds-card[data-variant="elevated"] { box-shadow: var(--ybm-elevation-raised); }
-.ds-card[data-size="small"] { --ds-card-padding: var(--ybm-space-x4); --ds-card-gap: var(--ybm-space-x3); }
+.ds-card[data-size="small"] { --ds-card-padding: var(--ybm-space-x4); --ds-card-gap: var(--ybm-space-x3); --ds-card-radius: var(--ybm-shape-lg); }
 .ds-card__header { display: flex; flex-direction: column; gap: var(--ybm-space-x1); }
-.ds-card__title { font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); font-weight: var(--ybm-font-weight-bold); }
+.ds-card__title { font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); font-weight: var(--ybm-font-weight-bold); letter-spacing: -0.01em; }
 .ds-card__desc { color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
-.ds-card[data-size="small"] .ds-card__title { font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
+.ds-card[data-size="small"] .ds-card__title { font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); }
 .ds-card[data-size="small"] .ds-card__desc { font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); }
 .ds-card__content { font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
 .ds-card__footer { display: flex; gap: var(--ybm-space-x2); }
@@ -2416,46 +2431,74 @@ a.ds-card:active, button.ds-card:active { background: linear-gradient(var(--ybm-
    density: default(기본) · compact
      <div class="ds-table-wrap">            ← 열이 넘치면 가로 스크롤
        <table class="ds-table" [data-density="compact"]>
-         <thead><tr><th scope="col" data-align="center">번호</th><th scope="col">제목</th>…</tr></thead>
-         <tbody><tr [aria-selected="true"] [data-interactive]><td data-align="center">10</td><td>…</td></tr></tbody>
+         <thead><tr><th scope="col">선택</th><th scope="col">제목</th><th scope="col" data-align="end">금액</th></tr></thead>
+         <tbody>
+           <tr class="ds-table__group"><td colspan="3">묶음 이름</td></tr>        ← 묶음 행(선택)
+           <tr [aria-selected="true"] [data-interactive]>
+             <td><label class="ds-checkbox">…</label></td>                         ← 체크박스만 든 칸은 폭 52 고정
+             <td><span class="ds-table__stack"><span>제목</span><span>보조 글</span></span></td>  ← 두 줄 칸
+             <td data-align="end">10,000원</td>
+           </tr>
+         </tbody>
        </table>
      </div>
-   Figma: 행 하단 1px stroke/neutral-weak · header bg/neutral-muted · 높이 header 44 / body 52 (compact 36 / 40)
-     칸 좌우 x4 · 한 줄 말줄임 · header t04 Medium fg/neutral-muted · body t04 fg/neutral
-     hover(data-interactive 행만) bg/neutral-weak-alpha · selected bg/brand-weak
-     정렬: 글 left(기본) · 숫자 right · 짧은 고정 길이 값(번호·날짜·상태) center → data-align
+   2026-11-03 개편(템플릿 표 기준과 같게): 위 진한 선 하나 + 머리줄 바탕 없음 + 행 사이 옅은 선
+   Figma: 표 위 1px stroke/neutral-solid · 칸 아래 1px stroke/neutral-muted · header 바탕 없음
+     높이 header 44 / body 56 (compact 44 / 48) · 칸 좌우 x3, 양 끝 칸 x4 · 한 줄 말줄임
+     header t03 Regular fg/neutral-subtle · body t04 fg/neutral · 두 줄 칸 아래 줄 t02 fg/neutral-subtle
+     묶음 행 44 bg/neutral-weak-alpha + SemiBold · hover(data-interactive 행만) bg/neutral-weak-alpha · selected bg/brand-weak
+     정렬: 글 start(기본) · 숫자 end · 짧은 고정 길이 값(번호·날짜·상태) center → data-align (right 는 end 와 같음)
+     선은 칸 border 로 그린다(행 그림자는 칸에 바탕을 넣으면 가려지고, 표 양 끝에 세로 선이 생긴다)
+     Card 안에 넣으면 카드 테두리가 틀이 되므로 위 진한 선과 마지막 줄 선을 뺀다 (2026-11-03)
    -------------------------------------------------------------------------- */
 .ds-table-wrap { width: 100%; overflow-x: auto; }
 .ds-table {
   --ds-table-head-h: 44px;
-  --ds-table-row-h: 52px;
+  --ds-table-row-h: 56px;
+  --ds-table-line: var(--ybm-color-stroke-neutral-muted);
   width: 100%;
   table-layout: fixed;              /* 고정 폭 열은 <th style="width:…"> 또는 <col>, 나머지 열이 남은 폭을 나눈다 */
   border-collapse: collapse;
+  border-top: 1px solid var(--ybm-color-stroke-neutral-solid);
   color: var(--ybm-color-fg-neutral);
   font-size: var(--ybm-font-size-t04);
   line-height: var(--ybm-line-height-t04);
+  font-variant-numeric: tabular-nums;
 }
-.ds-table[data-density="compact"] { --ds-table-head-h: 36px; --ds-table-row-h: 40px; }
+.ds-table[data-density="compact"] { --ds-table-head-h: 44px; --ds-table-row-h: 48px; }
 .ds-table :is(th, td) {
-  padding: 0 var(--ybm-space-x4);
+  padding: var(--ybm-space-x2) var(--ybm-space-x3);
   overflow: hidden;
+  border-bottom: 1px solid var(--ds-table-line);
   text-align: start;
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
 }
-.ds-table thead tr { height: var(--ds-table-head-h); background: var(--ybm-color-bg-neutral-muted); }
-.ds-table thead th { color: var(--ybm-color-fg-neutral-muted); font-weight: var(--ybm-font-weight-medium); }
+.ds-table :is(th, td):first-child { padding-inline-start: var(--ybm-space-x4); }
+.ds-table :is(th, td):last-child { padding-inline-end: var(--ybm-space-x4); }
+.ds-table thead tr { height: var(--ds-table-head-h); }
+.ds-table thead th { color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); font-weight: var(--ybm-font-weight-regular); }
 .ds-table tbody tr { height: var(--ds-table-row-h); }
-.ds-table tr { box-shadow: inset 0 -1px 0 var(--ybm-color-stroke-neutral-weak); }
 .ds-table td { font-weight: var(--ybm-font-weight-regular); }
 .ds-table [data-align="center"] { text-align: center; }
-.ds-table [data-align="right"] { text-align: end; }
+.ds-table :is([data-align="right"], [data-align="end"]) { text-align: end; }
+/* 체크박스만 든 칸 */
+.ds-table :is(th, td):has(> .ds-checkbox:only-child) { width: 52px; padding-inline: var(--ybm-space-x4) var(--ybm-space-x2); overflow: visible; }
+.ds-table .ds-checkbox { vertical-align: middle; }
+/* 두 줄 칸 */
+.ds-table__stack { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ds-table__stack > * { overflow: hidden; text-overflow: ellipsis; }
+.ds-table__stack > :last-child:not(:first-child) { color: var(--ybm-color-fg-neutral-subtle); font-size: var(--ybm-font-size-t02); line-height: var(--ybm-line-height-t02); }
+/* 묶음 행 */
+.ds-table tr.ds-table__group { height: 44px; background: var(--ybm-color-bg-neutral-weak-alpha); }
+.ds-table tr.ds-table__group > td { font-weight: var(--ybm-font-weight-semibold); }
 .ds-table tbody tr[data-interactive] { cursor: pointer; }
 .ds-table tbody tr[data-interactive]:active { background: var(--ybm-color-bg-neutral-weak-alpha); }
 @media (hover: hover) { .ds-table tbody tr[data-interactive]:hover { background: var(--ybm-color-bg-neutral-weak-alpha); } }
 .ds-table tbody tr[aria-selected="true"] { background: var(--ybm-color-bg-brand-weak); }
+.ds-card .ds-table { border-top: 0; }
+.ds-card .ds-table tbody tr:last-child > * { border-bottom: 0; }
 .ds-table caption { padding-bottom: var(--ybm-space-x2); text-align: start; color: var(--ybm-color-fg-neutral-subtle); }
 
 
@@ -3785,16 +3828,21 @@ a.ds-card:active, button.ds-card:active { background: linear-gradient(var(--ybm-
 /* --------------------------------------------------------------------------
    66 Image Frame - 사용자가 올린 사진을 정해진 비율로 보여 주는 틀 (2026-10-29 추가)
    ratio: 기본 1:1 / data-ratio="4:3" / data-ratio="16:9" (그 밖은 --ds-imageframe-ratio)   stroke: data-stroke
-     <div class="ds-imageframe" data-ratio="4:3" [data-stroke]>
+   radius: sm(기본) · none · md · lg · xl (2026-11-03 추가, 작은 썸네일 sm/md, 카드 안 사진 lg, 큰 대표 사진 xl)
+     <div class="ds-imageframe" data-ratio="4:3" [data-radius="lg"] [data-stroke]>
        <img src="…" alt="…">
        [<div class="ds-imageframe__floater" data-position="bottom-end"><span class="ds-imageframe__indicator">1/5</span></div>]
      </div>
    Figma: shape/sm / 빈 자리 bg/neutral / stroke 안쪽 1px stroke/neutral-subtle
      얹는 표시는 가장자리에서 x1_5 / indicator padding x0_5 x1_5, pill, palette/static-black-alpha-800, Static t01 Medium 흰색
    -------------------------------------------------------------------------- */
-.ds-imageframe { --ds-imageframe-ratio: 1; position: relative; overflow: hidden; aspect-ratio: var(--ds-imageframe-ratio); border-radius: var(--ybm-shape-sm); background: var(--ybm-color-bg-neutral); }
+.ds-imageframe { --ds-imageframe-ratio: 1; --ds-imageframe-radius: var(--ybm-shape-sm); position: relative; overflow: hidden; aspect-ratio: var(--ds-imageframe-ratio); border-radius: var(--ds-imageframe-radius); background: var(--ybm-color-bg-neutral); }
 .ds-imageframe[data-ratio="4:3"] { --ds-imageframe-ratio: 4 / 3; }
 .ds-imageframe[data-ratio="16:9"] { --ds-imageframe-ratio: 16 / 9; }
+.ds-imageframe[data-radius="none"] { --ds-imageframe-radius: 0; }
+.ds-imageframe[data-radius="md"] { --ds-imageframe-radius: var(--ybm-shape-md); }
+.ds-imageframe[data-radius="lg"] { --ds-imageframe-radius: var(--ybm-shape-lg); }
+.ds-imageframe[data-radius="xl"] { --ds-imageframe-radius: var(--ybm-shape-xl); }
 .ds-imageframe > img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .ds-imageframe[data-stroke]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--ybm-color-stroke-neutral-subtle); pointer-events: none; }
 .ds-imageframe__floater { position: absolute; z-index: 1; display: flex; gap: var(--ybm-space-x1); }

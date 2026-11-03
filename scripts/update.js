@@ -57,10 +57,14 @@ function ensureGitIdentity() {
 // 글자 추출은 Windows 내장 OCR 이라 Windows 에서만. 실패해도 업데이트 자체는 계속한다.
 function updateSearch(results) {
   const added = results.reduce((n, r) => n + r.newItems.length, 0);
-  if (!added && fs.existsSync(path.join(REPO, 'search', 'dist', 'uipatterns.db'))) return;
+  // 분류(classify-local.js)가 data.js 를 먼저 갱신하면 여기선 새 화면이 0장으로 보인다 (11/03 잼페이스 39장이 검색에서 빠짐)
+  // → 새 화면이 없어도 검색 데이터가 data.js 보다 오래됐으면 다시 만든다. 글자 추출은 이미 한 화면을 건너뛴다
+  const db = path.join(REPO, 'search', 'dist', 'uipatterns.db');
+  const stale = !fs.existsSync(db) || results.some(r => fs.statSync(path.join(REPO, r.platform, 'data.js')).mtimeMs > fs.statSync(db).mtimeMs);
+  if (!added && !stale) return;
   if (process.platform !== 'win32') { console.log('  검색 데이터: 화면 글자 추출은 Windows에서만 — 건너뜀'); return; }
   try {
-    console.log(`  검색 데이터: 새 화면 ${added}장 글자 추출 중…`);
+    console.log(added ? `  검색 데이터: 새 화면 ${added}장 글자 추출 중…` : '  검색 데이터: 이미지 목록이 더 새로워 글자 추출, 검색 데이터 다시 만드는 중…');
     execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${path.join(REPO, 'search', 'run-ocr.ps1')}" -Workers 4`, { cwd: REPO, stdio: 'inherit' });
     execSync(`node --no-warnings "${path.join(REPO, 'search', 'build-index.js')}"`, { cwd: REPO, stdio: 'inherit' });
   } catch (e) {
