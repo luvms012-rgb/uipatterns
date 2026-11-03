@@ -1,1 +1,1 @@
-window.__UIP_VER = "08846cef88a3";
+window.__UIP_VER = "2478f351419f";
