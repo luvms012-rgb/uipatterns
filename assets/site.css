@@ -154,12 +154,18 @@ body { background: var(--ybm-color-bg-canvas); }
 
 /* 서비스 상세 머리 */
 #detail-header { display: none; }
-.detail-bar {
-  position: sticky; top: var(--header-h); z-index: 90;
-  display: flex; align-items: center; gap: var(--ybm-space-x3);
-  padding: var(--ybm-space-x4) 0 var(--ybm-space-x5); margin-bottom: var(--ybm-space-x6);
-  border-bottom: 1px solid var(--ybm-color-stroke-neutral-muted); background: var(--ybm-color-bg-canvas);
+.detail-bar { display: flex; align-items: center; gap: var(--ybm-space-x3); padding-top: var(--ybm-space-x4); }
+/* 업종 · 아이콘 · 이름 · 화면 수를 가운데로 (유아이볼 서비스 화면처럼) */
+.svc-hero {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: var(--ybm-space-x4) 0 var(--ybm-space-x10); margin-bottom: var(--ybm-space-x6);
+  border-bottom: 1px solid var(--ybm-color-stroke-neutral-muted);
 }
+.svc-hero-cat { font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); font-weight: var(--ybm-font-weight-bold); color: var(--ybm-color-fg-neutral-subtle); }
+.svc-hero .svc-h-icon { width: 64px; height: 64px; border-radius: var(--ybm-shape-xl); margin-top: var(--ybm-space-x3); }
+.svc-hero-name { margin: var(--ybm-space-x4) 0 0; font-size: var(--ybm-font-size-t07); line-height: var(--ybm-line-height-t07); font-weight: var(--ybm-font-weight-bold); }
+.svc-hero-count { margin: var(--ybm-space-x1) 0 0; font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); color: var(--ybm-color-fg-neutral-muted); }
+.svc-hero-more:not(:empty) { margin-top: var(--ybm-space-x4); }
 .empty { grid-column: 1 / -1; padding-block: var(--ybm-space-x24); }
 
 /* 크게 보기 */

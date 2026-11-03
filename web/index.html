@@ -596,17 +596,29 @@ function render() {
     const cat = getSvcType(S.svc);   // 서비스 이름 아래 = 업종 (예전엔 첫 화면의 카테고리가 나와 네이버페이가 'AI' 로 보였음)
     const dh = document.getElementById('detail-header');
     dh.style.display = 'block';
+    // 서비스 머리: 업종 · 아이콘 · 이름 · 화면 수를 가운데로 (11/03 사용자: 유아이볼 서비스 화면처럼)
     dh.innerHTML = `<div class="detail-bar">
       <button type="button" class="ds-btn back-btn" data-variant="neutralWeak" data-size="small" onclick="backToIndex()" aria-label="목록으로 돌아가기">
         <i class="ds-icon ds-icon--chevron-left" aria-hidden="true"></i><span>목록</span>
       </button>
+    </div>
+    <div class="svc-hero">
+      ${cat ? `<span class="svc-hero-cat">#${cat}</span>` : ''}
       <img class="svc-h-icon" src="${iconBase()}${encodeURIComponent(S.svc)}.png" alt="${S.svc}"
         data-svc="${S.svc.replace(/"/g,'&quot;')}" onerror="tryNextIconExt(this)">
-      <div class="svc-h-info">
-        <span class="svc-h-name">${S.svc}</span>
-        <span class="svc-h-cat">${cat}</span>
-      </div>
+      <h2 class="svc-hero-name">${S.svc}</h2>
+      <p class="svc-hero-count">화면 ${svcItems.length}장</p>
+      <div class="svc-hero-more" id="svc-hero-more"></div>
     </div>`;
+    // 상대 사이트(웹 ↔ 모바일)에 같은 서비스가 있으면 그쪽 서비스 페이지로 가는 버튼
+    const heroSvc = S.svc, other = PLATFORM === 'mo' ? 'web' : 'mo';
+    loadCrossSearchIndex().then(idx => {
+      const box = document.getElementById('svc-hero-more');
+      const hit = idx && (idx.svcs || []).find(x => _lbSvcKey(x.svc) === _lbSvcKey(heroSvc));
+      if (!box || !hit || S.svc !== heroSvc) return;
+      box.innerHTML = `<button type="button" class="ds-btn" data-size="small" data-variant="neutralWeak" onclick="lbGoOther('${encodeURIComponent(hit.svc)}')">` +
+        `<i class="ds-icon ds-icon--${other === 'web' ? 'monitor' : 'smartphone'}" aria-hidden="true"></i>${other === 'web' ? '웹' : '모바일'} 버전 ${hit.count}장</button>`;
+    });
     g.classList.remove('filter-mode');
     resetLazyObservers();
     renderChunked(g, svcItems.map(item => cardTpl(item, ec)));
