@@ -42,7 +42,7 @@ const COLOR_LIST = [
 ];
 function colorDot(name) {
   const c = COLOR_LIST.find(x => x.name === name);
-  return c ? `<span class="color-dot" style="--dot:${c.hex}" aria-hidden="true"></span>` : '';
+  return c ? `<span class="color-dot" data-color="${c.name}" style="--dot:${c.hex}" aria-hidden="true"></span>` : '';
 }
 let _colorCounts = null;
 function colorCounts() {
