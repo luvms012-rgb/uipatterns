@@ -287,6 +287,9 @@ const SVC_TYPES = {
 
   // 자동 매핑 (오프라인, update, 2026-10-28)
   '퍼블리':'커뮤니티',
+
+  // 자동 매핑 (오프라인, update, 2026-11-03)
+  'KB스타뱅킹':'금융',
 };
 
 const ALL_INDUSTRY_TYPES = [

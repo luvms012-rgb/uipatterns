@@ -404,6 +404,9 @@ const SVC_TYPES = {
 
   // 자동 매핑 (오프라인, update, 2026-10-28)
   '삼성생명다이렉트':'금융',
+
+  // 자동 매핑 (오프라인, update, 2026-11-03)
+  '세이브티커':'금융',
 };
 
 const ALL_INDUSTRY_TYPES = [
