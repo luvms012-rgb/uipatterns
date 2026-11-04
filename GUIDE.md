@@ -56,7 +56,7 @@ uibowl 서비스 페이지
 
 - `prepare-upload.js`: `upload-list.txt` 에서 아직 안 담은 새 이미지만 `(업로드)/` 에 카테고리 구조 그대로 복사. 담은 파일은 `.last-upload` 에 한 줄씩 기록 (지우면 전체를 다시 담음). 로그 `prepare-upload-debug.log`
 - `(업로드)/` 를 비우고 다시 담기 때문에 분류 때 넣은 아이콘이 지워질 수 있다 → zip 전에 `(업로드)/icons/` 확인
-- `zip-upload.js`: `(업로드)/` 를 95MB 이하 zip 여러 개로 (`YYYYMMDD.zip`, 여러 개면 `_1`, `_2`). 하나씩 따로 풀리고, **이미지만** 담는다. 옵션 `--site mo|web`, `--limit 95`
+- `zip-upload.js`: `(업로드)/` 를 95MB 이하 zip 여러 개로, 저장소 바로 아래 `(서버업로드)/` 에 (`mo_YYYYMMDD.zip`, 여러 개면 `_1`, `_2`). 하나씩 따로 풀리고, **이미지만** 담는다. 옵션 `--site mo|web`, `--limit 95`
 - 사이트 파일 zip 은 따로 `node scripts/pack-site.js` (10/29~)
 - **서버용 zip 은 사용자가 서버에 올린다고 할 때만 만든다** (10/29 사용자 결정)
 

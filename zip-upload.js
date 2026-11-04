@@ -3,8 +3,8 @@
  * zip-upload.js  (2026-10-21)
  *
  * {site}/(업로드)/ 전체를 95MB 이하 zip 여러 개로 나눠 압축한다.
- *   - 파일명: 오늘 날짜(KST).  1개면 20261021.zip, 여러 개면 20261021_1.zip, 20261021_2.zip ...
- *   - 저장 위치: {site}/(업로드)/ 바로 아래 (기존 *.zip 은 먼저 지운다)
+ *   - 파일명: 사이트_오늘 날짜(KST).  1개면 mo_20261021.zip, 여러 개면 mo_20261021_1.zip, mo_20261021_2.zip ...
+ *   - 저장 위치: 저장소 바로 아래 (서버업로드)/ 한 곳에 사이트 zip 과 함께 (2026-11-04~). 같은 사이트의 예전 zip 은 먼저 지워 최신만 남긴다
  *   - 각 zip은 단독으로 풀 수 있다 (분할 볼륨 .z01 방식이 아님). 폴더 구조는 그대로 유지.
  *   - 이미지만 담는다 (2026-10-26~ 회사 서버엔 이미지만. 사이트 파일이 섞여 있으면 빼고 경고).
  *   - PNG는 이미 압축된 형식이라 무압축(store)으로 담는다 → 빠르고, 용량 계산이 정확하다.
@@ -22,7 +22,8 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 && proce
 const SITES = arg('--site', '') ? [arg('--site', '')] : ['mo', 'web'];
 const LIMIT = Math.floor(parseFloat(arg('--limit', '95')) * 1024 * 1024);
 const SITE_FILES = /^[^/]+\.(html|js|json|txt)$/i;   // (업로드) 바로 아래 사이트 파일 — 예전 방식의 잔재
-const PAGES_URL = JSON.parse(fs.readFileSync(path.join(ROOT, 'deploy.config.json'), 'utf8')).pagesUrl;
+const OUT = path.join(ROOT, '(서버업로드)');   // 서버에 올릴 zip 을 모두 모으는 곳 (사이트 zip 은 scripts/pack-site.js)
+const PAGES_URL =JSON.parse(fs.readFileSync(path.join(ROOT, 'deploy.config.json'), 'utf8')).pagesUrl;
 
 function today() {
   const d = new Date(Date.now() + 9 * 3600 * 1000); // KST 고정 (TZ 설정과 무관)
@@ -92,7 +93,10 @@ function run(site) {
   const stage = path.join(ROOT, site, '(업로드)');
   if (!fs.existsSync(stage)) { console.log('  [zip-upload] ' + site + ': (업로드) 폴더 없음 — 건너뜀'); return; }
 
-  for (const f of fs.readdirSync(stage)) if (/\.zip$/i.test(f)) fs.unlinkSync(path.join(stage, f)); // rmSync 는 Node 24 + 한글 경로에서 죽음
+  // 예전 zip 지우기: (업로드) 안에 남은 옛 방식 zip + (서버업로드) 의 같은 사이트 zip. rmSync 는 Node 24 + 한글 경로에서 죽음
+  for (const f of fs.readdirSync(stage)) if (/\.zip$/i.test(f)) fs.unlinkSync(path.join(stage, f));
+  fs.mkdirSync(OUT, { recursive: true });
+  for (const f of fs.readdirSync(OUT)) if (f.startsWith(site + '_') && /\.zip$/i.test(f)) fs.unlinkSync(path.join(OUT, f));
 
   const all = walk(stage, '', []);
   const skipped = all.filter(f => SITE_FILES.test(f.rel));
@@ -113,11 +117,11 @@ function run(site) {
   if (cur.length) parts.push(cur);
 
   const day = today();
-  const names = parts.length === 1 ? [day + '.zip'] : parts.map((_, i) => day + '_' + (i + 1) + '.zip');
+  const names = parts.length === 1 ? [site + '_' + day + '.zip'] : parts.map((_, i) => site + '_' + day + '_' + (i + 1) + '.zip');
   const total = files.reduce((s, f) => s + f.size, 0);
   console.log('\n  [zip-upload] ' + site + '/(업로드) 파일 ' + files.length + '개, ' + (total / 1048576).toFixed(1) + 'MB → ' + parts.length + '개로 분할 (한도 ' + (LIMIT / 1048576) + 'MB)');
   parts.forEach((p, i) => {
-    const out = path.join(stage, names[i]);
+    const out = path.join(OUT, names[i]);
     const tmp = out + '.part';
     const sz = writeZip(tmp, p);
     fs.renameSync(tmp, out);

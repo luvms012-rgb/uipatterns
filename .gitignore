@@ -37,4 +37,4 @@ desktop.ini
 .claude/
 
 # 서버에 올릴 사이트 파일 묶음 (scripts/pack-site.js)
-/(사이트업로드)/
+/(서버업로드)/

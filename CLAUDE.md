@@ -17,7 +17,7 @@
 
 ## 결정사항 (바꾸지 말 것)
 - **최종 운영은 회사 서버** `https://imagesisa.ybmnet.co.kr/platform/design_ybmnet_co_kr/uipatterns/` (사이트·이미지 같은 서버). GitHub Pages(`luvms012-rgb.github.io/uipatterns`)는 **개발 기간용**
-- 회사 서버에는 이미지와 사이트 파일 둘 다 올린다 (10/29 사용자 결정, 그 전엔 이미지만). 이미지 zip = `zip-upload.js`, 사이트 zip = `scripts/pack-site.js`. 업로드는 사용자가 보안망으로 직접 수동 - 업로드, FTP, 동기화 자동화 금지, 서버 설정(CORS 등) 변경 요청 금지
+- 회사 서버에는 이미지와 사이트 파일 둘 다 올린다 (10/29 사용자 결정, 그 전엔 이미지만). 이미지 zip = `zip-upload.js`, 사이트 zip = `scripts/pack-site.js`, **zip 3개는 저장소 바로 아래 `(서버업로드)/` 한 폴더에 최신 것만** (`mo_날짜.zip`, `web_날짜.zip`, `site_날짜.zip`, 11/04 사용자 결정). 업로드는 사용자가 보안망으로 직접 수동 - 업로드, FTP, 동기화 자동화 금지, 서버 설정(CORS 등) 변경 요청 금지
 - 핵심은 쉬운 업데이트: 이미지 넣고 → `업데이트.bat` 더블클릭 → 반영
 - **검색이 가장 중요.** 자연어 검색은 Claude + MCP(`mcp/`). 사이트 검색바는 단순 키워드, 사이드바 검색창 없음
 - **Cloudflare 가입 불가** → 원격 MCP·다운로드 중계(`worker/`) 보류. 다시 제안하지 말 것. 검색은 회사 PC 로컬 서버(`mcp/local.mjs`)
