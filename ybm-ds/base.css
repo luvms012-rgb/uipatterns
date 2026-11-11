@@ -1,5 +1,5 @@
 /* ==========================================================================
-   YBM Design System — BASE
+   YDS — BASE
    리셋 · 폰트 · 접근성 기본값. 여기에는 "모든 서비스에서 똑같아야 하는 것"만 둔다.
    ========================================================================== */
 
@@ -15,11 +15,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  font-family: var(--ybm-font-family-base);
-  font-size: var(--ybm-font-size-t05);
-  line-height: var(--ybm-line-height-t05);
-  color: var(--ybm-color-fg-neutral);
-  background: var(--ybm-color-bg-layer-default);
+  font-family: var(--ds-font-family-base);
+  font-size: var(--ds-font-size-t05);
+  line-height: var(--ds-line-height-t05);
+  color: var(--ds-color-fg-neutral);
+  background: var(--ds-color-bg-layer-default);
   -webkit-font-smoothing: antialiased;
   word-break: keep-all;          /* 한글 단어 단위 줄바꿈 */
   overflow-wrap: break-word;
@@ -36,7 +36,7 @@ button { padding: 0; border: 0; background: none; cursor: pointer; }
 
 /* 키보드 포커스만 링 표시 (DS §9) */
 :focus:not(:focus-visible) { outline: none; }
-:focus-visible { outline: 2px solid var(--ybm-color-stroke-focus-ring); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--ds-color-stroke-focus-ring); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

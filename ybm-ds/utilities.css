@@ -1,5 +1,5 @@
 /* ==========================================================================
-   YBM Design System — UTILITIES
+   YDS — UTILITIES
    --------------------------------------------------------------------------
    화면 하나에서만 필요한 배치·여백·글자 조정용. 반복되면 컴포넌트/서비스 클래스로 승격.
    값은 전부 토큰 참조 → 토큰이 바뀌면 함께 바뀐다.
@@ -11,32 +11,32 @@
      반응형   .u-hide-from-{sm|md|lg|xl}  .u-show-from-{sm|md|lg|xl}   (기준점 sm 480 / md 768 / lg 1280 / xl 1440, 작은 화면부터)
    ========================================================================== */
 
-.ds-t01 { font-size: var(--ybm-font-size-t01); line-height: var(--ybm-line-height-t01); }
-.ds-t02 { font-size: var(--ybm-font-size-t02); line-height: var(--ybm-line-height-t02); }
-.ds-t03 { font-size: var(--ybm-font-size-t03); line-height: var(--ybm-line-height-t03); }
-.ds-t04 { font-size: var(--ybm-font-size-t04); line-height: var(--ybm-line-height-t04); }
-.ds-t05 { font-size: var(--ybm-font-size-t05); line-height: var(--ybm-line-height-t05); }
-.ds-t06 { font-size: var(--ybm-font-size-t06); line-height: var(--ybm-line-height-t06); }
-.ds-t07 { font-size: var(--ybm-font-size-t07); line-height: var(--ybm-line-height-t07); }
-.ds-t08 { font-size: var(--ybm-font-size-t08); line-height: var(--ybm-line-height-t08); }
-.ds-t09 { font-size: var(--ybm-font-size-t09); line-height: var(--ybm-line-height-t09); }
-.ds-t10 { font-size: var(--ybm-font-size-t10); line-height: var(--ybm-line-height-t10); }
-.ds-t11 { font-size: var(--ybm-font-size-t11); line-height: var(--ybm-line-height-t11); }
-.ds-t12 { font-size: var(--ybm-font-size-t12); line-height: var(--ybm-line-height-t12); }
-.ds-t13 { font-size: var(--ybm-font-size-t13); line-height: var(--ybm-line-height-t13); }
-.ds-t14 { font-size: var(--ybm-font-size-t14); line-height: var(--ybm-line-height-t14); }
-.ds-t15 { font-size: var(--ybm-font-size-t15); line-height: var(--ybm-line-height-t15); }
-.ds-t16 { font-size: var(--ybm-font-size-t16); line-height: var(--ybm-line-height-t16); }
-.ds-t17 { font-size: var(--ybm-font-size-t17); line-height: var(--ybm-line-height-t17); }
-.ds-fw-regular { font-weight: var(--ybm-font-weight-regular); }
-.ds-fw-medium { font-weight: var(--ybm-font-weight-medium); }
-.ds-fw-semibold { font-weight: var(--ybm-font-weight-semibold); }
-.ds-fw-bold { font-weight: var(--ybm-font-weight-bold); }
-.ds-fg-neutral { color: var(--ybm-color-fg-neutral); }
-.ds-fg-muted { color: var(--ybm-color-fg-neutral-muted); }
-.ds-fg-subtle { color: var(--ybm-color-fg-neutral-subtle); }
-.ds-fg-brand { color: var(--ybm-color-fg-brand); }
-.ds-fg-critical { color: var(--ybm-color-fg-critical); }
+.ds-t01 { font-size: var(--ds-font-size-t01); line-height: var(--ds-line-height-t01); }
+.ds-t02 { font-size: var(--ds-font-size-t02); line-height: var(--ds-line-height-t02); }
+.ds-t03 { font-size: var(--ds-font-size-t03); line-height: var(--ds-line-height-t03); }
+.ds-t04 { font-size: var(--ds-font-size-t04); line-height: var(--ds-line-height-t04); }
+.ds-t05 { font-size: var(--ds-font-size-t05); line-height: var(--ds-line-height-t05); }
+.ds-t06 { font-size: var(--ds-font-size-t06); line-height: var(--ds-line-height-t06); }
+.ds-t07 { font-size: var(--ds-font-size-t07); line-height: var(--ds-line-height-t07); }
+.ds-t08 { font-size: var(--ds-font-size-t08); line-height: var(--ds-line-height-t08); }
+.ds-t09 { font-size: var(--ds-font-size-t09); line-height: var(--ds-line-height-t09); }
+.ds-t10 { font-size: var(--ds-font-size-t10); line-height: var(--ds-line-height-t10); }
+.ds-t11 { font-size: var(--ds-font-size-t11); line-height: var(--ds-line-height-t11); }
+.ds-t12 { font-size: var(--ds-font-size-t12); line-height: var(--ds-line-height-t12); }
+.ds-t13 { font-size: var(--ds-font-size-t13); line-height: var(--ds-line-height-t13); }
+.ds-t14 { font-size: var(--ds-font-size-t14); line-height: var(--ds-line-height-t14); }
+.ds-t15 { font-size: var(--ds-font-size-t15); line-height: var(--ds-line-height-t15); }
+.ds-t16 { font-size: var(--ds-font-size-t16); line-height: var(--ds-line-height-t16); }
+.ds-t17 { font-size: var(--ds-font-size-t17); line-height: var(--ds-line-height-t17); }
+.ds-fw-regular { font-weight: var(--ds-font-weight-regular); }
+.ds-fw-medium { font-weight: var(--ds-font-weight-medium); }
+.ds-fw-semibold { font-weight: var(--ds-font-weight-semibold); }
+.ds-fw-bold { font-weight: var(--ds-font-weight-bold); }
+.ds-fg-neutral { color: var(--ds-color-fg-neutral); }
+.ds-fg-muted { color: var(--ds-color-fg-neutral-muted); }
+.ds-fg-subtle { color: var(--ds-color-fg-neutral-subtle); }
+.ds-fg-brand { color: var(--ds-color-fg-brand); }
+.ds-fg-critical { color: var(--ds-color-fg-critical); }
 
 .u-flex { display: flex; }
 .u-col { display: flex; flex-direction: column; }
@@ -47,13 +47,13 @@
 .u-text-center { text-align: center; }
 .u-full { width: 100%; }
 
-.u-gap-0 { gap: var(--ybm-space-x0); } .u-gap-0_5 { gap: var(--ybm-space-x0_5); } .u-gap-1 { gap: var(--ybm-space-x1); } .u-gap-1_5 { gap: var(--ybm-space-x1_5); } .u-gap-2 { gap: var(--ybm-space-x2); } .u-gap-2_5 { gap: var(--ybm-space-x2_5); } .u-gap-3 { gap: var(--ybm-space-x3); } .u-gap-3_5 { gap: var(--ybm-space-x3_5); } .u-gap-4 { gap: var(--ybm-space-x4); } .u-gap-4_5 { gap: var(--ybm-space-x4_5); } .u-gap-5 { gap: var(--ybm-space-x5); } .u-gap-6 { gap: var(--ybm-space-x6); } .u-gap-7 { gap: var(--ybm-space-x7); } .u-gap-8 { gap: var(--ybm-space-x8); } .u-gap-9 { gap: var(--ybm-space-x9); } .u-gap-10 { gap: var(--ybm-space-x10); } .u-gap-11 { gap: var(--ybm-space-x11); } .u-gap-12 { gap: var(--ybm-space-x12); } .u-gap-13 { gap: var(--ybm-space-x13); } .u-gap-14 { gap: var(--ybm-space-x14); } .u-gap-15 { gap: var(--ybm-space-x15); } .u-gap-16 { gap: var(--ybm-space-x16); } .u-gap-18 { gap: var(--ybm-space-x18); } .u-gap-20 { gap: var(--ybm-space-x20); } .u-gap-24 { gap: var(--ybm-space-x24); } .u-gap-32 { gap: var(--ybm-space-x32); }
-.u-mt-0 { margin-top: var(--ybm-space-x0); } .u-mt-0_5 { margin-top: var(--ybm-space-x0_5); } .u-mt-1 { margin-top: var(--ybm-space-x1); } .u-mt-1_5 { margin-top: var(--ybm-space-x1_5); } .u-mt-2 { margin-top: var(--ybm-space-x2); } .u-mt-2_5 { margin-top: var(--ybm-space-x2_5); } .u-mt-3 { margin-top: var(--ybm-space-x3); } .u-mt-3_5 { margin-top: var(--ybm-space-x3_5); } .u-mt-4 { margin-top: var(--ybm-space-x4); } .u-mt-4_5 { margin-top: var(--ybm-space-x4_5); } .u-mt-5 { margin-top: var(--ybm-space-x5); } .u-mt-6 { margin-top: var(--ybm-space-x6); } .u-mt-7 { margin-top: var(--ybm-space-x7); } .u-mt-8 { margin-top: var(--ybm-space-x8); } .u-mt-9 { margin-top: var(--ybm-space-x9); } .u-mt-10 { margin-top: var(--ybm-space-x10); } .u-mt-11 { margin-top: var(--ybm-space-x11); } .u-mt-12 { margin-top: var(--ybm-space-x12); } .u-mt-13 { margin-top: var(--ybm-space-x13); } .u-mt-14 { margin-top: var(--ybm-space-x14); } .u-mt-15 { margin-top: var(--ybm-space-x15); } .u-mt-16 { margin-top: var(--ybm-space-x16); } .u-mt-18 { margin-top: var(--ybm-space-x18); } .u-mt-20 { margin-top: var(--ybm-space-x20); } .u-mt-24 { margin-top: var(--ybm-space-x24); } .u-mt-32 { margin-top: var(--ybm-space-x32); }
-.u-mb-0 { margin-bottom: var(--ybm-space-x0); } .u-mb-0_5 { margin-bottom: var(--ybm-space-x0_5); } .u-mb-1 { margin-bottom: var(--ybm-space-x1); } .u-mb-1_5 { margin-bottom: var(--ybm-space-x1_5); } .u-mb-2 { margin-bottom: var(--ybm-space-x2); } .u-mb-2_5 { margin-bottom: var(--ybm-space-x2_5); } .u-mb-3 { margin-bottom: var(--ybm-space-x3); } .u-mb-3_5 { margin-bottom: var(--ybm-space-x3_5); } .u-mb-4 { margin-bottom: var(--ybm-space-x4); } .u-mb-4_5 { margin-bottom: var(--ybm-space-x4_5); } .u-mb-5 { margin-bottom: var(--ybm-space-x5); } .u-mb-6 { margin-bottom: var(--ybm-space-x6); } .u-mb-7 { margin-bottom: var(--ybm-space-x7); } .u-mb-8 { margin-bottom: var(--ybm-space-x8); } .u-mb-9 { margin-bottom: var(--ybm-space-x9); } .u-mb-10 { margin-bottom: var(--ybm-space-x10); } .u-mb-11 { margin-bottom: var(--ybm-space-x11); } .u-mb-12 { margin-bottom: var(--ybm-space-x12); } .u-mb-13 { margin-bottom: var(--ybm-space-x13); } .u-mb-14 { margin-bottom: var(--ybm-space-x14); } .u-mb-15 { margin-bottom: var(--ybm-space-x15); } .u-mb-16 { margin-bottom: var(--ybm-space-x16); } .u-mb-18 { margin-bottom: var(--ybm-space-x18); } .u-mb-20 { margin-bottom: var(--ybm-space-x20); } .u-mb-24 { margin-bottom: var(--ybm-space-x24); } .u-mb-32 { margin-bottom: var(--ybm-space-x32); }
+.u-gap-0 { gap: var(--ds-space-x0); } .u-gap-0_5 { gap: var(--ds-space-x0_5); } .u-gap-1 { gap: var(--ds-space-x1); } .u-gap-1_5 { gap: var(--ds-space-x1_5); } .u-gap-2 { gap: var(--ds-space-x2); } .u-gap-2_5 { gap: var(--ds-space-x2_5); } .u-gap-3 { gap: var(--ds-space-x3); } .u-gap-3_5 { gap: var(--ds-space-x3_5); } .u-gap-4 { gap: var(--ds-space-x4); } .u-gap-4_5 { gap: var(--ds-space-x4_5); } .u-gap-5 { gap: var(--ds-space-x5); } .u-gap-6 { gap: var(--ds-space-x6); } .u-gap-7 { gap: var(--ds-space-x7); } .u-gap-8 { gap: var(--ds-space-x8); } .u-gap-9 { gap: var(--ds-space-x9); } .u-gap-10 { gap: var(--ds-space-x10); } .u-gap-11 { gap: var(--ds-space-x11); } .u-gap-12 { gap: var(--ds-space-x12); } .u-gap-13 { gap: var(--ds-space-x13); } .u-gap-14 { gap: var(--ds-space-x14); } .u-gap-15 { gap: var(--ds-space-x15); } .u-gap-16 { gap: var(--ds-space-x16); } .u-gap-18 { gap: var(--ds-space-x18); } .u-gap-20 { gap: var(--ds-space-x20); } .u-gap-24 { gap: var(--ds-space-x24); } .u-gap-32 { gap: var(--ds-space-x32); }
+.u-mt-0 { margin-top: var(--ds-space-x0); } .u-mt-0_5 { margin-top: var(--ds-space-x0_5); } .u-mt-1 { margin-top: var(--ds-space-x1); } .u-mt-1_5 { margin-top: var(--ds-space-x1_5); } .u-mt-2 { margin-top: var(--ds-space-x2); } .u-mt-2_5 { margin-top: var(--ds-space-x2_5); } .u-mt-3 { margin-top: var(--ds-space-x3); } .u-mt-3_5 { margin-top: var(--ds-space-x3_5); } .u-mt-4 { margin-top: var(--ds-space-x4); } .u-mt-4_5 { margin-top: var(--ds-space-x4_5); } .u-mt-5 { margin-top: var(--ds-space-x5); } .u-mt-6 { margin-top: var(--ds-space-x6); } .u-mt-7 { margin-top: var(--ds-space-x7); } .u-mt-8 { margin-top: var(--ds-space-x8); } .u-mt-9 { margin-top: var(--ds-space-x9); } .u-mt-10 { margin-top: var(--ds-space-x10); } .u-mt-11 { margin-top: var(--ds-space-x11); } .u-mt-12 { margin-top: var(--ds-space-x12); } .u-mt-13 { margin-top: var(--ds-space-x13); } .u-mt-14 { margin-top: var(--ds-space-x14); } .u-mt-15 { margin-top: var(--ds-space-x15); } .u-mt-16 { margin-top: var(--ds-space-x16); } .u-mt-18 { margin-top: var(--ds-space-x18); } .u-mt-20 { margin-top: var(--ds-space-x20); } .u-mt-24 { margin-top: var(--ds-space-x24); } .u-mt-32 { margin-top: var(--ds-space-x32); }
+.u-mb-0 { margin-bottom: var(--ds-space-x0); } .u-mb-0_5 { margin-bottom: var(--ds-space-x0_5); } .u-mb-1 { margin-bottom: var(--ds-space-x1); } .u-mb-1_5 { margin-bottom: var(--ds-space-x1_5); } .u-mb-2 { margin-bottom: var(--ds-space-x2); } .u-mb-2_5 { margin-bottom: var(--ds-space-x2_5); } .u-mb-3 { margin-bottom: var(--ds-space-x3); } .u-mb-3_5 { margin-bottom: var(--ds-space-x3_5); } .u-mb-4 { margin-bottom: var(--ds-space-x4); } .u-mb-4_5 { margin-bottom: var(--ds-space-x4_5); } .u-mb-5 { margin-bottom: var(--ds-space-x5); } .u-mb-6 { margin-bottom: var(--ds-space-x6); } .u-mb-7 { margin-bottom: var(--ds-space-x7); } .u-mb-8 { margin-bottom: var(--ds-space-x8); } .u-mb-9 { margin-bottom: var(--ds-space-x9); } .u-mb-10 { margin-bottom: var(--ds-space-x10); } .u-mb-11 { margin-bottom: var(--ds-space-x11); } .u-mb-12 { margin-bottom: var(--ds-space-x12); } .u-mb-13 { margin-bottom: var(--ds-space-x13); } .u-mb-14 { margin-bottom: var(--ds-space-x14); } .u-mb-15 { margin-bottom: var(--ds-space-x15); } .u-mb-16 { margin-bottom: var(--ds-space-x16); } .u-mb-18 { margin-bottom: var(--ds-space-x18); } .u-mb-20 { margin-bottom: var(--ds-space-x20); } .u-mb-24 { margin-bottom: var(--ds-space-x24); } .u-mb-32 { margin-bottom: var(--ds-space-x32); }
 
 /* 반응형 - 기준점 sm 480 / md 768 / lg 1280 / xl 1440 (작은 화면부터 쌓는 방식)
    u-hide-from-md = 768 이상에서 숨김(모바일 전용) / u-show-from-md = 768 이상에서만 보임(PC 전용)
-   @media 안에서는 CSS 변수를 쓸 수 없어 숫자를 직접 쓴다. 값은 --ybm-breakpoint-* 와 같다. */
+   @media 안에서는 CSS 변수를 쓸 수 없어 숫자를 직접 쓴다. 값은 --ds-breakpoint-* 와 같다. */
 @media (min-width: 480px)  { .u-hide-from-sm { display: none; } }
 @media (min-width: 768px)  { .u-hide-from-md { display: none; } }
 @media (min-width: 1280px) { .u-hide-from-lg { display: none; } }

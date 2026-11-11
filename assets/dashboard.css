@@ -1,8 +1,8 @@
 /* 사용 현황(대시보드) - 2026-10-26 숨김 (안 씀). 다시 쓸 때를 위해 옛 스타일 그대로 둔다 */
 #dashboard {
-  --bg: var(--ybm-color-bg-canvas); --bg-card: var(--ybm-color-bg-layer-default); --bg-hover: var(--ybm-color-bg-layer-floating);
-  --border: var(--ybm-color-stroke-neutral-muted); --text-1: var(--ybm-color-fg-neutral); --text-2: var(--ybm-color-fg-neutral-muted);
-  --text-3: var(--ybm-color-fg-neutral-subtle); --accent: var(--ybm-color-bg-brand-solid); --acc-h: var(--ybm-color-bg-brand-solid-pressed);
+  --bg: var(--ds-color-bg-canvas); --bg-card: var(--ds-color-bg-layer-default); --bg-hover: var(--ds-color-bg-layer-floating);
+  --border: var(--ds-color-stroke-neutral-muted); --text-1: var(--ds-color-fg-neutral); --text-2: var(--ds-color-fg-neutral-muted);
+  --text-3: var(--ds-color-fg-neutral-subtle); --accent: var(--ds-color-bg-brand-solid); --acc-h: var(--ds-color-bg-brand-solid-pressed);
 }
 #dashboard {
   position: fixed; inset: 0; background: var(--bg); z-index: 500;

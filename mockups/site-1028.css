@@ -3,23 +3,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 /* 사이트 색은 ybm-ds 토큰을 따른다 (페이지 <html data-theme="dark">) */
 :root {
-  --bg:        var(--ybm-color-bg-canvas);
-  --bg-nav:    var(--ybm-color-bg-canvas);
-  --bg-side:   var(--ybm-color-bg-canvas);
-  --bg-card:   var(--ybm-color-bg-layer-default);
-  --bg-hover:  var(--ybm-color-bg-layer-floating);
-  --bg-input:  var(--ybm-color-bg-layer-floating);
-  --border:    var(--ybm-color-stroke-neutral-muted);
-  --text-1:    var(--ybm-color-fg-neutral);
-  --text-2:    var(--ybm-color-fg-neutral-muted);
-  --text-3:    var(--ybm-color-fg-neutral-subtle);
-  --accent:    var(--ybm-color-bg-brand-solid);
-  --acc-h:     var(--ybm-color-bg-brand-solid-pressed);
+  --bg:        var(--ds-color-bg-canvas);
+  --bg-nav:    var(--ds-color-bg-canvas);
+  --bg-side:   var(--ds-color-bg-canvas);
+  --bg-card:   var(--ds-color-bg-layer-default);
+  --bg-hover:  var(--ds-color-bg-layer-floating);
+  --bg-input:  var(--ds-color-bg-layer-floating);
+  --border:    var(--ds-color-stroke-neutral-muted);
+  --text-1:    var(--ds-color-fg-neutral);
+  --text-2:    var(--ds-color-fg-neutral-muted);
+  --text-3:    var(--ds-color-fg-neutral-subtle);
+  --accent:    var(--ds-color-bg-brand-solid);
+  --acc-h:     var(--ds-color-bg-brand-solid-pressed);
   --sidebar-w: 256px;
   --header-h:  80px;
 }
 /* 줄 높이는 아직 사이트 값(normal) 유지 - 글자 크기 토큰 연결 때 함께 정리 */
-html, body { height: 100%; font-family: var(--ybm-font-family-base); font-size: 16px; line-height: normal; background: var(--bg); color: var(--text-1); }
+html, body { height: 100%; font-family: var(--ds-font-family-base); font-size: 16px; line-height: normal; background: var(--bg); color: var(--text-1); }
 svg, i[data-lucide] { display: block; flex-shrink: 0; }
 i[data-lucide] { display: flex; align-items: center; justify-content: center; }
 
