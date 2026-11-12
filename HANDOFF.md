@@ -55,6 +55,8 @@ GitHub 로 맞춰지는 것 / 안 맞춰지는 것:
 11/12 회사에서 한 일:
 1. **캡처: 겟차(web) 285장** (사용자 요청, 11월에 처음 들어온 서비스라 전체 43개 패턴, 영상 7개는 가운데 장면 PNG) → uibowl 확정 285, 컴포넌트 198장. 업종은 자동 매핑이 커뮤니티로 잡아 uibowl 표기대로 모빌리티로 고침. 방식은 11/10 그대로: 웹은 카드 fiber 를 14단계 위로 올라간 곳의 `allRows`(패턴 43개, 패턴마다 images)를 읽음. 새 zip `(서버업로드)/web_20261112.zip` (286개, 64MB)
    - 영상 장면 PowerShell: `BitmapEncoder.FlushAsync()` 는 IAsyncAction 이라 AsTask 를 IAsyncAction 용으로 골라 기다려야 함
+   - 처음엔 분류 뒤 대표 색을 뽑고 data.js 를 다시 만들지 않아 겟차 화면에 색이 빠졌음 → `updatePlatform(web)` 로 다시 만들고 검색 데이터도 다시. **캡처 뒤엔 `업데이트.bat` 순서(색 → data.js → 글자 추출 → 검색 데이터 → words.js)를 지킬 것**
+2. **서버용은 사이트 zip 까지 늘 같이** (사용자 "회사 서버용 사이트까지 해서 토탈 파일 만들어줄것. 앞으로" → 따로 두되 늘 같이): `zip-upload.js` 가 이미지 zip 뒤에 `scripts/pack-site.js` 를 부르고, `scripts/update.js` 는 오늘 날짜 이미지 zip 이 있으면 글자 색인까지 넣은 뒤 사이트 zip 을 다시 만든다. 오늘 `(서버업로드)` = `web_20261112.zip`, `site_20261112.zip` (11/11 yds CSS 변경도 이 사이트 zip 에 들어감)
 
 11/11 회사에서 한 일:
 1. **yds 사본 갱신** 882a70e → 54b7226e (`node scripts/sync-ybm-ds.js`, 사용자 "yds 업데이트"). yds 가 토큰 이름을 `--ybm-*` 에서 `--ds-*` 로, 레이어 이름을 `ybm.*` 에서 `ds.*` 로 바꿔서, 사이트 CSS 5개(`assets/site.css`, `sidebar.css`, `search.css`, `dashboard.css`, `mockups/site-1028.css`)의 `--ybm-` 을 `--ds-` 로 바꿈 (안 바꾸면 여백, 글자 크기가 전부 빠짐). 쓰던 토큰 72개는 새 이름에 모두 있음. 전후 계산된 스타일 비교(첫 화면, 열 고르기 열림, 크게 보기): 다른 곳은 상단 모바일/웹사이트 탭 글자 굵기 하나 (yds 세그먼트 규칙, 고른 것 600 / 안 고른 것 500, 전엔 둘 다 700). 서버 반영은 사이트 zip 을 다시 만들어 올릴 때

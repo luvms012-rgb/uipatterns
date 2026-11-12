@@ -152,6 +152,14 @@ async function main() {
 
     if (results.length) { updateSearch(results); updateWords(); }
 
+    // 오늘 만든 이미지 zip 이 있으면 사이트 zip 을 다시 만든다 (색, 글자 색인이 들어간 data.js, words.js 로). 11/12 사용자: 서버용은 사이트까지 늘 같이
+    const upDir = path.join(REPO, '(서버업로드)');
+    const day = require(path.join(REPO, 'zip-upload.js')).today();
+    if (fs.existsSync(upDir) && fs.readdirSync(upDir).some(f => /^(mo|web)_/.test(f) && f.includes(day))) {
+      try { execSync('node "' + path.join(REPO, 'scripts', 'pack-site.js') + '"', { cwd: REPO, stdio: 'inherit' }); }
+      catch (e) { console.log('  ⚠ 사이트 zip 만들기 실패 (업데이트는 계속): ' + e.message.split('\n')[0]); }
+    }
+
     // 3) 회사 서버에 올릴 이미지 목록
     const newOnes = results.flatMap(r => r.newItems.map(i => `${r.platform}/${i.path}`));
     if (newOnes.length) {

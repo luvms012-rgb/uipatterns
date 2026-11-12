@@ -138,5 +138,10 @@ function run(site) {
 }
 
 // scripts/pack-site.js 가 압축 함수만 빌려 쓴다
-if (require.main === module) for (const s of SITES) run(s);
 module.exports = { writeZip, today };
+if (require.main === module) {
+  for (const s of SITES) run(s);
+  // 이미지 zip 을 만들면 사이트 zip 도 늘 같이 만든다 (2026-11-12 사용자 결정, 따로 두되 함께). 업데이트.bat 이 글자 색인, 색까지 넣은 뒤 한 번 더 만든다
+  try { require('child_process').execSync('node "' + path.join(ROOT, 'scripts', 'pack-site.js') + '"', { stdio: 'inherit', cwd: ROOT }); }
+  catch (e) { console.log('  [오류] 사이트 zip 실패 — node scripts/pack-site.js 를 수동 실행해 주세요'); }
+}
