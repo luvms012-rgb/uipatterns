@@ -410,6 +410,9 @@ const SVC_TYPES = {
 
   // 자동 매핑 (오프라인, update, 2026-11-03)
   '클로브 AI':'AI',
+
+  // 자동 매핑 (오프라인, update, 2026-11-12)
+  '겟차':'모빌리티',
 };
 
 const ALL_INDUSTRY_TYPES = [
