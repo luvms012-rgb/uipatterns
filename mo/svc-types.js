@@ -294,6 +294,9 @@ const SVC_TYPES = {
   // 11/10 캡처, 업종은 uibowl 표기대로
   '크랙':'AI',
   '마이비':'적립',
+
+  // 자동 매핑 (오프라인, update, 2026-11-16)
+  'Muse from Meta':'AI',
 };
 
 const ALL_INDUSTRY_TYPES = [
