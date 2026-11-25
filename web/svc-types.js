@@ -416,6 +416,9 @@ const SVC_TYPES = {
 
   // 자동 매핑 (오프라인, update, 2026-11-18)
   '와디즈':'커머스',
+
+  // 자동 매핑 (오프라인, update, 2026-11-25)
+  '크랙':'AI',
 };
 
 const ALL_INDUSTRY_TYPES = [
